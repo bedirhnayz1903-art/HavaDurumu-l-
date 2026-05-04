@@ -1,126 +1,118 @@
-import pygame
-import random
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yapay Zeka Asistanım</title>
+    <style>
+        /* Genel Sayfa Ayarları */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
-# --- OYUNUN AYARLARI ---
-GENISLIK = 480
-YUKSEKLIK = 600
-FPS = 60 # Saniyede 60 kare (Akıcı oyun için)
+        /* LOGO KODU (İstediğin Köşe Logosu) */
+        .assistant-logo {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #6e8efb, #a777e3);
+            border-radius: 15px; /* Hafif karemsi modern tasarım */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(110, 142, 251, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
 
-# Renkler
-SIYAH = (0, 0, 0)
-BEYAZ = (255, 255, 255)
-KIRMIZI = (255, 0, 0)
-SARI = (255, 255, 0)
+        .assistant-logo:hover {
+            transform: rotate(10deg) scale(1.1);
+        }
 
-# --- OYUNCU (UÇAK) SINIFI ---
-class Oyuncu(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface((50, 40)) # Uçağın boyutu
-        self.image.fill((0, 255, 0)) # Gerçek oyunda buraya uçağın resmi gelir
-        self.rect = self.image.get_rect()
-        self.rect.centerx = GENISLIK / 2
-        self.rect.bottom = YUKSEKLIK - 10
-        self.hiz_x = 0
+        .assistant-logo span {
+            font-weight: 900;
+            font-size: 22px;
+            letter-spacing: 1px;
+        }
 
-    def update(self):
-        # Hareket kontrolü
-        self.hiz_x = 0
-        tuslar = pygame.key.get_pressed()
-        if tuslar[pygame.K_LEFT]:
-            self.hiz_x = -8
-        if tuslar[pygame.K_RIGHT]:
-            self.hiz_x = 8
-        self.rect.x += self.hiz_x
+        /* Asistan Arayüzü */
+        .chat-container {
+            width: 90%;
+            max-width: 400px;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid #333;
+        }
 
-    def ates_et(self):
-        mermi = Mermi(self.rect.centerx, self.rect.top)
-        tum_spritler.add(mermi)
-        mermiler.add(mermi)
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
 
-# --- MERMİ SINIFI ---
-class Mermi(pygame.sprite.Sprite):
-    def __init__(self, x, y):
-        super().__init__()
-        self.image = pygame.Surface((10, 20))
-        self.image.fill(SARI)
-        self.rect = self.image.get_rect()
-        self.rect.bottom = y
-        self.rect.centerx = x
-        self.hiz_y = -10 # Mermi yukarı doğru gider
+        p {
+            color: #bbb;
+            font-size: 14px;
+        }
 
-    def update(self):
-        self.rect.y += self.hiz_y
-        # Ekrandan çıkarsa mermiyi sil (Performans için)
-        if self.rect.bottom < 0:
-            self.kill()
+        .input-area {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
 
-# --- DÜŞMAN SINIFI ---
-class Dusman(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface((30, 30))
-        self.image.fill(KIRMIZI)
-        self.rect = self.image.get_rect()
-        self.rect.x = random.randrange(GENISLIK - self.rect.width)
-        self.rect.y = random.randrange(-100, -40)
-        self.hiz_y = random.randrange(1, 8)
+        input {
+            flex: 1;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: #2c2c2c;
+            color: white;
+            outline: none;
+        }
 
-    def update(self):
-        self.rect.y += self.hiz_y
-        if self.rect.top > YUKSEKLIK + 10:
-            self.rect.x = random.randrange(GENISLIK - self.rect.width)
-            self.rect.y = random.randrange(-100, -40)
-            self.hiz_y = random.randrange(1, 8)
+        button {
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: none;
+            background: #6e8efb;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+        }
 
-# --- OYUNU BAŞLATMA ---
-pygame.init()
-ekran = pygame.display.set_mode((GENISLIK, YUKSEKLIK))
-pygame.display.set_caption("1945 Pro Uçak Savaşı")
-saat = pygame.time.Clock()
+        button:hover {
+            background: #5a79e0;
+        }
+    </style>
+</head>
+<body>
 
-tum_spritler = pygame.sprite.Group()
-dusmanlar = pygame.sprite.Group()
-mermiler = pygame.sprite.Group()
+    <div class="assistant-logo">
+        <span>BX</span>
+    </div>
 
-oyuncu = Oyuncu()
-tum_spritler.add(oyuncu)
+    <div class="chat-container">
+        <h1>Asistanıma Hoş Geldin</h1>
+        <p>Sana bugün nasıl yardımcı olabilirim?</p>
+        
+        <div class="input-area">
+            <input type="text" placeholder="Bir şeyler yazın...">
+            <button>Gönder</button>
+        </div>
+    </div>
 
-for i in range(8):
-    d = Dusman()
-    tum_spritler.add(d)
-    dusmanlar.add(d)
-
-# --- ANA OYUN DÖNGÜSÜ ---
-oyun_calisiyor = True
-while oyun_calisiyor:
-    saat.tick(FPS)
-    
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            oyun_calisiyor = False
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                oyuncu.ates_et()
-
-    # Güncelleme
-    tum_spritler.update()
-
-    # Mermi düşmana değdi mi kontrolü?
-    vuruslar = pygame.sprite.groupcollide(dusmanlar, mermiler, True, True)
-    for vurus in vuruslar:
-        yeni_dusman = Dusman()
-        tum_spritler.add(yeni_dusman)
-        dusmanlar.add(yeni_dusman)
-
-    # Düşman oyuncuya çarptı mı?
-    carpisma = pygame.sprite.spritecollide(oyuncu, dusmanlar, False)
-    if carpisma:
-        oyun_calisiyor = False # Game Over!
-
-    # Çizim
-    ekran.fill(SIYAH)
-    tum_spritler.draw(ekran)
-    pygame.display.flip()
-
-pygame.quit()
+</body>
+</html>
