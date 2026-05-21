@@ -1,118 +1,224 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Yapay Zeka Asistanım</title>
-    <style>
-        /* Genel Sayfa Ayarları */
-        body {
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212;
-            color: white;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+{
+  "questions": [
+    {
+      "questionNumber": 1,
+      "question": "Bir ürünün fiyatı 200 TL'dir. Bu ürüne $\\%10$ zam yapılırsa yeni fiyatı kaç TL olur?",
+      "answerOptions": [
+        {
+          "text": "220",
+          "rationale": "Bir sayının %10'unu bulmak için sondan bir sıfır sileriz. 200'ün %10'u 20 TL'dir. Zam dediği için ekleriz: 200 + 20 = 220 TL.",
+          "isCorrect": true
+        },
+        {
+          "text": "210",
+          "rationale": "Doğrudan yüzde oranını sayıya eklemiş olabilirsin, paranın değerine göre yüzde hesaplamalısın.",
+          "isCorrect": false
+        },
+        {
+          "text": "180",
+          "rationale": "Bu sonuç zam yerine %10 indirim yapılsaydı doğru olurdu.",
+          "isCorrect": false
         }
-
-        /* LOGO KODU (İstediğin Köşe Logosu) */
-        .assistant-logo {
-            position: fixed;
-            top: 25px;
-            right: 25px;
-            width: 55px;
-            height: 55px;
-            background: linear-gradient(135deg, #6e8efb, #a777e3);
-            border-radius: 15px; /* Hafif karemsi modern tasarım */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 0 20px rgba(110, 142, 251, 0.4);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 1000;
-            transition: all 0.3s ease;
+      ],
+      "hint": "Bir sayının %10'u, o sayının 10'da 1'idir (yani bir sıfır silmektir)."
+    },
+    {
+      "questionNumber": 2,
+      "question": "$x + 5 = -2$ olduğuna göre $x$ kaçtır?",
+      "answerOptions": [
+        {
+          "text": "-7",
+          "rationale": "Hangi sayıya 5 eklersek -2 yapar? Tabii ki -7. Ya da +5 karşıya -5 olarak geçer; -2 ve -5 toplamda -7 yapar.",
+          "isCorrect": true
+        },
+        {
+          "text": "3",
+          "rationale": "İşaretleri dikkate almadan 5'ten 2'yi çıkarmış olabilirsin.",
+          "isCorrect": false
+        },
+        {
+          "text": "-3",
+          "rationale": "Pozitif ve negatif sayıların toplama mantığına tekrar göz atmalısın.",
+          "isCorrect": false
         }
-
-        .assistant-logo:hover {
-            transform: rotate(10deg) scale(1.1);
+      ],
+      "hint": "5 lira paran varken kaç lira borçlanırsan net -2 liraya (borca) düşersin?"
+    },
+    {
+      "questionNumber": 3,
+      "question": "Bir sınıftaki öğrencilerin yarısı ($\\%50$'si) gözlüklüdür. Gözlüklü öğrenci sayısı 15 ise sınıf mevcudu kaçtır?",
+      "answerOptions": [
+        {
+          "text": "30",
+          "rationale": "%50 demek yarısı demektir. Yarısı 15 olan sınıfın tamamı 15 x 2 = 30 kişidir.",
+          "isCorrect": true
+        },
+        {
+          "text": "25",
+          "rationale": "Yüzde oranıyla sayıyı karıştırmış olabilirsin.",
+          "isCorrect": false
+        },
+        {
+          "text": "60",
+          "rationale": "Yarısını bulmak yerine yanlışlıkla iki kez çarpmış olabilirsin.",
+          "isCorrect": false
         }
-
-        .assistant-logo span {
-            font-weight: 900;
-            font-size: 22px;
-            letter-spacing: 1px;
+      ],
+      "hint": "%50 ifadesinin 'yarım' anlamına geldiğini düşün."
+    },
+    {
+      "questionNumber": 4,
+      "question": "Bir daire grafiğinde $\\%50$'lik bir dilim kaç derecelik merkez açıyla gösterilir?",
+      "answerOptions": [
+        {
+          "text": "180",
+          "rationale": "Dairenin tamamı 360 derecedir. %50 yarısı demek olduğu için 360'ın yarısı 180 derecedir.",
+          "isCorrect": true
+        },
+        {
+          "text": "90",
+          "rationale": "90 derece dairenin çeyreğidir, yani %25'e denk gelir.",
+          "isCorrect": false
+        },
+        {
+          "text": "100",
+          "rationale": "Yüzde sembolü ile derece ölçüsü karıştırılmamalıdır.",
+          "isCorrect": false
         }
-
-        /* Asistan Arayüzü */
-        .chat-container {
-            width: 90%;
-            max-width: 400px;
-            background: #1e1e1e;
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid #333;
+      ],
+      "hint": "Dairenin tam turunun 360 derece olduğunu hatırla ve yarısını bul."
+    },
+    {
+      "questionNumber": 5,
+      "question": "$2x = 10$ ise $4x$ ifadesinin değeri kaçtır?",
+      "answerOptions": [
+        {
+          "text": "20",
+          "rationale": "2x ifadesi 4x olurken 2 katına çıkmıştır. O halde sonuç da 2 katına çıkar: 10 x 2 = 20.",
+          "isCorrect": true
+        },
+        {
+          "text": "5",
+          "rationale": "Bu x'in kendi değeridir, soruda 4x isteniyor.",
+          "isCorrect": false
+        },
+        {
+          "text": "40",
+          "rationale": "Kat ilişkisini doğrudan 4 ile çarparak hata yapmış olabilirsin.",
+          "isCorrect": false
         }
-
-        h1 {
-            font-size: 24px;
-            margin-bottom: 10px;
+      ],
+      "hint": "x'i bulmadan da yapabilirsin: 4x, 2x'in tam iki katıdır."
+    },
+    {
+      "questionNumber": 6,
+      "question": "Tümler iki açıdan biri 40 derece ise diğeri kaç derecedir?",
+      "answerOptions": [
+        {
+          "text": "50",
+          "rationale": "Tümler açıların toplamı 90 derecedir. 90 - 40 = 50 derece bulunur.",
+          "isCorrect": true
+        },
+        {
+          "text": "140",
+          "rationale": "Bu bütünler açının cevabıdır (toplamları 180 olan).",
+          "isCorrect": false
+        },
+        {
+          "text": "40",
+          "rationale": "Açıların eşit olduğu söylenmemiştir.",
+          "isCorrect": false
         }
-
-        p {
-            color: #bbb;
-            font-size: 14px;
+      ],
+      "hint": "'Tümler' kelimesinin toplamı 90 dereceye tamamladığını hatırla."
+    },
+    {
+      "questionNumber": 7,
+      "question": "30 liralık bir kitaba $\\%100$ zam gelirse kitabın yeni fiyatı kaç lira olur?",
+      "answerOptions": [
+        {
+          "text": "60",
+          "rationale": "%100 zam, bir şeyin kendi değeri kadar artması (yani 2 katına çıkması) demektir. 30 + 30 = 60 TL.",
+          "isCorrect": true
+        },
+        {
+          "text": "30",
+          "rationale": "Zam yapılmıştır, fiyatın aynı kalması imkansızdır.",
+          "isCorrect": false
+        },
+        {
+          "text": "130",
+          "rationale": "%100 oranını doğrudan 100 TL olarak fiyata eklemiş olabilirsin.",
+          "isCorrect": false
         }
-
-        .input-area {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
+      ],
+      "hint": "Bir şeyin %100'ü kendisi kadardır."
+    },
+    {
+      "questionNumber": 8,
+      "question": "Bütünler iki açının toplamı kaç derecedir?",
+      "answerOptions": [
+        {
+          "text": "180",
+          "rationale": "Bütünler açılar birbirini doğru açıya, yani 180 dereceye tamamlar.",
+          "isCorrect": true
+        },
+        {
+          "text": "90",
+          "rationale": "Toplamı 90 olan açılara tümler açılar denir.",
+          "isCorrect": false
+        },
+        {
+          "text": "360",
+          "rationale": "360 derece tam açıdır.",
+          "isCorrect": false
         }
-
-        input {
-            flex: 1;
-            padding: 12px;
-            border-radius: 10px;
-            border: none;
-            background: #2c2c2c;
-            color: white;
-            outline: none;
+      ],
+      "hint": "Doğru açı (düz çizgi) üzerindeki komşu iki açıyı hayal et."
+    },
+    {
+      "questionNumber": 9,
+      "question": "Ardışık üç sayının ortalaması 15 ise bu sayıların ortancası (ortadaki sayı) kaçtır?",
+      "answerOptions": [
+        {
+          "text": "15",
+          "rationale": "Ardışık sayı dizilerinde eğer veri sayısı tek ise aritmetik ortalama her zaman tam ortadaki sayıya eşittir. Yani sayılar 14, 15 ve 16'dır.",
+          "isCorrect": true
+        },
+        {
+          "text": "14",
+          "rationale": "14 bu dizinin en küçük sayısıdır.",
+          "isCorrect": false
+        },
+        {
+          "text": "16",
+          "rationale": "16 bu dizinin en büyük sayısıdır.",
+          "isCorrect": false
         }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: none;
-            background: #6e8efb;
-            color: white;
-            cursor: pointer;
-            font-weight: bold;
+      ],
+      "hint": "Ardışık sayılarda ortalama, tam ortadaki sayıyı verir."
+    },
+    {
+      "questionNumber": 10,
+      "question": "Bir kutudaki 20 bilyenin 5 tanesi mavi kalanı kırmızıdır. Kutudaki bilyelerin yüzde kaçı mavidir?",
+      "answerOptions": [
+        {
+          "text": "%25",
+          "rationale": "5 sayısı 20'nin 4'te 1'idir (çeyreğidir). Çeyrek de yüzdelik olarak %25'e eşittir.",
+          "isCorrect": true
+        },
+        {
+          "text": "%5",
+          "rationale": "Doğrudan bilye sayısını yüzde olarak düşünmüş olabilirsin.",
+          "isCorrect": false
+        },
+        {
+          "text": "%50",
+          "rationale": "%50 olması için bilyelerin yarısı (10 tane) mavi olmalıydı.",
+          "isCorrect": false
         }
-
-        button:hover {
-            background: #5a79e0;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="assistant-logo">
-        <span>BX</span>
-    </div>
-
-    <div class="chat-container">
-        <h1>Asistanıma Hoş Geldin</h1>
-        <p>Sana bugün nasıl yardımcı olabilirim?</p>
-        
-        <div class="input-area">
-            <input type="text" placeholder="Bir şeyler yazın...">
-            <button>Gönder</button>
-        </div>
-    </div>
-
-</body>
-</html>
+      ],
+      "hint": "5 bilye, toplam 20 bilyenin kaçta kaçıdır? (Genişletmeyi düşün)."
+    }
+  ]
+}
