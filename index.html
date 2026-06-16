@@ -1,1064 +1,1050 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>İksir Dükkanı Simülasyonu</title>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+<title>Padişah: İmparatorluk Savaşı</title>
 <style>
-  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
-  html, body { width:100%; height:100%; overflow:hidden; font-family:'Trebuchet MS', sans-serif; background:#0a0118; }
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
 
-  #game-container {
-    position:relative;
-    width:100%;
-    height:100%;
-    background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0118 100%);
+  *{margin:0;padding:0;box-sizing:border-box;}
+
+  :root{
+    --bg:#0d1117;
+    --bg2:#111827;
+    --bg3:#1a2332;
+    --panel:#162032;
+    --border:#2a3a52;
+    --gold:#d97706;
+    --gold2:#f59e0b;
+    --gold-dim:#92400e;
+    --green:#064e3b;
+    --green2:#065f46;
+    --green3:#047857;
+    --crimson:#991b1b;
+    --crimson2:#b91c1c;
+    --text:#e8dcc8;
+    --text2:#b8a98a;
+    --text3:#7a6a50;
+    --accent:#c0a060;
+  }
+
+  html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+
+  /* PORTRAIT WARNING */
+  #portrait-warn{
+    display:none;
+    position:fixed;inset:0;z-index:9999;
+    background:linear-gradient(135deg,#0a0f16 0%,#0d1a0a 50%,#0a0f16 100%);
+    flex-direction:column;align-items:center;justify-content:center;gap:24px;
+    text-align:center;padding:32px;
+  }
+  @media(orientation:portrait){
+    #portrait-warn{display:flex;}
+    #game-root{display:none!important;}
+  }
+  .pw-icon{width:80px;height:80px;animation:rotate-hint 2s ease-in-out infinite;}
+  .pw-title{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#d97706;letter-spacing:2px;}
+  .pw-sub{font-family:'Crimson Text',serif;font-size:16px;color:#b8a98a;max-width:280px;line-height:1.6;}
+  @keyframes rotate-hint{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-90deg);}}
+
+  /* GAME ROOT */
+  #game-root{
+    display:flex;flex-direction:column;width:100vw;height:100vh;
+    background:var(--bg);font-family:'Crimson Text',serif;color:var(--text);
     overflow:hidden;
   }
 
-  /* ---------- ÜST BİLGİ ÇUBUĞU ---------- */
-  #top-bar {
-    position:absolute; top:0; left:0; width:100%;
-    display:flex; justify-content:space-between; align-items:center;
-    padding:10px 14px;
-    background:linear-gradient(180deg, rgba(20,5,40,0.95), rgba(20,5,40,0.6));
-    border-bottom:2px solid #ff2fd6;
-    box-shadow:0 0 15px rgba(255,47,214,0.5);
-    z-index:50;
-  }
-  #coin-display {
-    color:#ffd700; font-weight:bold; font-size:16px;
-    text-shadow:0 0 8px #ffae00;
-    display:flex; align-items:center; gap:6px;
-  }
-  #title-display {
-    color:#7ce8ff; font-size:13px; text-shadow:0 0 8px #00eaff;
-  }
-  #combo-display{
-    color:#ff8fe0; font-size:11px; text-shadow:0 0 6px #ff2fd6; min-width:50px; text-align:right;
-  }
-
-  /* ---------- DÜKKAN SAHNESİ ---------- */
-  #shop-scene {
-    position:absolute; top:46px; left:0; width:100%; height:calc(100% - 46px - 90px);
-    overflow:hidden;
-  }
-  #shop-bg {
-    position:absolute; width:100%; height:100%;
-    background:
-      radial-gradient(circle at 50% 20%, rgba(140,0,255,0.25), transparent 60%),
-      linear-gradient(180deg, #1a0a2e 0%, #120420 70%, #0a0118 100%);
-  }
-  .star{ position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:0.6; animation:twinkle 3s infinite ease-in-out; }
-  @keyframes twinkle{ 0%,100%{opacity:0.2;} 50%{opacity:0.9;} }
-
-  .shelf {
-    position:absolute; width:70px; height:90px;
-    background:linear-gradient(180deg,#3a1d5e,#21103a);
-    border:2px solid #ff2fd6; border-radius:4px;
-    box-shadow:0 0 10px rgba(255,47,214,0.4);
-  }
-  #shelf-left { top:15%; left:5%; }
-  #shelf-right { top:15%; right:5%; }
-  .shelf-bottle { width:14px; height:20px; border-radius:2px 2px 6px 6px; margin:4px auto; }
-  .shelf-label{ position:absolute; bottom:-16px; width:100%; text-align:center; font-size:9px; color:#7ce8ff; }
-
-  #witch-counter {
-    position:absolute; bottom:0; left:50%; transform:translateX(-50%);
-    width:90%; max-width:420px; height:35%;
-    display:flex; justify-content:center; align-items:flex-end;
-  }
-  #counter-table {
-    position:absolute; bottom:0; width:100%; height:45%;
-    background:linear-gradient(180deg,#4a2a6e,#2a1245);
-    border-top:3px solid #ff2fd6;
-    box-shadow:0 -5px 20px rgba(255,47,214,0.4);
-    border-radius:10px 10px 0 0;
-  }
-
-  #witch-wrap {
-    position:absolute; bottom:30%; left:8%;
-    width:90px; height:140px;
-    transform: scaleX(-1);
-    filter: drop-shadow(0 0 10px #b300ff);
-    animation: witchIdle 2.5s ease-in-out infinite;
-  }
-  @keyframes witchIdle { 0%,100%{ transform: scaleX(-1) translateY(0); } 50%{ transform: scaleX(-1) translateY(-4px); } }
-
-  #customer-area {
-    position:absolute; bottom:32%; right:6%;
-    width:80px; height:130px;
-    display:none;
-    animation: customerIn 0.5s ease-out;
-  }
-  @keyframes customerIn { from{ opacity:0; transform:translateX(40px);} to{ opacity:1; transform:translateX(0);} }
-
-  #speech-bubble {
-    position:absolute; bottom:100%; right:-10px; margin-bottom:8px;
-    width:170px; max-width:60vw;
-    background:#fdf6ff; color:#2a1245; border-radius:12px;
-    padding:8px 10px; font-size:12px; line-height:1.3;
-    box-shadow:0 0 12px rgba(255,255,255,0.4);
-    display:none;
-  }
-  #speech-bubble::after {
-    content:''; position:absolute; bottom:-8px; right:20px;
-    border-width:8px 8px 0 8px; border-style:solid;
-    border-color:#fdf6ff transparent transparent transparent;
-  }
-
-  #patience-bar-wrap {
-    position:absolute; top:-18px; left:0; width:100%; height:8px;
-    background:rgba(0,0,0,0.4); border-radius:4px; overflow:hidden;
-    border:1px solid #ff2fd6;
-  }
-  #patience-bar {
-    height:100%; width:100%;
-    background:linear-gradient(90deg,#00ff7b,#ffee00,#ff2d2d);
-    transition:width 0.3s linear;
-  }
-
-  /* ---------- ALT TELEFON ARAYÜZÜ ---------- */
-  #phone-dock {
-    position:absolute; bottom:0; left:0; width:100%; height:90px;
-    background:linear-gradient(180deg,#1a0a2e,#0a0118);
-    border-top:2px solid #00eaff;
-    box-shadow:0 0 20px rgba(0,234,255,0.4);
-    display:flex; align-items:center; justify-content:center; gap:14px;
-    z-index:60;
-  }
-  .dock-btn{
-    display:flex; flex-direction:column; align-items:center; gap:3px;
-  }
-  #phone-icon, #shop-dock-icon {
-    width:58px; height:58px; border-radius:14px;
-    background:linear-gradient(145deg,#2a1245,#120420);
-    border:2px solid #00eaff;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 15px rgba(0,234,255,0.6);
+  /* TOP BAR */
+  #top-bar{
+    display:flex;align-items:center;gap:0;
+    background:linear-gradient(180deg,#1a0a00 0%,#0f1a10 50%,#0a0f1a 100%);
+    border-bottom:2px solid var(--gold-dim);
+    padding:0 8px;height:52px;flex-shrink:0;
     position:relative;
-    animation:phonePulse 1.8s ease-in-out infinite;
   }
-  #shop-dock-icon{ border-color:#ffd700; box-shadow:0 0 15px rgba(255,215,0,0.6); animation:none; }
-  @keyframes phonePulse { 0%,100%{ box-shadow:0 0 12px rgba(0,234,255,0.5);} 50%{ box-shadow:0 0 22px rgba(0,234,255,0.9);} }
-  #phone-icon svg, #shop-dock-icon svg { width:30px; height:30px; }
-  #phone-badge {
-    position:absolute; top:-6px; right:-6px;
-    background:#ff2d2d; color:#fff; font-size:11px; font-weight:bold;
-    width:20px; height:20px; border-radius:50%;
-    display:flex; align-items:center; justify-content:center;
-    box-shadow:0 0 6px #ff2d2d;
-    display:none;
+  #top-bar::after{
+    content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--gold),transparent);
   }
-  .dock-label-txt{ color:#7ce8ff; font-size:10px; text-shadow:0 0 6px #00eaff; }
+  .tb-brand{
+    font-family:'Cinzel',serif;font-size:13px;font-weight:900;
+    color:var(--gold);letter-spacing:3px;text-transform:uppercase;
+    padding-right:12px;border-right:1px solid var(--border);margin-right:8px;
+    white-space:nowrap;text-shadow:0 0 12px rgba(217,119,6,0.5);
+  }
+  .res-group{display:flex;align-items:center;gap:6px;padding:0 8px;border-right:1px solid var(--border);}
+  .res-icon{width:18px;height:18px;flex-shrink:0;}
+  .res-val{font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--gold2);}
+  .res-lbl{font-size:10px;color:var(--text3);display:block;line-height:1;}
+  .res-info{display:flex;flex-direction:column;}
+  .bar-wrap{display:flex;flex-direction:column;gap:2px;min-width:80px;}
+  .bar-lbl{font-size:9px;color:var(--text3);}
+  .bar-track{height:6px;background:#1a2332;border-radius:3px;border:1px solid var(--border);overflow:hidden;}
+  .bar-fill{height:100%;border-radius:3px;transition:width 0.5s;}
+  .bar-fill.happiness{background:linear-gradient(90deg,#d97706,#f59e0b);}
+  .bar-fill.morale{background:linear-gradient(90deg,#065f46,#059669);}
+  .bar-pct{font-size:9px;color:var(--text2);font-family:'Cinzel',serif;}
+  .turn-display{margin-left:auto;font-family:'Cinzel',serif;font-size:11px;color:var(--text2);padding-right:8px;}
+  .turn-num{color:var(--gold);font-size:14px;font-weight:700;}
 
-  /* ---------- İKSİR YAPMA EKRANI ---------- */
-  #brew-screen {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    background:linear-gradient(180deg,#0a0118,#1a0a2e);
-    display:none; flex-direction:column;
-    z-index:200;
-  }
-  #brew-header {
-    display:flex; align-items:center; justify-content:space-between;
-    padding:10px 14px; border-bottom:2px solid #ff2fd6;
-    box-shadow:0 0 15px rgba(255,47,214,0.4);
-  }
-  #brew-back {
-    color:#fff; background:#3a1d5e; border:1px solid #ff2fd6;
-    border-radius:8px; padding:6px 12px; font-size:13px;
-  }
-  #brew-order {
-    color:#ffd700; font-size:12px; text-align:right; max-width:60%;
-  }
-  #brew-timer-wrap { padding:8px 14px; }
-  #brew-timer-bar-bg {
-    width:100%; height:10px; background:rgba(255,255,255,0.1); border-radius:5px; overflow:hidden;
-    border:1px solid #00eaff;
-  }
-  #brew-timer-bar { height:100%; width:100%; background:linear-gradient(90deg,#00eaff,#7ce8ff); }
+  /* MAIN LAYOUT */
+  #main-layout{display:flex;flex:1;overflow:hidden;}
 
-  #cauldron-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
-  #cauldron-svg-wrap { width:160px; height:160px; filter:drop-shadow(0 0 20px #b300ff); }
-  #cauldron-status { margin-top:10px; color:#fdf6ff; font-size:13px; min-height:18px; text-align:center; padding:0 20px; }
-  #recipe-hint { margin-top:6px; color:#7ce8ff; font-size:11px; text-align:center; opacity:0.85; min-height:14px; }
-  #drop-zone { position:absolute; width:140px; height:140px; border-radius:50%; top:calc(50% - 70px); left:calc(50% - 70px); }
-  #drop-zone.drag-over { box-shadow:0 0 0 6px rgba(0,255,123,0.5) inset; border-radius:50%; }
+  /* LEFT SIDEBAR */
+  #sidebar{
+    width:72px;flex-shrink:0;
+    background:linear-gradient(180deg,#0a1520 0%,#0d1a10 100%);
+    border-right:2px solid var(--border);
+    display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:4px;
+    position:relative;
+  }
+  #sidebar::after{
+    content:'';position:absolute;right:-4px;top:0;bottom:0;width:2px;
+    background:linear-gradient(180deg,transparent,var(--gold-dim),transparent);
+  }
+  .nav-btn{
+    width:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
+    padding:8px 4px;border-radius:6px;cursor:pointer;border:1px solid transparent;
+    transition:all 0.2s;background:transparent;user-select:none;
+  }
+  .nav-btn:hover{background:rgba(217,119,6,0.1);border-color:var(--gold-dim);}
+  .nav-btn.active{background:linear-gradient(135deg,rgba(6,78,59,0.6),rgba(10,30,20,0.8));border-color:var(--green3);}
+  .nav-btn svg{width:26px;height:26px;}
+  .nav-btn span{font-family:'Cinzel',serif;font-size:8px;color:var(--text2);letter-spacing:0.5px;text-align:center;line-height:1.2;}
+  .nav-btn.active span{color:var(--gold2);}
+  .nav-divider{width:40px;height:1px;background:var(--border);margin:2px 0;}
 
-  #ingredient-tray {
-    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
-    padding:10px 10px 14px; background:rgba(20,5,40,0.6);
-    border-top:1px solid #ff2fd6; max-height:34%; overflow-y:auto;
+  /* TURN BUTTON at sidebar bottom */
+  .turn-btn{
+    margin-top:auto;width:58px;padding:8px 4px;
+    background:linear-gradient(135deg,var(--green),var(--green2));
+    border:2px solid var(--green3);border-radius:6px;cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;gap:3px;
+    font-family:'Cinzel',serif;font-size:7px;color:#a7f3d0;letter-spacing:0.5px;
+    transition:all 0.2s;box-shadow:0 0 10px rgba(4,120,87,0.3);
+    user-select:none;text-align:center;
   }
-  .ingredient-chip {
-    width:58px; height:70px; border-radius:10px;
-    background:linear-gradient(180deg,#3a1d5e,#21103a);
-    border:2px solid #00eaff; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:3px;
-    touch-action:none; cursor:grab; position:relative;
-  }
-  .ingredient-chip .ing-icon { width:24px; height:24px; }
-  .ingredient-chip .ing-name { font-size:8px; color:#fdf6ff; text-align:center; padding:0 2px; }
-  .ingredient-chip .ing-count { position:absolute; top:-6px; right:-6px; background:#ffd700; color:#2a1245; font-size:10px; font-weight:bold; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; }
-  .ingredient-chip.dragging { opacity:0.5; }
-  .ingredient-chip.locked { opacity:0.3; pointer-events:none; }
-  .ingredient-chip.empty { opacity:0.4; pointer-events:none; }
+  .turn-btn:hover{background:linear-gradient(135deg,var(--green2),var(--green3));box-shadow:0 0 18px rgba(4,120,87,0.5);}
+  .turn-btn:active{transform:scale(0.96);}
+  .turn-btn svg{width:22px;height:22px;}
 
-  #brew-action-btn {
-    margin:8px auto 12px; display:block;
-    background:linear-gradient(145deg,#ff2fd6,#b300ff); color:#fff;
-    border:none; border-radius:30px; padding:12px 36px; font-size:15px; font-weight:bold;
-    box-shadow:0 0 18px rgba(255,47,214,0.6);
+  /* CENTER PANEL */
+  #center{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg2);}
+  .panel-header{
+    padding:10px 16px 8px;border-bottom:1px solid var(--border);
+    background:linear-gradient(180deg,rgba(10,20,30,0.8),transparent);
+    display:flex;align-items:center;gap:10px;flex-shrink:0;
   }
-  #brew-action-btn:disabled { opacity:0.35; }
-  #brew-clear-btn{
-    margin:0 auto 6px; display:block; background:transparent; color:#ff8fae;
-    border:1px solid #ff5d5d; border-radius:20px; padding:5px 16px; font-size:11px;
-  }
+  .panel-title{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:2px;}
+  .panel-sub{font-size:12px;color:var(--text3);}
+  .panel-content{flex:1;overflow-y:auto;padding:10px 12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
+  .panel-content::-webkit-scrollbar{width:4px;}
+  .panel-content::-webkit-scrollbar-track{background:transparent;}
+  .panel-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
 
-  /* ---------- MAĞAZA EKRANI ---------- */
-  #shop-screen {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    background:linear-gradient(180deg,#0a0118,#1a0a2e);
-    display:none; flex-direction:column; z-index:200;
-  }
-  #shop-header { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:2px solid #00eaff; }
-  #shop-list { flex:1; overflow-y:auto; padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start; }
-  .shop-item { background:linear-gradient(180deg,#2a1245,#1a0a2e); border:2px solid #ff2fd6; border-radius:10px; padding:8px; display:flex; flex-direction:column; align-items:center; gap:4px; }
-  .shop-item .ing-icon { width:30px; height:30px; }
-  .shop-item-name { color:#fdf6ff; font-size:11px; text-align:center; }
-  .shop-item-price { color:#ffd700; font-size:11px; }
-  .shop-item-buy { background:#00eaff; color:#0a0118; border:none; border-radius:14px; padding:5px 14px; font-size:11px; font-weight:bold; margin-top:2px; }
-  .shop-item-buy:disabled { background:#555; color:#999; }
-  .shop-item.locked { opacity:0.5; }
-  .shop-item-locked-tag { color:#ff5d5d; font-size:9px; text-align:center; }
-  .shop-item-owned{ color:#7ce8ff; font-size:9px; }
+  /* CARDS */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;}
+  .card-title{font-family:'Cinzel',serif;font-size:11px;font-weight:600;color:var(--gold2);margin-bottom:4px;}
+  .card-desc{font-size:11px;color:var(--text2);line-height:1.5;}
 
-  /* ---------- TUTORIAL ---------- */
-  #tutorial-overlay {
-    position:absolute; top:0; left:0; width:100%; height:100%;
-    background:rgba(0,0,0,0.6); z-index:9999; display:none;
-    align-items:flex-end; justify-content:center;
-    pointer-events:none; /* overlay tıklamayı bloklamaz, sadece kutu engeller */
+  /* SARAY TAB */
+  .tax-section{margin-bottom:10px;}
+  .tax-title{font-family:'Cinzel',serif;font-size:10px;color:var(--accent);margin-bottom:6px;letter-spacing:1px;}
+  .tax-options{display:flex;gap:6px;}
+  .tax-opt{
+    flex:1;padding:6px 4px;text-align:center;border-radius:6px;cursor:pointer;
+    border:1px solid var(--border);background:var(--bg3);
+    font-family:'Cinzel',serif;font-size:9px;color:var(--text2);
+    transition:all 0.2s;user-select:none;
   }
-  #tutorial-box {
-    background:linear-gradient(180deg,#2a1245,#1a0a2e);
-    border:2px solid #ffd700; border-radius:14px 14px 0 0;
-    padding:16px; width:100%; max-width:480px;
-    box-shadow:0 0 25px rgba(255,215,0,0.4);
-    pointer-events:auto;
+  .tax-opt:hover{border-color:var(--gold-dim);}
+  .tax-opt.active{background:linear-gradient(135deg,rgba(92,40,0,0.6),rgba(50,20,0,0.8));border-color:var(--gold);color:var(--gold2);}
+  .tax-opt .tax-val{font-size:14px;font-weight:700;color:var(--gold2);display:block;margin-bottom:2px;}
+  .tax-opt .tax-effect{font-size:8px;color:var(--crimson2);}
+  .upgrades-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
+  .upgrade-card{
+    background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px;cursor:pointer;
+    transition:all 0.2s;position:relative;overflow:hidden;
   }
-  #tutorial-text { color:#fdf6ff; font-size:13px; line-height:1.5; margin-bottom:12px; }
-  #tutorial-next {
-    background:#ffd700; color:#2a1245; border:none; border-radius:20px;
-    padding:9px 22px; font-size:13px; font-weight:bold; display:block; margin-left:auto;
-  }
-  #tutorial-skip{
-    background:transparent; color:#999; border:none; font-size:11px; margin-right:auto; display:block;
-  }
-  #tutorial-footer{ display:flex; justify-content:space-between; align-items:center; }
-  .tutorial-highlight {
-    box-shadow:0 0 0 4px #ffd700, 0 0 20px 6px rgba(255,215,0,0.7) !important;
-    z-index:10000 !important; position:relative !important; pointer-events:auto !important;
-  }
-  #tutorial-arrow{
-    position:absolute; font-size:30px; color:#ffd700; text-shadow:0 0 10px #ffd700;
-    z-index:10000; display:none; animation:bounceArrow 1s infinite;
-  }
-  @keyframes bounceArrow{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(8px);} }
+  .upgrade-card:hover:not(.bought){border-color:var(--gold-dim);background:rgba(26,35,50,0.9);}
+  .upgrade-card.bought{border-color:var(--green3);background:rgba(6,78,59,0.2);cursor:default;}
+  .upgrade-card.bought::after{content:'ALINDI';position:absolute;top:4px;right:4px;font-size:7px;color:var(--green3);font-family:'Cinzel',serif;letter-spacing:1px;}
+  .upg-name{font-family:'Cinzel',serif;font-size:10px;color:var(--gold2);margin-bottom:2px;}
+  .upg-desc{font-size:9px;color:var(--text2);line-height:1.4;margin-bottom:4px;}
+  .upg-cost{font-family:'Cinzel',serif;font-size:9px;color:var(--gold);}
+  .upg-bonus{font-size:9px;color:#6ee7b7;}
 
-  /* ---------- TOAST / SONUÇ ---------- */
-  #toast {
-    position:absolute; top:50px; left:50%; transform:translateX(-50%);
-    background:rgba(20,5,40,0.95); border:2px solid #00ff7b; color:#fdf6ff;
-    padding:10px 20px; border-radius:30px; font-size:13px; z-index:600;
-    display:none; box-shadow:0 0 15px rgba(0,255,123,0.5); text-align:center; max-width:80%;
+  /* ORDU TAB */
+  .unit-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
+  .unit-icon{width:36px;height:36px;flex-shrink:0;border-radius:4px;display:flex;align-items:center;justify-content:center;background:rgba(217,119,6,0.1);border:1px solid var(--gold-dim);}
+  .unit-info{flex:1;}
+  .unit-name{font-family:'Cinzel',serif;font-size:10px;color:var(--gold2);margin-bottom:1px;}
+  .unit-stats{font-size:9px;color:var(--text2);line-height:1.5;}
+  .unit-count{font-family:'Cinzel',serif;font-size:18px;color:var(--gold);font-weight:700;text-align:center;min-width:32px;}
+  .unit-controls{display:flex;flex-direction:column;gap:3px;}
+  .unit-btn{
+    width:28px;height:20px;border-radius:3px;border:1px solid var(--border);background:var(--bg2);
+    color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
+    transition:all 0.15s;user-select:none;font-family:'Cinzel',serif;
   }
-  #toast.fail { border-color:#ff2d2d; box-shadow:0 0 15px rgba(255,45,45,0.5); }
+  .unit-btn:hover{border-color:var(--gold);color:var(--gold);}
+  .upkeep-box{background:rgba(153,27,27,0.15);border:1px solid rgba(153,27,27,0.4);border-radius:6px;padding:8px;margin-top:6px;}
+  .upkeep-title{font-family:'Cinzel',serif;font-size:9px;color:#fca5a5;margin-bottom:4px;letter-spacing:1px;}
+  .upkeep-row{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);padding:1px 0;}
+  .upkeep-val{color:#fca5a5;font-family:'Cinzel',serif;font-size:10px;}
 
-  #levelup-banner {
-    position:absolute; top:40%; left:50%; transform:translate(-50%,-50%) scale(0.6);
-    background:linear-gradient(145deg,#ffd700,#ff8c00); color:#2a1245; font-weight:bold;
-    padding:18px 30px; border-radius:16px; text-align:center; z-index:700;
-    box-shadow:0 0 40px rgba(255,215,0,0.8); display:none; opacity:0;
-    transition:opacity 0.4s, transform 0.4s;
+  /* SEFER TAB */
+  .empire-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
+  .empire-card:hover:not(.conquered){border-color:var(--crimson2);background:rgba(26,15,15,0.9);}
+  .empire-card.conquered{border-color:var(--green3);background:rgba(6,78,59,0.15);cursor:default;}
+  .empire-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+  .empire-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--gold-dim);}
+  .empire-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text);font-weight:700;}
+  .empire-status{font-size:9px;color:var(--text3);}
+  .empire-stats{display:flex;gap:10px;margin-bottom:6px;}
+  .empire-stat{font-size:9px;color:var(--text2);}
+  .empire-stat span{color:var(--gold2);font-family:'Cinzel',serif;}
+  .empire-power-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:6px;border:1px solid var(--border);}
+  .empire-power-fill{height:100%;background:linear-gradient(90deg,var(--crimson),var(--crimson2));border-radius:3px;}
+  .sefere-btn{
+    padding:5px 14px;background:linear-gradient(135deg,var(--crimson),var(--crimson2));
+    border:1px solid #ef4444;border-radius:4px;color:#fecaca;
+    font-family:'Cinzel',serif;font-size:9px;cursor:pointer;transition:all 0.2s;
+    letter-spacing:1px;user-select:none;
   }
-  #levelup-banner.show { display:block; opacity:1; transform:translate(-50%,-50%) scale(1); }
-  #levelup-banner .lvl-title { font-size:20px; }
-  #levelup-banner .lvl-sub { font-size:12px; margin-top:4px; }
+  .sefere-btn:hover{box-shadow:0 0 10px rgba(185,28,28,0.5);}
+  .conquered-badge{font-family:'Cinzel',serif;font-size:9px;color:var(--green3);letter-spacing:1px;}
 
-  #floating-coin{
-    position:absolute; font-size:14px; color:#ffd700; font-weight:bold; text-shadow:0 0 6px #ffae00;
-    pointer-events:none; z-index:800; animation:floatUp 1s forwards;
+  /* BATTLE VIEW */
+  #battle-view{display:none;flex-direction:column;height:100%;}
+  .battle-header{padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(153,27,27,0.1);flex-shrink:0;}
+  .battle-title{font-family:'Cinzel',serif;font-size:13px;color:#fca5a5;letter-spacing:2px;}
+  .battle-vs{font-size:10px;color:var(--text2);margin-top:2px;}
+  .battle-phases{display:flex;gap:6px;padding:8px 12px;flex-shrink:0;border-bottom:1px solid var(--border);}
+  .phase-indicator{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.5s;}
+  .phase-indicator.active{background:var(--crimson2);}
+  .phase-indicator.done{background:var(--green3);}
+  .battle-log{
+    flex:1;overflow-y:auto;padding:8px 12px;
+    font-size:11px;color:var(--text2);line-height:1.8;
+    scrollbar-width:thin;scrollbar-color:var(--border) transparent;
   }
-  @keyframes floatUp{ 0%{opacity:1; transform:translateY(0);} 100%{opacity:0; transform:translateY(-50px);} }
+  .log-line{margin-bottom:2px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
+  .log-line.phase-header{color:var(--gold2);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;margin-top:6px;}
+  .log-line.victory{color:#6ee7b7;font-family:'Cinzel',serif;}
+  .log-line.defeat{color:#fca5a5;font-family:'Cinzel',serif;}
+  .battle-controls{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
+  .start-battle-btn{
+    flex:1;padding:8px;background:linear-gradient(135deg,var(--crimson),var(--crimson2));
+    border:1px solid #ef4444;border-radius:6px;color:#fff;
+    font-family:'Cinzel',serif;font-size:11px;cursor:pointer;
+    letter-spacing:1px;transition:all 0.2s;user-select:none;
+  }
+  .start-battle-btn:hover{box-shadow:0 0 14px rgba(185,28,28,0.5);}
+  .back-btn{
+    padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;
+    color:var(--text2);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;
+    transition:all 0.2s;user-select:none;
+  }
+  .back-btn:hover{border-color:var(--gold-dim);color:var(--gold2);}
 
-  ::-webkit-scrollbar { width:5px; }
-  ::-webkit-scrollbar-thumb { background:#ff2fd6; border-radius:3px; }
+  /* DIVAN TAB */
+  .event-inactive{text-align:center;padding:20px;color:var(--text3);font-size:12px;}
+
+  /* EVENT MODAL */
+  #event-modal{
+    display:none;position:fixed;inset:0;z-index:1000;
+    background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);
+    align-items:center;justify-content:center;
+  }
+  #event-modal.show{display:flex;}
+  .modal-box{
+    width:min(420px,90vw);background:linear-gradient(135deg,#0f1a10,#0a0f1a);
+    border:2px solid var(--gold-dim);border-radius:12px;padding:20px;
+    box-shadow:0 0 40px rgba(0,0,0,0.9);position:relative;overflow:hidden;
+  }
+  .modal-box::before{
+    content:'';position:absolute;inset:0;border-radius:12px;
+    background:radial-gradient(ellipse at top,rgba(217,119,6,0.05),transparent 60%);pointer-events:none;
+  }
+  .modal-seal{width:40px;height:40px;margin:0 auto 10px;display:block;}
+  .modal-title{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:6px;letter-spacing:2px;}
+  .modal-text{font-size:12px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:14px;}
+  .modal-choices{display:flex;flex-direction:column;gap:8px;}
+  .choice-btn{
+    padding:10px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--border);
+    background:var(--bg3);transition:all 0.2s;text-align:left;user-select:none;
+  }
+  .choice-btn:hover{border-color:var(--gold-dim);background:rgba(217,119,6,0.08);}
+  .choice-label{font-family:'Cinzel',serif;font-size:10px;color:var(--gold2);margin-bottom:3px;}
+  .choice-effect{font-size:10px;color:var(--text2);}
+  .choice-effect .pos{color:#6ee7b7;}
+  .choice-effect .neg{color:#fca5a5;}
+
+  /* NOTIFICATION */
+  #notif{
+    position:fixed;bottom:16px;right:16px;z-index:2000;
+    display:flex;flex-direction:column;gap:6px;pointer-events:none;
+  }
+  .notif-item{
+    padding:8px 14px;border-radius:6px;font-family:'Cinzel',serif;font-size:10px;
+    letter-spacing:1px;border:1px solid;animation:notif-in 0.3s ease;
+    pointer-events:none;max-width:240px;
+  }
+  .notif-item.success{background:rgba(6,78,59,0.9);border-color:var(--green3);color:#a7f3d0;}
+  .notif-item.warning{background:rgba(92,40,0,0.9);border-color:var(--gold);color:#fde68a;}
+  .notif-item.danger{background:rgba(153,27,27,0.9);border-color:var(--crimson2);color:#fecaca;}
+  @keyframes notif-in{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+  /* ARMY POWER DISPLAY */
+  .army-power-box{background:rgba(6,78,59,0.1);border:1px solid rgba(4,120,87,0.3);border-radius:6px;padding:8px;margin-bottom:8px;}
+  .ap-title{font-family:'Cinzel',serif;font-size:9px;color:#6ee7b7;letter-spacing:1px;margin-bottom:4px;}
+  .ap-value{font-family:'Cinzel',serif;font-size:20px;color:var(--gold2);font-weight:700;}
+  .ap-breakdown{font-size:9px;color:var(--text3);}
+
+  /* DIVAN LOG */
+  .divan-log{margin-top:10px;}
+  .divan-log-title{font-family:'Cinzel',serif;font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:6px;}
+  .divan-entry{padding:6px 8px;background:var(--bg3);border-left:3px solid var(--gold-dim);border-radius:0 4px 4px 0;margin-bottom:4px;font-size:10px;color:var(--text2);line-height:1.5;}
+
+  /* Scrollbar for battle log */
+  .battle-log::-webkit-scrollbar{width:3px;}
+  .battle-log::-webkit-scrollbar-track{background:transparent;}
+  .battle-log::-webkit-scrollbar-thumb{background:var(--border);}
+
+  /* GOLD change flash */
+  .flash-pos{animation:flash-pos 0.4s ease;}
+  .flash-neg{animation:flash-neg 0.4s ease;}
+  @keyframes flash-pos{0%,100%{color:var(--gold2);}50%{color:#6ee7b7;text-shadow:0 0 8px #6ee7b7;}}
+  @keyframes flash-neg{0%,100%{color:var(--gold2);}50%{color:#fca5a5;text-shadow:0 0 8px #fca5a5;}}
 </style>
 </head>
 <body>
 
-<div id="game-container">
-
-  <div id="top-bar">
-    <div id="coin-display">🪙 <span id="coin-amount">50</span></div>
-    <div id="title-display">🎓 <span id="rank-name">Çırak</span></div>
-    <div id="combo-display"></div>
-  </div>
-
-  <div id="shop-scene">
-    <div id="shop-bg"></div>
-
-    <div class="shelf" id="shelf-left">
-      <div class="shelf-bottle" style="background:#7ce8ff;box-shadow:0 0 6px #7ce8ff;"></div>
-      <div class="shelf-bottle" style="background:#ff6fb5;box-shadow:0 0 6px #ff6fb5;"></div>
-      <div class="shelf-label">Mağaza</div>
-    </div>
-    <div class="shelf" id="shelf-right">
-      <div class="shelf-bottle" style="background:#b3ff6f;box-shadow:0 0 6px #b3ff6f;"></div>
-      <div class="shelf-bottle" style="background:#ffd76f;box-shadow:0 0 6px #ffd76f;"></div>
-      <div class="shelf-label">Mağaza</div>
-    </div>
-
-    <div id="customer-area">
-      <div id="patience-bar-wrap"><div id="patience-bar"></div></div>
-      <div id="speech-bubble"></div>
-      <svg id="customer-svg" viewBox="0 0 80 130" width="80" height="130"></svg>
-    </div>
-
-    <div id="witch-counter">
-      <div id="counter-table"></div>
-      <div id="witch-wrap">
-        <svg viewBox="0 0 90 140" width="90" height="140">
-          <polygon points="45,5 25,55 65,55" fill="#3a1d5e" stroke="#ff2fd6" stroke-width="2"/>
-          <ellipse cx="45" cy="55" rx="26" ry="6" fill="#2a1245" stroke="#ff2fd6" stroke-width="2"/>
-          <circle cx="45" cy="15" r="4" fill="#ffd700"/>
-          <ellipse cx="45" cy="70" rx="16" ry="17" fill="#b3ff8f"/>
-          <circle cx="40" cy="68" r="2" fill="#1a0a2e"/>
-          <circle cx="50" cy="68" r="2" fill="#1a0a2e"/>
-          <path d="M40 76 Q45 80 50 76" stroke="#1a0a2e" stroke-width="1.5" fill="none"/>
-          <path d="M52 65 Q60 60 58 70" stroke="#b3ff8f" stroke-width="5" fill="none" stroke-linecap="round"/>
-          <path d="M22 130 Q25 85 45 85 Q65 85 68 130 Z" fill="#2a1245" stroke="#ff2fd6" stroke-width="2"/>
-          <path d="M30 130 Q33 95 45 95 Q57 95 60 130 Z" fill="#3a1d5e"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-  <div id="phone-dock">
-    <div class="dock-btn" id="phone-dock-btn">
-      <div id="phone-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#00eaff" stroke-width="1.6">
-          <rect x="6" y="2" width="12" height="20" rx="2"/>
-          <line x1="10" y1="19" x2="14" y2="19"/>
-        </svg>
-        <div id="phone-badge">!</div>
-      </div>
-      <div class="dock-label-txt">İksir Yap</div>
-    </div>
-    <div class="dock-btn" id="shop-dock-btn">
-      <div id="shop-dock-icon">
-        <svg viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="1.6">
-          <path d="M3 7l1-4h16l1 4"/>
-          <path d="M3 7h18v13H3z"/>
-          <path d="M9 11a3 3 0 006 0"/>
-        </svg>
-      </div>
-      <div class="dock-label-txt">Mağaza</div>
-    </div>
-  </div>
-
-  <div id="toast"></div>
-  <div id="levelup-banner">
-    <div class="lvl-title">⭐ SEVİYE ATLADIN!</div>
-    <div class="lvl-sub" id="levelup-text"></div>
-  </div>
-
-  <div id="brew-screen">
-    <div id="brew-header">
-      <button id="brew-back">⬅ Dükkana Dön</button>
-      <div id="brew-order"></div>
-    </div>
-    <div id="brew-timer-wrap">
-      <div id="brew-timer-bar-bg"><div id="brew-timer-bar"></div></div>
-    </div>
-    <div id="cauldron-area">
-      <div id="cauldron-svg-wrap">
-        <svg id="cauldron-svg" viewBox="0 0 100 100" width="160" height="160">
-          <ellipse cx="50" cy="85" rx="38" ry="8" fill="#1a0a2e"/>
-          <path d="M14 50 Q14 90 50 90 Q86 90 86 50 Z" fill="#2a1245" stroke="#ff2fd6" stroke-width="2.5"/>
-          <ellipse cx="50" cy="50" rx="36" ry="10" fill="#3a1d5e" stroke="#00eaff" stroke-width="2"/>
-          <ellipse id="potion-liquid" cx="50" cy="50" rx="30" ry="6" fill="#5d2e8f"/>
-        </svg>
-      </div>
-      <div id="drop-zone"></div>
-      <div id="cauldron-status">Malzemeleri kazana sürükle</div>
-      <div id="recipe-hint"></div>
-    </div>
-    <button id="brew-clear-btn">Kazanı Temizle ✕</button>
-    <div id="ingredient-tray"></div>
-    <button id="brew-action-btn" disabled>İksiri Tamamla</button>
-  </div>
-
-  <div id="shop-screen">
-    <div id="shop-header">
-      <button id="shop-back" style="color:#fff;background:#3a1d5e;border:1px solid #00eaff;border-radius:8px;padding:6px 12px;font-size:13px;">⬅ Geri</button>
-      <div id="shop-title-coin" style="color:#ffd700;font-size:13px;">🪙 <span id="shop-coin-amount">0</span></div>
-    </div>
-    <div id="shop-list"></div>
-  </div>
-
-  <div id="tutorial-overlay">
-    <div id="tutorial-box">
-      <div id="tutorial-text"></div>
-      <div id="tutorial-footer">
-        <button id="tutorial-skip">Atla</button>
-        <button id="tutorial-next">İleri ➜</button>
-      </div>
-    </div>
-  </div>
-  <div id="tutorial-arrow">👇</div>
-
+<!-- PORTRAIT WARNING -->
+<div id="portrait-warn">
+  <svg class="pw-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <rect x="20" y="10" width="40" height="60" rx="5" stroke="#d97706" stroke-width="3" fill="none"/>
+    <rect x="28" y="18" width="24" height="44" rx="2" fill="rgba(217,119,6,0.1)"/>
+    <circle cx="40" cy="65" r="3" fill="#d97706"/>
+    <path d="M5 40 L75 40" stroke="#064e3b" stroke-width="2" stroke-dasharray="4 4"/>
+    <path d="M60 32 L75 40 L60 48" fill="#064e3b"/>
+  </svg>
+  <div class="pw-title">Cihazınızı Yan Çevirin!</div>
+  <div class="pw-sub">Bu oyun yalnızca <strong style="color:#d97706">yatay (landscape) modda</strong> oynanabilir. Lütfen cihazınızı döndürün.</div>
 </div>
 
+<!-- GAME ROOT -->
+<div id="game-root">
+  <!-- TOP BAR -->
+  <div id="top-bar">
+    <div class="tb-brand">PADİŞAH</div>
+    <div class="res-group">
+      <!-- Gold SVG -->
+      <svg class="res-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#d97706" stroke="#92400e" stroke-width="1.5"/><circle cx="12" cy="12" r="7" fill="#f59e0b"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="bold" fill="#78350f">₺</text></svg>
+      <div class="res-info"><span class="res-lbl">Hazine</span><span class="res-val" id="res-gold">0</span></div>
+    </div>
+    <div class="res-group">
+      <!-- Manpower SVG -->
+      <svg class="res-icon" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5" fill="#e8dcc8" stroke="#7a6a50" stroke-width="1"/><path d="M6 20c0-4 2.5-6 6-6s6 2 6 6" fill="#e8dcc8" stroke="#7a6a50" stroke-width="1"/><path d="M3 16c0-3 1.5-4.5 4-5" stroke="#b8a98a" stroke-width="1" stroke-linecap="round" fill="none"/><path d="M21 16c0-3-1.5-4.5-4-5" stroke="#b8a98a" stroke-width="1" stroke-linecap="round" fill="none"/></svg>
+      <div class="res-info"><span class="res-lbl">İnsan Gücü</span><span class="res-val" id="res-manpower">0</span></div>
+    </div>
+    <div class="res-group">
+      <!-- Territory SVG -->
+      <svg class="res-icon" viewBox="0 0 24 24"><path d="M3 18 L12 4 L21 18 Z" fill="rgba(6,78,59,0.4)" stroke="#047857" stroke-width="1.5"/><path d="M7 18 L12 10 L17 18" fill="#064e3b" stroke="#047857" stroke-width="1"/><circle cx="12" cy="4" r="1.5" fill="#f59e0b"/></svg>
+      <div class="res-info"><span class="res-lbl">Toprak</span><span class="res-val" id="res-territory">0</span></div>
+    </div>
+    <div class="res-group">
+      <div class="bar-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="bar-lbl">Halkın Mutluluğu</span>
+          <span class="bar-pct" id="res-happiness-pct">0%</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill happiness" id="bar-happiness" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="res-group" style="border-right:none;">
+      <div class="bar-wrap">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <span class="bar-lbl">Ordu Morali</span>
+          <span class="bar-pct" id="res-morale-pct">0%</span>
+        </div>
+        <div class="bar-track"><div class="bar-fill morale" id="bar-morale" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="turn-display">Tur <span class="turn-num" id="turn-num">1</span></div>
+  </div>
+
+  <!-- MAIN LAYOUT -->
+  <div id="main-layout">
+    <!-- SIDEBAR -->
+    <div id="sidebar">
+      <div class="nav-btn active" id="nav-saray" onclick="switchTab('saray')">
+        <svg viewBox="0 0 32 32" fill="none"><rect x="4" y="16" width="24" height="14" rx="1" fill="rgba(217,119,6,0.15)" stroke="#d97706" stroke-width="1.5"/><rect x="10" y="10" width="12" height="8" rx="1" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/><rect x="14" y="4" width="4" height="8" rx="1" fill="rgba(217,119,6,0.15)" stroke="#d97706" stroke-width="1.5"/><rect x="11" y="22" width="4" height="8" fill="rgba(217,119,6,0.2)"/><rect x="17" y="22" width="4" height="8" fill="rgba(217,119,6,0.2)"/><circle cx="16" cy="4" r="1.5" fill="#f59e0b"/></svg>
+        <span>SARAY</span>
+      </div>
+      <div class="nav-btn" id="nav-ordu" onclick="switchTab('ordu')">
+        <svg viewBox="0 0 32 32" fill="none"><path d="M8 24 L16 6 L24 24" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.1)"/><line x1="10" y1="18" x2="22" y2="18" stroke="#d97706" stroke-width="1.5"/><path d="M13 24 L13 28 M19 24 L19 28" stroke="#d97706" stroke-width="1.5"/><circle cx="16" cy="6" r="2" fill="#f59e0b" stroke="#92400e" stroke-width="1"/></svg>
+        <span>ORDU</span>
+      </div>
+      <div class="nav-btn" id="nav-sefer" onclick="switchTab('sefer')">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="11" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><path d="M16 5 L16 27 M5 16 L27 16" stroke="#d97706" stroke-width="1"/><path d="M8 8 L24 24 M24 8 L8 24" stroke="#d97706" stroke-width="0.5" opacity="0.4"/><circle cx="16" cy="16" r="2.5" fill="#f59e0b"/></svg>
+        <span>SEFER</span>
+      </div>
+      <div class="nav-btn" id="nav-divan" onclick="switchTab('divan')">
+        <svg viewBox="0 0 32 32" fill="none"><rect x="6" y="8" width="20" height="16" rx="2" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><line x1="10" y1="13" x2="22" y2="13" stroke="#d97706" stroke-width="1"/><line x1="10" y1="17" x2="18" y2="17" stroke="#d97706" stroke-width="1"/><circle cx="24" cy="8" r="4" fill="#991b1b" stroke="#b91c1c" stroke-width="1"/><text x="24" y="11" text-anchor="middle" font-size="6" fill="#fecaca" font-weight="bold" id="divan-badge-txt">!</text></svg>
+        <span>DİVAN</span>
+      </div>
+
+      <div class="nav-divider"></div>
+
+      <div class="turn-btn" onclick="nextTurn()">
+        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="11" stroke="#6ee7b7" stroke-width="1.5"/><path d="M16 10 L16 16 L21 19" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 7 L25 4 M25 4 L25 8 M25 4 L21 4" stroke="#6ee7b7" stroke-width="1.5" stroke-linecap="round"/></svg>
+        TUR ATLA
+      </div>
+    </div>
+
+    <!-- CENTER PANEL -->
+    <div id="center">
+      <!-- SARAY TAB -->
+      <div id="tab-saray" class="tab-panel" style="display:flex;flex-direction:column;height:100%;">
+        <div class="panel-header">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="4" y="16" width="24" height="14" rx="1" fill="rgba(217,119,6,0.15)" stroke="#d97706" stroke-width="1.5"/><rect x="10" y="10" width="12" height="8" rx="1" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/><circle cx="16" cy="4" r="2" fill="#f59e0b"/></svg>
+          <div><div class="panel-title">SARAY</div><div class="panel-sub">Ekonomi, Vergi ve Devlet Düzenlemeleri</div></div>
+        </div>
+        <div class="panel-content">
+          <!-- Tax Rate -->
+          <div class="tax-section">
+            <div class="tax-title">VERGİ ORANI</div>
+            <div class="tax-options">
+              <div class="tax-opt" id="tax-low" onclick="setTax('low')">
+                <span class="tax-val">%5</span>
+                <span>DÜŞÜK</span>
+                <span class="tax-effect" style="color:#6ee7b7;">+Mutluluk</span>
+              </div>
+              <div class="tax-opt active" id="tax-normal" onclick="setTax('normal')">
+                <span class="tax-val">%10</span>
+                <span>NORMAL</span>
+                <span class="tax-effect" style="color:var(--text3);">Dengeli</span>
+              </div>
+              <div class="tax-opt" id="tax-high" onclick="setTax('high')">
+                <span class="tax-val">%20</span>
+                <span>YÜKSEK</span>
+                <span class="tax-effect">-Mutluluk</span>
+              </div>
+            </div>
+          </div>
+          <!-- Upgrades -->
+          <div class="tax-title" style="margin-bottom:6px;">DEVLET İYİLEŞTİRMELERİ</div>
+          <div class="upgrades-grid" id="upgrades-grid"></div>
+        </div>
+      </div>
+
+      <!-- ORDU TAB -->
+      <div id="tab-ordu" class="tab-panel" style="display:none;flex-direction:column;height:100%;">
+        <div class="panel-header">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><path d="M8 24 L16 6 L24 24" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.1)"/><line x1="10" y1="18" x2="22" y2="18" stroke="#d97706" stroke-width="1.5"/><circle cx="16" cy="6" r="2" fill="#f59e0b"/></svg>
+          <div><div class="panel-title">ORDU</div><div class="panel-sub">Kışla ve Asker Yönetimi</div></div>
+        </div>
+        <div class="panel-content">
+          <div class="army-power-box">
+            <div class="ap-title">TOPLAM ORDU GÜCÜ</div>
+            <div class="ap-value" id="army-power-val">0</div>
+            <div class="ap-breakdown" id="army-breakdown">Yeniçeri x0 + Sipahi x0 + Şahi Topu x0</div>
+          </div>
+          <!-- Units -->
+          <div id="units-list"></div>
+          <!-- Upkeep -->
+          <div class="upkeep-box">
+            <div class="upkeep-title">AYLIK BAKIYET (Her Tur)</div>
+            <div class="upkeep-row"><span>Yeniçeri Maaşı</span><span class="upkeep-val" id="up-yeni">0 Altın</span></div>
+            <div class="upkeep-row"><span>Sipahi Maaşı</span><span class="upkeep-val" id="up-sipahi">0 Altın</span></div>
+            <div class="upkeep-row"><span>Top Bakımı</span><span class="upkeep-val" id="up-top">0 Altın</span></div>
+            <div class="upkeep-row" style="border-top:1px solid rgba(153,27,27,0.3);margin-top:4px;padding-top:4px;"><span style="color:#fca5a5;font-family:'Cinzel',serif;font-size:10px;">TOPLAM</span><span class="upkeep-val" id="up-total">0 Altın</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SEFER TAB -->
+      <div id="tab-sefer" class="tab-panel" style="display:none;flex-direction:column;height:100%;">
+        <div id="sefer-list-view" style="display:flex;flex-direction:column;height:100%;">
+          <div class="panel-header">
+            <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="11" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><path d="M16 5 L16 27 M5 16 L27 16" stroke="#d97706" stroke-width="1"/><circle cx="16" cy="16" r="2.5" fill="#f59e0b"/></svg>
+            <div><div class="panel-title">SEFER</div><div class="panel-sub">Savaş Haritası ve Fetihler</div></div>
+          </div>
+          <div class="panel-content" id="empires-list"></div>
+        </div>
+
+        <!-- Battle View (inside sefer tab) -->
+        <div id="battle-view" style="display:none;flex-direction:column;height:100%;">
+          <div class="battle-header">
+            <div class="battle-title" id="battle-title">SAVAŞ BAŞLIYOR</div>
+            <div class="battle-vs" id="battle-vs">Kuvvetleriniz vs Düşman</div>
+          </div>
+          <div class="battle-phases">
+            <div class="phase-indicator" id="phase0"></div>
+            <div class="phase-indicator" id="phase1"></div>
+            <div class="phase-indicator" id="phase2"></div>
+          </div>
+          <div class="battle-log" id="battle-log"></div>
+          <div class="battle-controls">
+            <div class="back-btn" onclick="closeBattle()">GERİ DÖN</div>
+            <div class="start-battle-btn" id="battle-start-btn" onclick="startBattle()">SAVAŞA BAŞLA</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DIVAN TAB -->
+      <div id="tab-divan" class="tab-panel" style="display:none;flex-direction:column;height:100%;">
+        <div class="panel-header">
+          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="6" y="8" width="20" height="16" rx="2" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><line x1="10" y1="13" x2="22" y2="13" stroke="#d97706" stroke-width="1"/><line x1="10" y1="17" x2="18" y2="17" stroke="#d97706" stroke-width="1"/></svg>
+          <div><div class="panel-title">DİVAN</div><div class="panel-sub">Olaylar ve Kararlar</div></div>
+        </div>
+        <div class="panel-content">
+          <div class="card">
+            <div class="card-title">DİVAN-I HÜMAYUN</div>
+            <div class="card-desc">Devletin en büyük karar meclisi. Her 3 turda bir önemli olaylar ve krizler gündeme gelir. Kararlarınız imparatorluğun kaderini belirler.</div>
+          </div>
+          <div class="divan-log">
+            <div class="divan-log-title">OLAY GEÇMİŞİ</div>
+            <div id="divan-history"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EVENT MODAL -->
+<div id="event-modal">
+  <div class="modal-box">
+    <svg class="modal-seal" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" stroke="#d97706" stroke-width="2" fill="rgba(217,119,6,0.05)"/><path d="M20 4 L22 16 L34 12 L26 22 L36 28 L24 26 L24 36 L20 26 L16 36 L16 26 L4 28 L14 22 L6 12 L18 16 Z" fill="#d97706" opacity="0.3"/><circle cx="20" cy="20" r="4" fill="#d97706"/></svg>
+    <div class="modal-title" id="modal-title">DİVAN KARARI</div>
+    <div class="modal-text" id="modal-text"></div>
+    <div class="modal-choices" id="modal-choices"></div>
+  </div>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div id="notif"></div>
+
 <script>
-/* =====================================================================
-   İKSİR DÜKKANI SİMÜLASYONU - Geliştirilmiş Sürüm
-   Modüler yapı: DATA -> STATE -> AUDIO -> CUSTOMER -> BREW -> SHOP -> TUTORIAL -> EVENTS -> INIT
-   ===================================================================== */
+// ============================================================
+// STATE
+// ============================================================
+const S = {
+  turn: 1,
+  gold: 2500,
+  manpower: 500,
+  happiness: 75,
+  morale: 70,
+  territory: 150,
+  population: 1000,
+  taxRate: 'normal',
+  taxRates: {low: 0.05, normal: 0.10, high: 0.20},
+  happinessEffect: {low: 2, normal: 0, high: -4},
 
-const INGREDIENTS_DB = {
-  su:        { name:"Kaynak Suyu",      color:"#7ce8ff", price:0,   tier:0 },
-  ot:        { name:"Şifa Otu",         color:"#7dff8f", price:0,   tier:0 },
-  bal:       { name:"Yaban Balı",       color:"#ffd76f", price:5,   tier:0 },
-  tuz:       { name:"Deniz Tuzu",       color:"#e9e9e9", price:5,   tier:0 },
-  lavanta:   { name:"Lavanta",          color:"#c79bff", price:8,   tier:0 },
-  biberiye:  { name:"Biberiye",         color:"#6fbf73", price:8,   tier:0 },
-  kokmantar: { name:"Kök Mantar",       color:"#a9744f", price:12,  tier:1 },
-  korbocek:  { name:"Kör Böcek Kanadı", color:"#8f6fae", price:15,  tier:1 },
-  yildiztoz: { name:"Yıldız Tozu",      color:"#ffe7a3", price:25,  tier:1 },
-  kedigozu:  { name:"Kedi Gözü Otu",    color:"#9bff5a", price:25,  tier:1 },
-  ejderpul:  { name:"Ejderha Pulu",     color:"#ff5d5d", price:60,  tier:2 },
-  ayisigi:   { name:"Ay Işığı Özü",     color:"#cfe8ff", price:70,  tier:2 },
-  feniksTuy: { name:"Anka Tüyü",        color:"#ff9a3c", price:90,  tier:2 },
-  golgeOzu:  { name:"Gölge Özü",        color:"#5a3d8f", price:100, tier:2 },
+  // Army
+  units: {
+    yeniceri: { count: 50, power: 3, upkeep: 2, name: 'Yeniçeri (Piyade)', manpowerCost: 1, goldCost: 50 },
+    sipahi:   { count: 20, power: 6, upkeep: 5, name: 'Sipahi (Süvari)', manpowerCost: 2, goldCost: 120 },
+    sahiTopu: { count: 5,  power: 12, upkeep: 8, name: 'Şahi Topu (Kuşatma)', manpowerCost: 0, goldCost: 300 },
+  },
+
+  // Upgrades
+  upgrades: [
+    { id:'timar', name:'Tımar Sistemi', desc:'Sipahi toprak geliri. Her tur +50 Altın.', cost: 800, bonus:'+50 Altın/Tur', bought:false, effect:()=>{ S.passiveGold += 50; } },
+    { id:'kervan', name:'Kervansaraylar', desc:'Ticaret yolları. Her tur +80 Altın.', cost:1200, bonus:'+80 Altın/Tur', bought:false, effect:()=>{ S.passiveGold += 80; } },
+    { id:'medrese', name:'Medreseler', desc:'Eğitimli nüfus. +100 İnsan Gücü.', cost:600, bonus:'+100 İnsan Gücü', bought:false, effect:()=>{ S.manpower += 100; } },
+    { id:'tersane', name:'Tersane-i Amire', desc:'Deniz gücü. Toprak +30, Moral +5.', cost:1500, bonus:'+30 Toprak, +5 Moral', bought:false, effect:()=>{ S.territory += 30; S.morale = Math.min(100, S.morale+5); } },
+    { id:'devshirme', name:'Devşirme Sistemi', desc:'Elit asker kaynağı. Yeniçeri gücü +2.', cost:900, bonus:'+2 Yeniceri Gücü', bought:false, effect:()=>{ S.units.yeniceri.power += 2; } },
+    { id:'bab', name:'Bab-ı Ali Divan', desc:'Yönetim etkinliği. Vergi geliri %25 artar.', cost:1100, bonus:'%25 Vergi Bonusu', bought:false, effect:()=>{ S.taxBonus += 0.25; } },
+  ],
+  passiveGold: 0,
+  taxBonus: 0,
+
+  // Empires
+  empires: [
+    { id:'bizans', name:'Bizans İmparatorluğu', power:180, reward:{gold:800, territory:40, morale:15}, conquered:false, color:'#7c3aed' },
+    { id:'venedik', name:'Venedik Cumhuriyeti', power:250, reward:{gold:1200, territory:30, morale:10}, conquered:false, color:'#0369a1' },
+    { id:'safevi', name:'Safevi Devleti', power:350, reward:{gold:1500, territory:60, morale:20}, conquered:false, color:'#b45309' },
+    { id:'kutsal', name:'Kutsal Roma İmparatorluğu', power:500, reward:{gold:2500, territory:100, morale:25}, conquered:false, color:'#be185d' },
+  ],
+
+  // Battle
+  currentEnemy: null,
+  battleRunning: false,
+
+  // Events
+  divanHistory: [],
+  nextEventTurn: 3,
+
+  // Events pool
+  events: [
+    {
+      id:'yeni_isyan', title:'Yeniçeri Ocağı İsyanı!',
+      text:'Yeniçeriler ulufe artışı talep ediyor. Reddetmek ordunun moralini çökertebilir!',
+      choices:[
+        { label:'A) Altın öde (Ulufe ver)', effect:'<span class="pos">+15 Moral</span> <span class="neg">-300 Altın</span>', apply:()=>{ S.gold -= 300; S.morale = Math.min(100,S.morale+15); addDivanHistory('Yeniçeri isyanı: Ulufe ödendi. Moral arttı.'); }},
+        { label:'B) İsyanı sertçe bastır', effect:'<span class="neg">-10 Moral</span> <span class="neg">-100 Nüfus</span> <span class="neg">-10 Mutluluk</span>', apply:()=>{ S.morale = Math.max(0,S.morale-10); S.population -= 100; S.happiness = Math.max(0,S.happiness-10); addDivanHistory('Yeniçeri isyanı bastırıldı. Moral ve nüfus düştü.'); }},
+      ]
+    },
+    {
+      id:'veba', title:'Veba Salgını!',
+      text:'İstanbul\'da veba görüldü. Tedbirler alınmazsa nüfus ciddi düşecek.',
+      choices:[
+        { label:'A) Karantina ilan et', effect:'<span class="neg">-200 Altın</span> <span class="neg">-50 Nüfus</span> <span class="pos">+5 Mutluluk</span>', apply:()=>{ S.gold-=200; S.population-=50; S.happiness=Math.min(100,S.happiness+5); addDivanHistory('Veba: Karantina ilan edildi. Ağır kayıp önlendi.'); }},
+        { label:'B) Görmezden gel', effect:'<span class="neg">-250 Nüfus</span> <span class="neg">-15 Mutluluk</span>', apply:()=>{ S.population-=250; S.happiness=Math.max(0,S.happiness-15); addDivanHistory('Veba salgını: Müdahale edilmedi. Büyük nüfus kaybı.'); }},
+      ]
+    },
+    {
+      id:'tacir', title:'Venedikli Tüccarlar',
+      text:'Venedikli tüccarlar ticaret anlaşması teklif ediyor. Kabul eder misiniz?',
+      choices:[
+        { label:'A) Anlaşmayı kabul et', effect:'<span class="pos">+500 Altın</span> <span class="pos">+10 Mutluluk</span>', apply:()=>{ S.gold+=500; S.happiness=Math.min(100,S.happiness+10); addDivanHistory('Venedik ticaret anlaşması imzalandı. Hazine doldu.'); }},
+        { label:'B) Reddet (Gurur meselesi)', effect:'<span class="pos">+10 Moral</span> <span class="neg">-200 Altın</span>', apply:()=>{ S.morale=Math.min(100,S.morale+10); S.gold-=200; addDivanHistory('Venedik teklifi reddedildi. Asker morali yükseldi.'); }},
+      ]
+    },
+    {
+      id:'halife', title:'Halifelik Talepleri',
+      text:'Mısır\'dan haberci geldi: Memluk sultanı halife unvanını kabul etmenizi istiyor.',
+      choices:[
+        { label:'A) Kabul et (Dini meşruiyet)', effect:'<span class="pos">+20 Mutluluk</span> <span class="pos">+50 Toprak</span>', apply:()=>{ S.happiness=Math.min(100,S.happiness+20); S.territory+=50; addDivanHistory('Halifelik kabul edildi. Halkın desteği arttı.'); }},
+        { label:'B) Reddet (Bağımsız kal)', effect:'<span class="pos">+15 Moral</span> <span class="neg">-10 Mutluluk</span>', apply:()=>{ S.morale=Math.min(100,S.morale+15); S.happiness=Math.max(0,S.happiness-10); addDivanHistory('Halifelik reddedildi. Ordu morali yükseldi.'); }},
+      ]
+    },
+    {
+      id:'deprem', title:'Büyük Deprem!',
+      text:'Anadolu\'da şiddetli bir deprem yaşandı. Kurtarma operasyonu gerekiyor.',
+      choices:[
+        { label:'A) Hazineden yardım gönder', effect:'<span class="neg">-400 Altın</span> <span class="pos">+20 Mutluluk</span>', apply:()=>{ S.gold-=400; S.happiness=Math.min(100,S.happiness+20); addDivanHistory('Deprem: Hazineden yardım gönderildi. Halk memnun.'); }},
+        { label:'B) Yerel valileri görevlendir', effect:'<span class="neg">-5 Mutluluk</span> <span class="pos">+5 Moral</span>', apply:()=>{ S.happiness=Math.max(0,S.happiness-5); S.morale=Math.min(100,S.morale+5); addDivanHistory('Deprem: Valiler görevlendirildi. Halk biraz şikayetçi.'); }},
+      ]
+    },
+  ],
+  usedEvents: [],
 };
 
-const POTIONS_DB = {
-  cesaret:   { name:"Cesaret İksiri",       recipe:["ot","bal"],                 reward:12, color:"#ff8f3c" },
-  huzur:     { name:"Huzur İksiri",         recipe:["su","lavanta"],             reward:12, color:"#8fc7ff" },
-  enerji:    { name:"Enerji İksiri",        recipe:["bal","biberiye"],           reward:14, color:"#ffe34f" },
-  zihinAcan: { name:"Zihin Açan İksir",     recipe:["su","ot","kokmantar"],      reward:22, color:"#7dffb0" },
-  ask:       { name:"Aşk İksiri",           recipe:["bal","lavanta","kedigozu"], reward:26, color:"#ff6fb5" },
-  unutus:    { name:"Unutuş İksiri",        recipe:["su","korbocek","golgeOzu"], reward:34, color:"#5a3d8f" },
-  sans:      { name:"Şans İksiri",          recipe:["yildiztoz","bal","ot"],     reward:30, color:"#ffe7a3" },
-  guc:       { name:"Güç İksiri",           recipe:["ejderpul","tuz","biberiye"],reward:48, color:"#ff5d5d" },
-  ruyaIsigi: { name:"Rüya Işığı İksiri",    recipe:["ayisigi","lavanta","su"],   reward:50, color:"#cfe8ff" },
-  yeniden:   { name:"Yeniden Doğuş İksiri", recipe:["feniksTuy","ot","bal","yildiztoz"], reward:65, color:"#ff9a3c" },
-};
-
-const PROBLEMS_DB = [
-  { text:"Sevgilimden ayrıldım, kalbim kırık... 💔", potion:"huzur" },
-  { text:"Yarın çok önemli bir sınavım var, zihnim dağınık.", potion:"zihinAcan" },
-  { text:"Kendimi çok yorgun ve bitkin hissediyorum.", potion:"enerji" },
-  { text:"Biri beni çok kızdırdı, içimde cesaret arıyorum.", potion:"cesaret" },
-  { text:"Aşkımı fark etmiyor, ona ilaç gibi bir şey gerek.", potion:"ask" },
-  { text:"Kötü bir anıyı unutmak istiyorum, beni rahat bırakmıyor.", potion:"unutus" },
-  { text:"Şu kumarhanede şansım hiç yaver gitmiyor.", potion:"sans" },
-  { text:"Çok güçsüz hissediyorum, savaşa hazırlanmam gerek.", potion:"guc" },
-  { text:"Geceleri kötü rüyalar görüyorum, ışığa ihtiyacım var.", potion:"ruyaIsigi" },
-  { text:"Hayatımı sıfırdan kurmak istiyorum, yeni bir başlangıç...", potion:"yeniden" },
-  { text:"Stresten uyuyamıyorum, huzur bulmam lazım.", potion:"huzur" },
-  { text:"Derslerime konsantre olamıyorum.", potion:"zihinAcan" },
-  { text:"İçimde tuhaf bir korku var, cesaret lazım bana.", potion:"cesaret" },
-  { text:"Enerjim sıfırı tüketti, ayakta zor duruyorum.", potion:"enerji" },
-];
-
-const CUSTOMER_NAMES = ["Elif","Mehmet","Aylin","Burak","Selin","Kaan","Derya","Tolga","Naz","Emre","Yağmur","Cem"];
-
-const RANKS = [
-  { minCoin:0,    name:"Çırak" },
-  { minCoin:200,  name:"Kalfa" },
-  { minCoin:600,  name:"Usta" },
-  { minCoin:1500, name:"Büyük Usta" },
-  { minCoin:3000, name:"İksir Lordu" },
-];
-
-const state = {
-  coins: 50,
-  totalEarned: 0,
-  rankIndex: 0,
-  inventory: { su:99, ot:99, bal:3, tuz:2, lavanta:2, biberiye:1 },
-  unlockedIngredients: new Set(["su","ot","bal","tuz","lavanta","biberiye"]),
-  currentCustomer: null,
-  patience: 100,
-  patienceTimer: null,
-  selectedPotionIngredients: [],
-  brewTimerInterval: null,
-  brewTimeLeft: 0,
-  brewMax: 0,
-  tutorialActive: false,
-  tutorialStep: -1,
-  comboCount: 0,
-  spawnTimeout: null,
-};
-
-/* ---------------------- SES (Web Audio API) ---------------------- */
-const AudioFX = (() => {
-  let ctx = null;
-  function getCtx(){ if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
-  function tone(freq, dur, type="sine", vol=0.15, delay=0){
-    try{
-      const c = getCtx(); const t0 = c.currentTime + delay;
-      const osc = c.createOscillator(); const gain = c.createGain();
-      osc.type = type; osc.frequency.setValueAtTime(freq, t0);
-      gain.gain.setValueAtTime(vol, t0);
-      gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
-      osc.connect(gain); gain.connect(c.destination);
-      osc.start(t0); osc.stop(t0 + dur);
-    }catch(e){}
-  }
-  return {
-    click(){ tone(520,0.07,"triangle",0.12); },
-    drop(){ tone(300,0.1,"sine",0.15); tone(420,0.1,"sine",0.1,0.05); },
-    success(){ tone(523,0.12,"triangle",0.18); tone(659,0.12,"triangle",0.16,0.1); tone(784,0.18,"triangle",0.18,0.2); },
-    fail(){ tone(180,0.25,"sawtooth",0.15); tone(120,0.3,"sawtooth",0.12,0.1); },
-    coin(){ tone(880,0.08,"square",0.1); tone(1100,0.08,"square",0.08,0.06); },
-    levelup(){ tone(440,0.1,"triangle",0.18); tone(554,0.1,"triangle",0.18,0.1); tone(659,0.1,"triangle",0.18,0.2); tone(880,0.25,"triangle",0.2,0.3); },
-    knock(){ tone(150,0.08,"square",0.1); }
-  };
-})();
-
-function $(sel){ return document.querySelector(sel); }
-function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
-
-function showToast(msg, fail=false){
-  const t = $("#toast");
-  t.textContent = msg;
-  t.classList.toggle("fail", fail);
-  t.style.display = "block";
-  clearTimeout(t._hideTimeout);
-  t._hideTimeout = setTimeout(()=> t.style.display="none", 2200);
+// ============================================================
+// UI HELPERS
+// ============================================================
+function updateUI(){
+  document.getElementById('res-gold').textContent = S.gold.toLocaleString('tr-TR');
+  document.getElementById('res-manpower').textContent = S.manpower.toLocaleString('tr-TR');
+  document.getElementById('res-territory').textContent = S.territory;
+  document.getElementById('res-happiness-pct').textContent = Math.round(S.happiness)+'%';
+  document.getElementById('res-morale-pct').textContent = Math.round(S.morale)+'%';
+  document.getElementById('bar-happiness').style.width = Math.max(0,Math.min(100,S.happiness))+'%';
+  document.getElementById('bar-morale').style.width = Math.max(0,Math.min(100,S.morale))+'%';
+  document.getElementById('turn-num').textContent = S.turn;
+  updateArmyUI();
+  updateUpkeepUI();
 }
 
-function spawnFloatingCoin(amount){
-  const el = document.createElement("div");
-  el.id = "floating-coin";
-  el.textContent = "+" + amount + " 🪙";
-  el.style.left = "calc(50% - 20px)";
-  el.style.top = "120px";
-  $("#game-container").appendChild(el);
-  setTimeout(()=> el.remove(), 1000);
+function getArmyPower(){
+  return S.units.yeniceri.count * S.units.yeniceri.power +
+         S.units.sipahi.count * S.units.sipahi.power +
+         S.units.sahiTopu.count * S.units.sahiTopu.power;
 }
 
-function getCurrentRank(){
-  let r = RANKS[0];
-  for (const rk of RANKS) if (state.totalEarned >= rk.minCoin) r = rk;
-  return r;
-}
-function refreshTopBar(){
-  $("#coin-amount").textContent = state.coins;
-  $("#rank-name").textContent = getCurrentRank().name;
-  $("#combo-display").textContent = state.comboCount > 1 ? `🔥 x${state.comboCount}` : "";
+function updateArmyUI(){
+  const power = getArmyPower();
+  const apEl = document.getElementById('army-power-val');
+  if(apEl){ apEl.textContent = power; }
+  const brEl = document.getElementById('army-breakdown');
+  if(brEl){ brEl.textContent = `Yeniçeri x${S.units.yeniceri.count} + Sipahi x${S.units.sipahi.count} + Şahi Topu x${S.units.sahiTopu.count}`; }
 }
 
-/* ---------------------- MÜŞTERİ SİSTEMİ ---------------------- */
-function spawnCustomer(){
-  if (state.tutorialActive) return;
-  const problem = rand(PROBLEMS_DB);
-  const name = rand(CUSTOMER_NAMES);
-  state.currentCustomer = { name, problem, potionId: problem.potion };
-
-  const area = $("#customer-area");
-  area.style.display = "block";
-  drawCustomerSVG();
-
-  const bubble = $("#speech-bubble");
-  bubble.style.display = "block";
-  bubble.textContent = `${name}: "${problem.text}"`;
-
-  $("#phone-badge").style.display = "flex";
-  AudioFX.knock();
-
-  state.patience = 100;
-  updatePatienceBar();
-  clearInterval(state.patienceTimer);
-  state.patienceTimer = setInterval(()=>{
-    state.patience -= 0.55;
-    if (state.patience <= 0){
-      state.patience = 0; updatePatienceBar();
-      customerLeavesAngry();
-    } else updatePatienceBar();
-  }, 200);
-}
-function updatePatienceBar(){ $("#patience-bar").style.width = state.patience + "%"; }
-
-function customerLeavesAngry(){
-  clearInterval(state.patienceTimer);
-  showToast(`${state.currentCustomer?.name || "Müşteri"} sabırsızlanıp dükkanı terk etti! 😠`, true);
-  AudioFX.fail();
-  state.comboCount = 0;
-  refreshTopBar();
-  endCustomerVisit();
+function updateUpkeepUI(){
+  const yu = S.units.yeniceri.count * S.units.yeniceri.upkeep;
+  const su = S.units.sipahi.count * S.units.sipahi.upkeep;
+  const tu = S.units.sahiTopu.count * S.units.sahiTopu.upkeep;
+  const el = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v+' Altın'; };
+  el('up-yeni', yu); el('up-sipahi', su); el('up-top', tu);
+  const tot = document.getElementById('up-total');
+  if(tot) tot.textContent = (yu+su+tu)+' Altın';
 }
 
-function endCustomerVisit(){
-  $("#customer-area").style.display = "none";
-  $("#speech-bubble").style.display = "none";
-  $("#phone-badge").style.display = "none";
-  state.currentCustomer = null;
-  clearInterval(state.patienceTimer);
-  clearTimeout(state.spawnTimeout);
-  state.spawnTimeout = setTimeout(spawnCustomer, 2500 + Math.random()*2000);
+function notify(msg, type='success'){
+  const n = document.getElementById('notif');
+  const el = document.createElement('div');
+  el.className = 'notif-item '+type;
+  el.textContent = msg;
+  n.appendChild(el);
+  setTimeout(()=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }, 3000);
 }
 
-function drawCustomerSVG(){
-  const svg = $("#customer-svg");
-  const skin = rand(["#f3c89a","#e0a878","#caa06a"]);
-  const cloth = rand(["#4fa3ff","#ff6f9c","#9b59ff","#5ed99b","#ffb347"]);
-  svg.innerHTML = `
-    <ellipse cx="40" cy="38" rx="14" ry="15" fill="${skin}"/>
-    <path d="M28 30 Q40 18 52 30 L52 26 Q40 14 28 26 Z" fill="#2a1a0a"/>
-    <circle cx="35" cy="37" r="1.8" fill="#1a0a2e"/>
-    <circle cx="45" cy="37" r="1.8" fill="#1a0a2e"/>
-    <path d="M35 44 Q40 41 45 44" stroke="#1a0a2e" stroke-width="1.3" fill="none"/>
-    <path d="M18 125 Q20 70 40 68 Q60 70 62 125 Z" fill="${cloth}"/>
-    <rect x="14" y="60" width="10" height="35" rx="4" fill="${cloth}" transform="rotate(-15 14 60)"/>
-  `;
+// ============================================================
+// TAB SWITCHING
+// ============================================================
+function switchTab(tab){
+  ['saray','ordu','sefer','divan'].forEach(t=>{
+    document.getElementById('tab-'+t).style.display = 'none';
+    document.getElementById('nav-'+t).classList.remove('active');
+  });
+  document.getElementById('tab-'+tab).style.display = 'flex';
+  document.getElementById('nav-'+tab).classList.add('active');
+  if(tab==='sefer'){ closeBattle(); }
 }
 
-/* ---------------------- İKSİR EKRANI ---------------------- */
-function openBrewScreen(){
-  if (!state.currentCustomer && !(state.tutorialActive && state.tutorialStep===2)){
-    showToast("Şu anda bekleyen bir müşteri yok.");
-    return;
-  }
-  AudioFX.click();
-  $("#brew-screen").style.display = "flex";
-  state.selectedPotionIngredients = [];
-  resetCauldronVisual();
-
-  const order = (state.tutorialActive && state.tutorialStep===2)
-    ? "Eğitim: Cesaret İksiri yap (Şifa Otu + Yaban Balı)"
-    : `${state.currentCustomer.name} bekliyor: "${state.currentCustomer.problem.text}"`;
-  $("#brew-order").textContent = order;
-
-  renderIngredientTray();
-  startBrewTimer();
-
-  if (state.tutorialActive && state.tutorialStep===2){
-    setTimeout(()=> goToTutorialStep(3), 300);
-  }
-}
-
-function closeBrewScreen(){
-  $("#brew-screen").style.display = "none";
-  clearInterval(state.brewTimerInterval);
-}
-
-function startBrewTimer(){
-  clearInterval(state.brewTimerInterval);
-  state.brewMax = 45;
-  state.brewTimeLeft = state.brewMax;
-  updateBrewTimerBar();
-  state.brewTimerInterval = setInterval(()=>{
-    if (state.tutorialActive) return; // eğitimde süre işlemesin
-    state.brewTimeLeft -= 1;
-    updateBrewTimerBar();
-    if (state.brewTimeLeft <= 0){
-      clearInterval(state.brewTimerInterval);
-      showToast("Süre doldu! İksir bozuldu.", true);
-      AudioFX.fail();
-      closeBrewScreen();
-      state.comboCount = 0; refreshTopBar();
-      customerLeavesAngry();
-    }
-  }, 1000);
-}
-function updateBrewTimerBar(){
-  const pct = Math.max(0, (state.brewTimeLeft / state.brewMax) * 100);
-  $("#brew-timer-bar").style.width = pct + "%";
-}
-
-function renderIngredientTray(){
-  const tray = $("#ingredient-tray");
-  tray.innerHTML = "";
-  Object.keys(INGREDIENTS_DB).forEach(id=>{
-    const ing = INGREDIENTS_DB[id];
-    const unlocked = state.unlockedIngredients.has(id);
-    const owned = state.inventory[id] || 0;
-
-    const chip = document.createElement("div");
-    chip.className = "ingredient-chip";
-    if (!unlocked) chip.classList.add("locked");
-    else if (owned <= 0) chip.classList.add("empty");
-    chip.dataset.id = id;
-    chip.innerHTML = `
-      <svg class="ing-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="${ing.color}" stroke="#1a0a2e" stroke-width="1.5"/></svg>
-      <div class="ing-name">${ing.name}</div>
-      <div class="ing-count">${unlocked ? owned : "🔒"}</div>
-    `;
-    if (unlocked && owned > 0) attachDragEvents(chip, id);
-    tray.appendChild(chip);
+// ============================================================
+// SARAY
+// ============================================================
+function setTax(rate){
+  S.taxRate = rate;
+  ['low','normal','high'].forEach(r=>{
+    document.getElementById('tax-'+r).classList.toggle('active', r===rate);
   });
 }
 
-function attachDragEvents(chip, ingId){
-  let dragGhost = null;
-  function startDrag(x,y){
-    AudioFX.click();
-    chip.classList.add("dragging");
-    dragGhost = chip.cloneNode(true);
-    dragGhost.style.position = "fixed";
-    dragGhost.style.pointerEvents = "none";
-    dragGhost.style.zIndex = 999;
-    dragGhost.style.opacity = "0.85";
-    dragGhost.style.width = chip.offsetWidth + "px";
-    document.body.appendChild(dragGhost);
-    moveGhost(x,y);
-  }
-  function moveGhost(x,y){
-    if (!dragGhost) return;
-    dragGhost.style.left = (x - dragGhost.offsetWidth/2) + "px";
-    dragGhost.style.top = (y - dragGhost.offsetHeight/2) + "px";
-  }
-  function endDrag(x,y){
-    chip.classList.remove("dragging");
-    const dropZone = $("#drop-zone");
-    const rect = dropZone.getBoundingClientRect();
-    const inside = x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
-    if (dragGhost){ dragGhost.remove(); dragGhost=null; }
-    dropZone.classList.remove("drag-over");
-    if (inside) addIngredientToCauldron(ingId);
-  }
-  function checkOverDropzone(x,y){
-    const dropZone = $("#drop-zone");
-    const rect = dropZone.getBoundingClientRect();
-    const inside = x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
-    dropZone.classList.toggle("drag-over", inside);
-  }
-  chip.addEventListener("mousedown", e=>{
-    e.preventDefault(); startDrag(e.clientX, e.clientY);
-    function onMove(ev){ moveGhost(ev.clientX, ev.clientY); checkOverDropzone(ev.clientX, ev.clientY); }
-    function onUp(ev){ endDrag(ev.clientX, ev.clientY); document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); }
-    document.addEventListener("mousemove", onMove);
-    document.addEventListener("mouseup", onUp);
+function renderUpgrades(){
+  const grid = document.getElementById('upgrades-grid');
+  grid.innerHTML = '';
+  S.upgrades.forEach(u=>{
+    const el = document.createElement('div');
+    el.className = 'upgrade-card'+(u.bought?' bought':'');
+    el.innerHTML = `<div class="upg-name">${u.name}</div><div class="upg-desc">${u.desc}</div><div class="upg-bonus">${u.bonus}</div><div class="upg-cost">${u.bought?'':'Maliyet: '+u.cost+' Altın'}</div>`;
+    if(!u.bought){ el.onclick = ()=>buyUpgrade(u.id); }
+    grid.appendChild(el);
   });
-  chip.addEventListener("touchstart", e=>{ e.preventDefault(); const t=e.touches[0]; startDrag(t.clientX,t.clientY); }, {passive:false});
-  chip.addEventListener("touchmove", e=>{ e.preventDefault(); const t=e.touches[0]; moveGhost(t.clientX,t.clientY); checkOverDropzone(t.clientX,t.clientY); }, {passive:false});
-  chip.addEventListener("touchend", e=>{ const t=e.changedTouches[0]; endDrag(t.clientX,t.clientY); });
 }
 
-function addIngredientToCauldron(ingId){
-  if ((state.inventory[ingId]||0) <= 0){
-    showToast("Bu malzemeden hiç kalmadı! Mağazadan al.", true);
-    return;
-  }
-  state.inventory[ingId] -= 1;
-  state.selectedPotionIngredients.push(ingId);
-  AudioFX.drop();
-  renderIngredientTray();
-  updateCauldronStatus();
-
-  if (state.tutorialActive && state.tutorialStep===3 && state.selectedPotionIngredients.length>=2){
-    goToTutorialStep(4);
-  }
+function buyUpgrade(id){
+  const u = S.upgrades.find(x=>x.id===id);
+  if(!u||u.bought) return;
+  if(S.gold < u.cost){ notify('Yeterli altın yok!','danger'); return; }
+  S.gold -= u.cost;
+  u.bought = true;
+  u.effect();
+  renderUpgrades();
+  updateUI();
+  notify(u.name+' satın alındı!','success');
 }
 
-function clearCauldron(){
-  state.selectedPotionIngredients.forEach(id=> state.inventory[id] = (state.inventory[id]||0)+1);
-  state.selectedPotionIngredients = [];
-  renderIngredientTray();
-  resetCauldronVisual();
+// ============================================================
+// ORDU
+// ============================================================
+function renderUnits(){
+  const list = document.getElementById('units-list');
+  list.innerHTML = '';
+  const unitDefs = [
+    { key:'yeniceri', svgPath: `<path d="M16 4 L16 28 M10 10 L22 10" stroke="#d97706" stroke-width="2" stroke-linecap="round"/><path d="M10 10 L8 16 L16 14 L24 16 L22 10" fill="rgba(217,119,6,0.2)" stroke="#d97706" stroke-width="1"/>` },
+    { key:'sipahi', svgPath: `<ellipse cx="16" cy="22" rx="10" ry="6" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1"/><path d="M16 22 L16 8 M12 12 L20 12" stroke="#d97706" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="#f59e0b"/>` },
+    { key:'sahiTopu', svgPath: `<ellipse cx="16" cy="20" rx="12" ry="5" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/><rect x="10" y="12" width="12" height="8" rx="3" fill="rgba(217,119,6,0.2)" stroke="#d97706" stroke-width="1.5"/><circle cx="8" cy="20" r="3" fill="#92400e" stroke="#d97706" stroke-width="1"/><circle cx="24" cy="20" r="3" fill="#92400e" stroke="#d97706" stroke-width="1"/>` },
+  ];
+  unitDefs.forEach(def=>{
+    const u = S.units[def.key];
+    const el = document.createElement('div');
+    el.className = 'unit-card';
+    el.innerHTML = `
+      <div class="unit-icon"><svg width="28" height="28" viewBox="0 0 32 32" fill="none">${def.svgPath}</svg></div>
+      <div class="unit-info">
+        <div class="unit-name">${u.name}</div>
+        <div class="unit-stats">Güç: <b style="color:var(--gold2)">${u.power}</b> | Bakiyet: <b style="color:#fca5a5">${u.upkeep} Altın/Tur</b> | Maliyet: <b style="color:var(--gold)">${u.goldCost} Altın</b></div>
+      </div>
+      <div class="unit-count">${u.count}</div>
+      <div class="unit-controls">
+        <div class="unit-btn" onclick="recruitUnit('${def.key}')">+</div>
+        <div class="unit-btn" onclick="dismissUnit('${def.key}')">-</div>
+      </div>`;
+    list.appendChild(el);
+  });
+  updateArmyUI();
+  updateUpkeepUI();
 }
 
-function resetCauldronVisual(){
-  $("#potion-liquid").setAttribute("fill", "#5d2e8f");
-  $("#cauldron-status").textContent = "Malzemeleri kazana sürükle";
-  $("#recipe-hint").textContent = "";
-  $("#brew-action-btn").disabled = true;
+function recruitUnit(key){
+  const u = S.units[key];
+  if(S.gold < u.goldCost){ notify('Yeterli altın yok!','danger'); return; }
+  if(u.manpowerCost > 0 && S.manpower < u.manpowerCost){ notify('Yeterli insan gücü yok!','danger'); return; }
+  S.gold -= u.goldCost;
+  S.manpower -= u.manpowerCost;
+  u.count++;
+  renderUnits();
+  updateUI();
 }
 
-function updateCauldronStatus(){
-  const names = state.selectedPotionIngredients.map(id=>INGREDIENTS_DB[id].name);
-  $("#cauldron-status").textContent = names.length ? "Kazanda: " + names.join(", ") : "Malzemeleri kazana sürükle";
+function dismissUnit(key){
+  const u = S.units[key];
+  if(u.count <= 0) return;
+  u.count--;
+  renderUnits();
+  updateUI();
+}
 
-  const matched = matchPotion(state.selectedPotionIngredients);
-  if (matched){
-    $("#potion-liquid").setAttribute("fill", POTIONS_DB[matched].color);
-    $("#recipe-hint").textContent = `✨ ${POTIONS_DB[matched].name} hazır görünüyor!`;
-    $("#brew-action-btn").disabled = false;
+// ============================================================
+// SEFER / BATTLE
+// ============================================================
+function renderEmpires(){
+  const list = document.getElementById('empires-list');
+  list.innerHTML = '';
+  S.empires.forEach(emp=>{
+    const pct = Math.min(100, (emp.power/600)*100);
+    const el = document.createElement('div');
+    el.className = 'empire-card'+(emp.conquered?' conquered':'');
+    el.innerHTML = `
+      <div class="empire-header">
+        <div class="empire-icon" style="border-color:${emp.color};background:${emp.color}22">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 L14 8 L20 8 L15 12 L17 18 L12 15 L7 18 L9 12 L4 8 L10 8 Z" fill="${emp.color}" stroke="${emp.color}" stroke-width="0.5"/></svg>
+        </div>
+        <div><div class="empire-name">${emp.name}</div><div class="empire-status">${emp.conquered?'FETHEDİLDİ':'Bağımsız Devlet'}</div></div>
+      </div>
+      <div class="empire-power-bar"><div class="empire-power-fill" style="width:${pct}%;background:linear-gradient(90deg,${emp.color},${emp.color}bb)"></div></div>
+      <div class="empire-stats">
+        <div class="empire-stat">Savunma Gücü: <span>${emp.power}</span></div>
+        <div class="empire-stat">Kazanç: <span>${emp.reward.gold} Altın</span></div>
+        <div class="empire-stat">Toprak: <span>+${emp.reward.territory}</span></div>
+      </div>
+      ${emp.conquered
+        ? '<div class="conquered-badge">FETHEDILDI - TOPRAKLARINIZDA</div>'
+        : `<div class="sefere-btn" onclick="openBattle('${emp.id}')">SAVAŞ AÇ</div>`}`;
+    list.appendChild(el);
+  });
+}
+
+let battleEnemy = null;
+let battleTimeout = null;
+
+function openBattle(empId){
+  battleEnemy = S.empires.find(e=>e.id===empId);
+  if(!battleEnemy||battleEnemy.conquered) return;
+  document.getElementById('sefer-list-view').style.display = 'none';
+  document.getElementById('battle-view').style.display = 'flex';
+  document.getElementById('battle-title').textContent = `SAVAŞ: ${battleEnemy.name.toUpperCase()}`;
+  document.getElementById('battle-vs').textContent = `Ordu Gücünüz: ${getArmyPower()} vs Düşman: ${battleEnemy.power}`;
+  document.getElementById('battle-log').innerHTML = '<div class="log-line" style="color:var(--text3);">Savaşı başlatmak için düğmeye basın...</div>';
+  document.getElementById('battle-start-btn').style.display = 'block';
+  document.getElementById('battle-start-btn').disabled = false;
+  [0,1,2].forEach(i=>{ const p=document.getElementById('phase'+i); p.className='phase-indicator'; });
+  S.battleRunning = false;
+}
+
+function closeBattle(){
+  document.getElementById('sefer-list-view').style.display = 'flex';
+  document.getElementById('battle-view').style.display = 'none';
+  if(battleTimeout){ clearTimeout(battleTimeout); battleTimeout=null; }
+  S.battleRunning = false;
+}
+
+function addLog(text, cls=''){
+  const log = document.getElementById('battle-log');
+  const el = document.createElement('div');
+  el.className = 'log-line'+(cls?' '+cls:'');
+  el.textContent = text;
+  log.appendChild(el);
+  log.scrollTop = log.scrollHeight;
+}
+
+function delay(ms){ return new Promise(r=>{ battleTimeout=setTimeout(r,ms); }); }
+
+async function startBattle(){
+  if(S.battleRunning) return;
+  if(getArmyPower() === 0){ notify('Ordu olmadan savaşamazsınız!','danger'); return; }
+  S.battleRunning = true;
+  document.getElementById('battle-start-btn').style.display = 'none';
+  document.getElementById('battle-log').innerHTML = '';
+
+  const myPower = getArmyPower();
+  const moralCoeff = 0.5 + (S.morale / 200);
+  const myTotal = Math.floor(myPower * moralCoeff);
+  const enemyPower = battleEnemy.power;
+  const randomMod = Math.floor((Math.random()-0.5)*enemyPower*0.3);
+  const enemyTotal = enemyPower + randomMod;
+
+  // PHASE 0: Okçu Çatışması
+  document.getElementById('phase0').classList.add('active');
+  addLog('--- FAZ 1: OKÇU ÇATIŞMASI ---','phase-header');
+  await delay(600);
+  addLog('İki ordu karşı karşıya geldi. Okçular mevzi aldı...');
+  await delay(700);
+  const yeniceriBonus = S.units.yeniceri.count * 2;
+  addLog(`Yeniçeri tüfekçilerimiz ateş açtı! (+${yeniceriBonus} hasar)`);
+  await delay(600);
+  if(S.units.yeniceri.count > 30){
+    addLog('Düşman ön safları büyük kayıp verdi!');
   } else {
-    $("#brew-action-btn").disabled = state.selectedPotionIngredients.length === 0;
-    $("#recipe-hint").textContent = "";
+    addLog('Yetersiz tüfekçi... Düşman kararlı ilerliyor.');
   }
-}
+  await delay(500);
+  document.getElementById('phase0').classList.remove('active');
+  document.getElementById('phase0').classList.add('done');
 
-function matchPotion(arr){
-  const sorted = [...arr].sort().join(",");
-  for (const pid in POTIONS_DB){
-    if ([...POTIONS_DB[pid].recipe].sort().join(",") === sorted) return pid;
-  }
-  return null;
-}
-
-function completeBrew(){
-  const matched = matchPotion(state.selectedPotionIngredients);
-
-  if (state.tutorialActive){
-    if (matched === "cesaret"){
-      AudioFX.success();
-      showToast("Harika! İlk iksirini yaptın. 🎉");
-      closeBrewScreen();
-      goToTutorialStep(5);
-    } else {
-      AudioFX.fail();
-      showToast("Bu tarif değil. Şifa Otu + Yaban Balı dene.", true);
-    }
-    return;
-  }
-
-  if (!state.currentCustomer){ closeBrewScreen(); return; }
-
-  const neededPotion = state.currentCustomer.potionId;
-  clearInterval(state.brewTimerInterval);
-
-  if (matched === neededPotion){
-    const potion = POTIONS_DB[matched];
-    state.comboCount += 1;
-    const comboBonus = Math.min(state.comboCount-1, 5) * 2;
-    const reward = potion.reward + comboBonus;
-    state.coins += reward;
-    state.totalEarned += reward;
-    AudioFX.success();
-    setTimeout(()=>AudioFX.coin(), 150);
-    spawnFloatingCoin(reward);
-    showToast(`${state.currentCustomer.name} çok mutlu! +${reward} 🪙` + (comboBonus>0 ? ` (Kombo bonus +${comboBonus})` : ""));
-    refreshTopBar();
-    checkRankUp();
-  } else if (matched){
-    showToast("Yanlış iksir! Müşteri istediğini bulamadı.", true);
-    AudioFX.fail();
-    state.comboCount = 0; refreshTopBar();
+  // PHASE 1: Süvari Hücumu
+  document.getElementById('phase1').classList.add('active');
+  addLog('--- FAZ 2: SÜVARİ HÜCUMU ---','phase-header');
+  await delay(600);
+  if(S.units.sipahi.count > 10){
+    addLog(`${S.units.sipahi.count} Sipahi süvarisi düşman hatlarını yardı!`);
+    await delay(700);
+    addLog('Düşman süvari birliği bozguna uğradı!');
   } else {
-    showToast("Tarif eşleşmedi, malzemeler boşa gitti.", true);
-    AudioFX.fail();
-    state.comboCount = 0; refreshTopBar();
+    addLog('Sipahi birlikleri yetersiz. Düşman savunması sağlam.');
+    await delay(700);
+    addLog('Merkezimizde bir gedik açıldı!');
   }
+  await delay(500);
+  document.getElementById('phase1').classList.remove('active');
+  document.getElementById('phase1').classList.add('done');
 
-  closeBrewScreen();
-  endCustomerVisit();
-}
-
-function checkRankUp(){
-  const newRank = getCurrentRank();
-  const idx = RANKS.indexOf(newRank);
-  if (idx > state.rankIndex){
-    state.rankIndex = idx;
-    showLevelUp(newRank.name);
-  }
-}
-function showLevelUp(rankName){
-  AudioFX.levelup();
-  const banner = $("#levelup-banner");
-  $("#levelup-text").textContent = `Artık bir "${rankName}" sın!`;
-  banner.classList.add("show");
-  setTimeout(()=> banner.classList.remove("show"), 2200);
-}
-
-/* ---------------------- MAĞAZA ---------------------- */
-function openShop(){
-  AudioFX.click();
-  $("#shop-screen").style.display = "flex";
-  $("#shop-coin-amount").textContent = state.coins;
-  renderShop();
-  if (state.tutorialActive && state.tutorialStep===6) goToTutorialStep(7);
-}
-function closeShop(){ $("#shop-screen").style.display = "none"; }
-
-function renderShop(){
-  const list = $("#shop-list");
-  list.innerHTML = "";
-  const rankIdx = RANKS.indexOf(getCurrentRank());
-
-  Object.keys(INGREDIENTS_DB).forEach(id=>{
-    const ing = INGREDIENTS_DB[id];
-    const tierLocked = ing.tier > rankIdx;
-    const owned = state.inventory[id] || 0;
-
-    const card = document.createElement("div");
-    card.className = "shop-item" + (tierLocked ? " locked" : "");
-    card.innerHTML = `
-      <svg class="ing-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="${ing.color}" stroke="#1a0a2e" stroke-width="1.5"/></svg>
-      <div class="shop-item-name">${ing.name}</div>
-      ${tierLocked
-        ? `<div class="shop-item-locked-tag">🔒 Seviye gerekli</div>`
-        : `<div class="shop-item-owned">Stok: ${owned}</div>
-           <div class="shop-item-price">${ing.price===0?"Ücretsiz":"🪙 "+ing.price}</div>
-           <button class="shop-item-buy" data-id="${id}">${ing.price===0 ? "Topla" : "Satın Al"}</button>`
-      }
-    `;
-    list.appendChild(card);
-  });
-
-  list.querySelectorAll(".shop-item-buy").forEach(btn=>{
-    btn.addEventListener("click", ()=> buyIngredient(btn.dataset.id));
-  });
-}
-
-function buyIngredient(id){
-  const ing = INGREDIENTS_DB[id];
-  if (ing.price > 0 && state.coins < ing.price){
-    showToast("Yeterli coin'in yok!", true);
-    return;
-  }
-  state.coins -= ing.price;
-  state.inventory[id] = (state.inventory[id]||0) + 1;
-  state.unlockedIngredients.add(id);
-  AudioFX.coin();
-  refreshTopBar();
-  $("#shop-coin-amount").textContent = state.coins;
-  showToast(`${ing.name} satın alındı!`);
-  renderShop();
-}
-
-/* ---------------------- ÖĞRETİCİ (TUTORIAL) - state-machine tabanlı ---------------------- */
-/*
-  Her adım: text, hedef eleman (highlight), ok pozisyonu, ve "next" butonunun görünür olup olmadığı.
-  Adımlar arasında geçiş hem "İleri" butonuyla hem de ilgili elemana dokunarak tetiklenebilir.
-*/
-const TUTORIAL_STEPS = [
-  { text:"Dükkanına hoş geldin, genç cadı! Sana iksir yapmayı öğreteceğim. Hazırsan ilerle.", target:null, showNext:true },
-  { text:"Önce malzeme stoğuna göz atalım. Sol veya sağ raftaki mağaza simgesine dokun.", target:"#shelf-left, #shelf-right", showNext:false, arrowAt:"#shelf-left" },
-  { text:"Süper! Şimdi geri dön ve alttaki 'İksir Yap' simgesine dokunarak kazan ekranını aç.", target:"#phone-dock-btn", showNext:false, arrowAt:"#phone-dock-btn" },
-  { text:"Şimdi alttaki tepsiden 'Şifa Otu' ve 'Yaban Balı' malzemelerini kazana (ortadaki daire) sürükle.", target:null, showNext:true },
-  { text:"Mükemmel! Malzemeler kazanda. Şimdi 'İksiri Tamamla' butonuna dokun.", target:"#brew-action-btn", showNext:false, arrowAt:"#brew-action-btn" },
-  { text:"Tebrikler, ilk iksirini yaptın! 🎉 Artık gerçek müşteriler gelecek. Devam et.", target:null, showNext:true },
-  { text:"Yeni ve nadir malzemeler için coin biriktirip mağazadan alışveriş yapabilirsin. Mağaza simgesine dokun.", target:"#shop-dock-btn", showNext:false, arrowAt:"#shop-dock-btn" },
-  { text:"Burası mağaza! Seviyen yükseldikçe ejderha pulu, ay ışığı özü gibi nadir malzemelerin kilidi açılır. Geri dön ve dükkanı işletmeye başla!", target:"#shop-back", showNext:false, arrowAt:"#shop-back" },
-];
-
-function startTutorial(){
-  state.tutorialActive = true;
-  $("#tutorial-overlay").style.display = "flex";
-  goToTutorialStep(0);
-}
-
-function goToTutorialStep(stepIndex){
-  // önceki highlight ve arrow temizle
-  document.querySelectorAll(".tutorial-highlight").forEach(el=>el.classList.remove("tutorial-highlight"));
-  $("#tutorial-arrow").style.display = "none";
-
-  if (stepIndex >= TUTORIAL_STEPS.length){
-    endTutorial();
-    return;
-  }
-  state.tutorialStep = stepIndex;
-  const step = TUTORIAL_STEPS[stepIndex];
-
-  $("#tutorial-text").textContent = step.text;
-  $("#tutorial-next").style.display = step.showNext ? "inline-block" : "none";
-  $("#tutorial-overlay").style.display = "flex";
-
-  if (step.target){
-    document.querySelectorAll(step.target).forEach(el=> el.classList.add("tutorial-highlight"));
-  }
-  if (step.arrowAt){
-    const el = $(step.arrowAt);
-    if (el){
-      const r = el.getBoundingClientRect();
-      const arrow = $("#tutorial-arrow");
-      arrow.style.left = (r.left + r.width/2 - 15) + "px";
-      arrow.style.top = (r.top - 38) + "px";
-      arrow.style.display = "block";
-    }
-  }
-
-  // adım 3 kazana malzeme sürüklenmesini beklediği için overlay'i ekrandan kaldırıp
-  // sadece metin kutusunu gösteriyoruz, brew-screen tam etkileşimli olsun
-  if (stepIndex === 3 || stepIndex === 4){
-    $("#tutorial-overlay").style.pointerEvents = "none";
+  // PHASE 2: Sur Kuşatması
+  document.getElementById('phase2').classList.add('active');
+  addLog('--- FAZ 3: SUR KUŞATMASI ---','phase-header');
+  await delay(600);
+  if(S.units.sahiTopu.count > 0){
+    addLog(`Şahi topları ateşlendi! Surlarda gedik açılıyor...`);
+    await delay(800);
+    addLog(`${S.units.sahiTopu.count} top surlarda büyük tahribat yarattı!`);
   } else {
-    $("#tutorial-overlay").style.pointerEvents = step.target ? "none" : "auto";
+    addLog('Şahi topu yok! Surları aşmak imkansız görünüyor...');
+    await delay(600);
   }
-}
+  await delay(500);
+  document.getElementById('phase2').classList.remove('active');
+  document.getElementById('phase2').classList.add('done');
 
-function endTutorial(){
-  state.tutorialActive = false;
-  state.tutorialStep = -1;
-  document.querySelectorAll(".tutorial-highlight").forEach(el=>el.classList.remove("tutorial-highlight"));
-  $("#tutorial-overlay").style.display = "none";
-  $("#tutorial-arrow").style.display = "none";
-  closeBrewScreen();
-  closeShop();
-  showToast("Eğitim tamamlandı! İyi şanslar genç cadı. ✨");
-  spawnCustomer();
-}
+  // SONUÇ
+  addLog('--- MUHAREBE SONUCU ---','phase-header');
+  await delay(700);
+  addLog(`Sizin Güç Puanı: ${myTotal} (Güç: ${myPower} × Moral Kat: ${moralCoeff.toFixed(2)})`);
+  addLog(`Düşman Güç Puanı: ${enemyTotal} (Taban: ${enemyPower}, Rastlantı: ${randomMod>=0?'+':''}${randomMod})`);
+  await delay(800);
 
-$("#tutorial-next").addEventListener("click", ()=>{
-  AudioFX.click();
-  goToTutorialStep(state.tutorialStep + 1);
-});
-$("#tutorial-skip").addEventListener("click", ()=>{
-  AudioFX.click();
-  endTutorial();
-});
-
-/* ---------------------- OLAY DİNLEYİCİLERİ ---------------------- */
-$("#phone-dock-btn").addEventListener("click", ()=>{
-  if (state.tutorialActive && state.tutorialStep===2){ openBrewScreen(); return; }
-  if (!state.tutorialActive) openBrewScreen();
-});
-$("#brew-back").addEventListener("click", ()=>{
-  if (state.tutorialActive && (state.tutorialStep===3 || state.tutorialStep===4)) return; // tutorial sırasında çıkışı kilitle
-  closeBrewScreen();
-});
-$("#brew-action-btn").addEventListener("click", completeBrew);
-$("#brew-clear-btn").addEventListener("click", clearCauldron);
-
-$("#shelf-left").addEventListener("click", ()=>{
-  if (state.tutorialActive && state.tutorialStep===1){ goToTutorialStep(2); return; }
-  openShop();
-});
-$("#shelf-right").addEventListener("click", ()=>{
-  if (state.tutorialActive && state.tutorialStep===1){ goToTutorialStep(2); return; }
-  openShop();
-});
-$("#shop-dock-btn").addEventListener("click", openShop);
-$("#shop-back").addEventListener("click", ()=>{
-  closeShop();
-  if (state.tutorialActive && state.tutorialStep===7){ endTutorial(); }
-});
-
-window.addEventListener("resize", ()=>{
-  // pencere boyutu değişirse ok pozisyonunu güncelle
-  if (state.tutorialActive){
-    const step = TUTORIAL_STEPS[state.tutorialStep];
-    if (step && step.arrowAt) goToTutorialStep(state.tutorialStep);
+  if(myTotal >= enemyTotal){
+    // ZAFER
+    const r = battleEnemy.reward;
+    S.gold += r.gold;
+    S.territory += r.territory;
+    S.morale = Math.min(100, S.morale + r.morale);
+    battleEnemy.conquered = true;
+    await delay(400);
+    addLog(`ZAFER! ${battleEnemy.name} fethedildi!`,'victory');
+    addLog(`+${r.gold} Altın | +${r.territory} Toprak | +${r.morale} Moral`,'victory');
+    notify('ZAFER! '+battleEnemy.name+' fethedildi!','success');
+    addDivanHistory(`${battleEnemy.name} fethedildi. +${r.gold} Altın, +${r.territory} Toprak.`);
+  } else {
+    // YENILGI
+    const losses50yeni = Math.floor(S.units.yeniceri.count * 0.5);
+    const losses50sipahi = Math.floor(S.units.sipahi.count * 0.5);
+    S.units.yeniceri.count -= losses50yeni;
+    S.units.sipahi.count -= losses50sipahi;
+    S.morale = Math.max(0, S.morale - 20);
+    if(S.morale < 30){ S.happiness = Math.max(0, S.happiness - 10); }
+    await delay(400);
+    addLog(`HEZIMET! Ordumuz geri çekildi!`,'defeat');
+    addLog(`Yeniçeri kaybı: ${losses50yeni} | Sipahi kaybı: ${losses50sipahi} | Moral: -20`,'defeat');
+    notify('Hezimete uğradınız!','danger');
+    addDivanHistory(`${battleEnemy.name} seferinde hezimete uğradı. Ağır kayıplar.`);
   }
-});
 
-/* ---------------------- BAŞLATMA ---------------------- */
-function createStars(){
-  const bg = $("#shop-bg");
-  for (let i=0;i<25;i++){
-    const s = document.createElement("div");
-    s.className = "star";
-    s.style.left = Math.random()*100 + "%";
-    s.style.top = Math.random()*60 + "%";
-    s.style.animationDelay = (Math.random()*3) + "s";
-    bg.appendChild(s);
+  updateUI();
+  S.battleRunning = false;
+}
+
+// ============================================================
+// DIVAN
+// ============================================================
+function addDivanHistory(text){
+  S.divanHistory.unshift({ text, turn: S.turn });
+  renderDivanHistory();
+}
+
+function renderDivanHistory(){
+  const el = document.getElementById('divan-history');
+  if(!el) return;
+  if(S.divanHistory.length === 0){
+    el.innerHTML = '<div style="color:var(--text3);font-size:11px;text-align:center;padding:12px;">Henüz kayıtlı olay yok.</div>';
+    return;
   }
+  el.innerHTML = S.divanHistory.slice(0,8).map(d=>`<div class="divan-entry">Tur ${d.turn}: ${d.text}</div>`).join('');
 }
 
-function initGame(){
-  refreshTopBar();
-  createStars();
-  startTutorial();
+function triggerEvent(){
+  const available = S.events.filter(e=>!S.usedEvents.includes(e.id));
+  if(available.length === 0){ S.usedEvents=[]; return; }
+  const ev = available[Math.floor(Math.random()*available.length)];
+  S.usedEvents.push(ev.id);
+  showModal(ev);
 }
 
-window.addEventListener("load", initGame);
+function showModal(ev){
+  document.getElementById('modal-title').textContent = ev.title;
+  document.getElementById('modal-text').textContent = ev.text;
+  const choicesEl = document.getElementById('modal-choices');
+  choicesEl.innerHTML = '';
+  ev.choices.forEach(c=>{
+    const btn = document.createElement('div');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<div class="choice-label">${c.label}</div><div class="choice-effect">${c.effect}</div>`;
+    btn.onclick = ()=>{ c.apply(); updateUI(); renderDivanHistory(); closeModal(); notify('Karar verildi.','warning'); };
+    choicesEl.appendChild(btn);
+  });
+  document.getElementById('event-modal').classList.add('show');
+}
+
+function closeModal(){
+  document.getElementById('event-modal').classList.remove('show');
+}
+
+// ============================================================
+// TURN
+// ============================================================
+function nextTurn(){
+  // Gold income from taxes
+  const taxIncome = Math.floor(S.population * S.taxRates[S.taxRate] * (1 + S.taxBonus));
+  // Army upkeep
+  const upkeep = S.units.yeniceri.count * S.units.yeniceri.upkeep +
+                 S.units.sipahi.count * S.units.sipahi.upkeep +
+                 S.units.sahiTopu.count * S.units.sahiTopu.upkeep;
+  const netGold = taxIncome + S.passiveGold - upkeep;
+  S.gold += netGold;
+
+  // Happiness effects on gold / morale
+  const happinessDelta = S.happinessEffect[S.taxRate];
+  S.happiness = Math.max(0, Math.min(100, S.happiness + happinessDelta));
+
+  // Morale passive drift
+  if(S.happiness > 60){ S.morale = Math.min(100, S.morale + 1); }
+  else if(S.happiness < 30){ S.morale = Math.max(0, S.morale - 2); }
+
+  // Low morale effects
+  if(S.morale < 20){
+    S.happiness = Math.max(0, S.happiness - 5);
+    notify('Ordu morali çok düşük! Ayaklanma riski var!','danger');
+  }
+
+  // Bankruptcy
+  if(S.gold < 0){ S.gold = 0; S.morale = Math.max(0, S.morale - 10); notify('Hazine boş! Asker maaşları ödenemedi!','danger'); }
+
+  S.turn++;
+
+  // Notify turn income
+  notify(`+${taxIncome} Vergi | +${S.passiveGold} Pasif | -${upkeep} Bakiyet = ${netGold>0?'+':''}${netGold} Altın`, netGold>=0?'success':'danger');
+
+  // Divan event
+  if(S.turn >= S.nextEventTurn){
+    S.nextEventTurn = S.turn + 3;
+    setTimeout(triggerEvent, 500);
+  }
+
+  updateUI();
+  renderUnits();
+  renderEmpires();
+  renderDivanHistory();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+function init(){
+  renderUpgrades();
+  renderUnits();
+  renderEmpires();
+  renderDivanHistory();
+  updateUI();
+}
+
+init();
 </script>
 </body>
-  </html>
+</html>
