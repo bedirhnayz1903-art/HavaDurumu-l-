@@ -1,1050 +1,644 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Padişah: İmparatorluk Savaşı</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Mahalle Ligi: Neon Menajer</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css"></script>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&display=swap');
 
-  *{margin:0;padding:0;box-sizing:border-box;}
-
-  :root{
-    --bg:#0d1117;
-    --bg2:#111827;
-    --bg3:#1a2332;
-    --panel:#162032;
-    --border:#2a3a52;
-    --gold:#d97706;
-    --gold2:#f59e0b;
-    --gold-dim:#92400e;
-    --green:#064e3b;
-    --green2:#065f46;
-    --green3:#047857;
-    --crimson:#991b1b;
-    --crimson2:#b91c1c;
-    --text:#e8dcc8;
-    --text2:#b8a98a;
-    --text3:#7a6a50;
-    --accent:#c0a060;
+  * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
+  body {
+    background: #050505;
+    color: #e5e7eb;
+    font-family: 'Rajdhani', sans-serif;
+    overscroll-behavior: none;
+    user-select: none;
+    margin: 0; padding: 0;
+  }
+  
+  /* NEON & GOTHIC AESTHETICS */
+  :root {
+    --neon-green: #39ff88;
+    --neon-purple: #b026ff;
+    --dark-bg: #090a0f;
+    --card-bg: #11131a;
+    --border-color: #1f222e;
   }
 
-  html,body{width:100%;height:100%;overflow:hidden;background:#000;}
+  #app { height: 100vh; height: 100dvh; display: flex; flex-direction: column; max-width: 480px; margin: 0 auto; position: relative; overflow: hidden; background: radial-gradient(circle at top, #111827 0%, #050505 100%); }
+  
+  .screen { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 16px 90px 16px; }
+  .screen::-webkit-scrollbar { display: none; }
+  
+  /* NAVIGATION */
+  .bottom-nav { display: flex; background: rgba(9, 10, 15, 0.95); backdrop-filter: blur(10px); border-top: 1px solid var(--border-color); position: absolute; bottom: 0; left: 0; right: 0; z-index: 40; padding-bottom: env(safe-area-inset-bottom); }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px 2px; gap: 4px; color: #4b5563; font-size: 11px; font-weight: 600; transition: all .3s; text-transform: uppercase; letter-spacing: 1px; }
+  .nav-btn.active { color: var(--neon-green); text-shadow: 0 0 8px rgba(57,255,136,0.4); }
+  .nav-icon { font-size: 20px; }
+  
+  /* CARDS & BUTTONS */
+  .card { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 12px; padding: 16px; margin-bottom: 12px; position: relative; overflow: hidden; }
+  .card::before { content: ''; position: absolute; top: 0; left: 0; width: 3px; height: 100%; background: var(--border-color); transition: .3s; }
+  .card:hover::before { background: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+  
+  .accent-text { color: var(--neon-green); text-shadow: 0 0 5px rgba(57,255,136,0.3); }
+  
+  .btn-primary { background: transparent; color: var(--neon-green); font-weight: 700; border: 1px solid var(--neon-green); border-radius: 8px; padding: 12px 16px; text-align: center; text-transform: uppercase; letter-spacing: 1px; box-shadow: inset 0 0 10px rgba(57,255,136,0.1), 0 0 10px rgba(57,255,136,0.1); transition: all .2s; cursor: pointer; width: 100%; }
+  .btn-primary:active { transform: scale(0.96); background: var(--neon-green); color: #000; box-shadow: 0 0 20px var(--neon-green); }
+  
+  .btn-action { background: #1a1f2e; color: #fff; border: 1px solid #2d3748; padding: 8px 12px; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; transition: .2s; }
+  .btn-action:active { transform: scale(0.95); border-color: var(--neon-purple); color: var(--neon-purple); }
 
-  /* PORTRAIT WARNING */
-  #portrait-warn{
-    display:none;
-    position:fixed;inset:0;z-index:9999;
-    background:linear-gradient(135deg,#0a0f16 0%,#0d1a0a 50%,#0a0f16 100%);
-    flex-direction:column;align-items:center;justify-content:center;gap:24px;
-    text-align:center;padding:32px;
-  }
-  @media(orientation:portrait){
-    #portrait-warn{display:flex;}
-    #game-root{display:none!important;}
-  }
-  .pw-icon{width:80px;height:80px;animation:rotate-hint 2s ease-in-out infinite;}
-  .pw-title{font-family:'Cinzel',serif;font-size:22px;font-weight:700;color:#d97706;letter-spacing:2px;}
-  .pw-sub{font-family:'Crimson Text',serif;font-size:16px;color:#b8a98a;max-width:280px;line-height:1.6;}
-  @keyframes rotate-hint{0%,100%{transform:rotate(0deg);}50%{transform:rotate(-90deg);}}
-
-  /* GAME ROOT */
-  #game-root{
-    display:flex;flex-direction:column;width:100vw;height:100vh;
-    background:var(--bg);font-family:'Crimson Text',serif;color:var(--text);
-    overflow:hidden;
-  }
-
-  /* TOP BAR */
-  #top-bar{
-    display:flex;align-items:center;gap:0;
-    background:linear-gradient(180deg,#1a0a00 0%,#0f1a10 50%,#0a0f1a 100%);
-    border-bottom:2px solid var(--gold-dim);
-    padding:0 8px;height:52px;flex-shrink:0;
-    position:relative;
-  }
-  #top-bar::after{
-    content:'';position:absolute;bottom:-4px;left:0;right:0;height:2px;
-    background:linear-gradient(90deg,transparent,var(--gold),transparent);
-  }
-  .tb-brand{
-    font-family:'Cinzel',serif;font-size:13px;font-weight:900;
-    color:var(--gold);letter-spacing:3px;text-transform:uppercase;
-    padding-right:12px;border-right:1px solid var(--border);margin-right:8px;
-    white-space:nowrap;text-shadow:0 0 12px rgba(217,119,6,0.5);
-  }
-  .res-group{display:flex;align-items:center;gap:6px;padding:0 8px;border-right:1px solid var(--border);}
-  .res-icon{width:18px;height:18px;flex-shrink:0;}
-  .res-val{font-family:'Cinzel',serif;font-size:12px;font-weight:600;color:var(--gold2);}
-  .res-lbl{font-size:10px;color:var(--text3);display:block;line-height:1;}
-  .res-info{display:flex;flex-direction:column;}
-  .bar-wrap{display:flex;flex-direction:column;gap:2px;min-width:80px;}
-  .bar-lbl{font-size:9px;color:var(--text3);}
-  .bar-track{height:6px;background:#1a2332;border-radius:3px;border:1px solid var(--border);overflow:hidden;}
-  .bar-fill{height:100%;border-radius:3px;transition:width 0.5s;}
-  .bar-fill.happiness{background:linear-gradient(90deg,#d97706,#f59e0b);}
-  .bar-fill.morale{background:linear-gradient(90deg,#065f46,#059669);}
-  .bar-pct{font-size:9px;color:var(--text2);font-family:'Cinzel',serif;}
-  .turn-display{margin-left:auto;font-family:'Cinzel',serif;font-size:11px;color:var(--text2);padding-right:8px;}
-  .turn-num{color:var(--gold);font-size:14px;font-weight:700;}
-
-  /* MAIN LAYOUT */
-  #main-layout{display:flex;flex:1;overflow:hidden;}
-
-  /* LEFT SIDEBAR */
-  #sidebar{
-    width:72px;flex-shrink:0;
-    background:linear-gradient(180deg,#0a1520 0%,#0d1a10 100%);
-    border-right:2px solid var(--border);
-    display:flex;flex-direction:column;align-items:center;padding:6px 0;gap:4px;
-    position:relative;
-  }
-  #sidebar::after{
-    content:'';position:absolute;right:-4px;top:0;bottom:0;width:2px;
-    background:linear-gradient(180deg,transparent,var(--gold-dim),transparent);
-  }
-  .nav-btn{
-    width:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;
-    padding:8px 4px;border-radius:6px;cursor:pointer;border:1px solid transparent;
-    transition:all 0.2s;background:transparent;user-select:none;
-  }
-  .nav-btn:hover{background:rgba(217,119,6,0.1);border-color:var(--gold-dim);}
-  .nav-btn.active{background:linear-gradient(135deg,rgba(6,78,59,0.6),rgba(10,30,20,0.8));border-color:var(--green3);}
-  .nav-btn svg{width:26px;height:26px;}
-  .nav-btn span{font-family:'Cinzel',serif;font-size:8px;color:var(--text2);letter-spacing:0.5px;text-align:center;line-height:1.2;}
-  .nav-btn.active span{color:var(--gold2);}
-  .nav-divider{width:40px;height:1px;background:var(--border);margin:2px 0;}
-
-  /* TURN BUTTON at sidebar bottom */
-  .turn-btn{
-    margin-top:auto;width:58px;padding:8px 4px;
-    background:linear-gradient(135deg,var(--green),var(--green2));
-    border:2px solid var(--green3);border-radius:6px;cursor:pointer;
-    display:flex;flex-direction:column;align-items:center;gap:3px;
-    font-family:'Cinzel',serif;font-size:7px;color:#a7f3d0;letter-spacing:0.5px;
-    transition:all 0.2s;box-shadow:0 0 10px rgba(4,120,87,0.3);
-    user-select:none;text-align:center;
-  }
-  .turn-btn:hover{background:linear-gradient(135deg,var(--green2),var(--green3));box-shadow:0 0 18px rgba(4,120,87,0.5);}
-  .turn-btn:active{transform:scale(0.96);}
-  .turn-btn svg{width:22px;height:22px;}
-
-  /* CENTER PANEL */
-  #center{flex:1;overflow:hidden;display:flex;flex-direction:column;background:var(--bg2);}
-  .panel-header{
-    padding:10px 16px 8px;border-bottom:1px solid var(--border);
-    background:linear-gradient(180deg,rgba(10,20,30,0.8),transparent);
-    display:flex;align-items:center;gap:10px;flex-shrink:0;
-  }
-  .panel-title{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold);letter-spacing:2px;}
-  .panel-sub{font-size:12px;color:var(--text3);}
-  .panel-content{flex:1;overflow-y:auto;padding:10px 12px;scrollbar-width:thin;scrollbar-color:var(--border) transparent;}
-  .panel-content::-webkit-scrollbar{width:4px;}
-  .panel-content::-webkit-scrollbar-track{background:transparent;}
-  .panel-content::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
-
-  /* CARDS */
-  .card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;}
-  .card-title{font-family:'Cinzel',serif;font-size:11px;font-weight:600;color:var(--gold2);margin-bottom:4px;}
-  .card-desc{font-size:11px;color:var(--text2);line-height:1.5;}
-
-  /* SARAY TAB */
-  .tax-section{margin-bottom:10px;}
-  .tax-title{font-family:'Cinzel',serif;font-size:10px;color:var(--accent);margin-bottom:6px;letter-spacing:1px;}
-  .tax-options{display:flex;gap:6px;}
-  .tax-opt{
-    flex:1;padding:6px 4px;text-align:center;border-radius:6px;cursor:pointer;
-    border:1px solid var(--border);background:var(--bg3);
-    font-family:'Cinzel',serif;font-size:9px;color:var(--text2);
-    transition:all 0.2s;user-select:none;
-  }
-  .tax-opt:hover{border-color:var(--gold-dim);}
-  .tax-opt.active{background:linear-gradient(135deg,rgba(92,40,0,0.6),rgba(50,20,0,0.8));border-color:var(--gold);color:var(--gold2);}
-  .tax-opt .tax-val{font-size:14px;font-weight:700;color:var(--gold2);display:block;margin-bottom:2px;}
-  .tax-opt .tax-effect{font-size:8px;color:var(--crimson2);}
-  .upgrades-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;}
-  .upgrade-card{
-    background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px;cursor:pointer;
-    transition:all 0.2s;position:relative;overflow:hidden;
-  }
-  .upgrade-card:hover:not(.bought){border-color:var(--gold-dim);background:rgba(26,35,50,0.9);}
-  .upgrade-card.bought{border-color:var(--green3);background:rgba(6,78,59,0.2);cursor:default;}
-  .upgrade-card.bought::after{content:'ALINDI';position:absolute;top:4px;right:4px;font-size:7px;color:var(--green3);font-family:'Cinzel',serif;letter-spacing:1px;}
-  .upg-name{font-family:'Cinzel',serif;font-size:10px;color:var(--gold2);margin-bottom:2px;}
-  .upg-desc{font-size:9px;color:var(--text2);line-height:1.4;margin-bottom:4px;}
-  .upg-cost{font-family:'Cinzel',serif;font-size:9px;color:var(--gold);}
-  .upg-bonus{font-size:9px;color:#6ee7b7;}
-
-  /* ORDU TAB */
-  .unit-card{background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:8px;margin-bottom:6px;display:flex;align-items:center;gap:8px;}
-  .unit-icon{width:36px;height:36px;flex-shrink:0;border-radius:4px;display:flex;align-items:center;justify-content:center;background:rgba(217,119,6,0.1);border:1px solid var(--gold-dim);}
-  .unit-info{flex:1;}
-  .unit-name{font-family:'Cinzel',serif;font-size:10px;color:var(--gold2);margin-bottom:1px;}
-  .unit-stats{font-size:9px;color:var(--text2);line-height:1.5;}
-  .unit-count{font-family:'Cinzel',serif;font-size:18px;color:var(--gold);font-weight:700;text-align:center;min-width:32px;}
-  .unit-controls{display:flex;flex-direction:column;gap:3px;}
-  .unit-btn{
-    width:28px;height:20px;border-radius:3px;border:1px solid var(--border);background:var(--bg2);
-    color:var(--text2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;
-    transition:all 0.15s;user-select:none;font-family:'Cinzel',serif;
-  }
-  .unit-btn:hover{border-color:var(--gold);color:var(--gold);}
-  .upkeep-box{background:rgba(153,27,27,0.15);border:1px solid rgba(153,27,27,0.4);border-radius:6px;padding:8px;margin-top:6px;}
-  .upkeep-title{font-family:'Cinzel',serif;font-size:9px;color:#fca5a5;margin-bottom:4px;letter-spacing:1px;}
-  .upkeep-row{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);padding:1px 0;}
-  .upkeep-val{color:#fca5a5;font-family:'Cinzel',serif;font-size:10px;}
-
-  /* SEFER TAB */
-  .empire-card{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px;margin-bottom:8px;cursor:pointer;transition:all 0.2s;}
-  .empire-card:hover:not(.conquered){border-color:var(--crimson2);background:rgba(26,15,15,0.9);}
-  .empire-card.conquered{border-color:var(--green3);background:rgba(6,78,59,0.15);cursor:default;}
-  .empire-header{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
-  .empire-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;border:2px solid var(--gold-dim);}
-  .empire-name{font-family:'Cinzel',serif;font-size:11px;color:var(--text);font-weight:700;}
-  .empire-status{font-size:9px;color:var(--text3);}
-  .empire-stats{display:flex;gap:10px;margin-bottom:6px;}
-  .empire-stat{font-size:9px;color:var(--text2);}
-  .empire-stat span{color:var(--gold2);font-family:'Cinzel',serif;}
-  .empire-power-bar{height:5px;background:var(--bg);border-radius:3px;overflow:hidden;margin-bottom:6px;border:1px solid var(--border);}
-  .empire-power-fill{height:100%;background:linear-gradient(90deg,var(--crimson),var(--crimson2));border-radius:3px;}
-  .sefere-btn{
-    padding:5px 14px;background:linear-gradient(135deg,var(--crimson),var(--crimson2));
-    border:1px solid #ef4444;border-radius:4px;color:#fecaca;
-    font-family:'Cinzel',serif;font-size:9px;cursor:pointer;transition:all 0.2s;
-    letter-spacing:1px;user-select:none;
-  }
-  .sefere-btn:hover{box-shadow:0 0 10px rgba(185,28,28,0.5);}
-  .conquered-badge{font-family:'Cinzel',serif;font-size:9px;color:var(--green3);letter-spacing:1px;}
-
-  /* BATTLE VIEW */
-  #battle-view{display:none;flex-direction:column;height:100%;}
-  .battle-header{padding:8px 12px;border-bottom:1px solid var(--border);background:rgba(153,27,27,0.1);flex-shrink:0;}
-  .battle-title{font-family:'Cinzel',serif;font-size:13px;color:#fca5a5;letter-spacing:2px;}
-  .battle-vs{font-size:10px;color:var(--text2);margin-top:2px;}
-  .battle-phases{display:flex;gap:6px;padding:8px 12px;flex-shrink:0;border-bottom:1px solid var(--border);}
-  .phase-indicator{flex:1;height:4px;border-radius:2px;background:var(--border);transition:background 0.5s;}
-  .phase-indicator.active{background:var(--crimson2);}
-  .phase-indicator.done{background:var(--green3);}
-  .battle-log{
-    flex:1;overflow-y:auto;padding:8px 12px;
-    font-size:11px;color:var(--text2);line-height:1.8;
-    scrollbar-width:thin;scrollbar-color:var(--border) transparent;
-  }
-  .log-line{margin-bottom:2px;padding:2px 0;border-bottom:1px solid rgba(255,255,255,0.03);}
-  .log-line.phase-header{color:var(--gold2);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;margin-top:6px;}
-  .log-line.victory{color:#6ee7b7;font-family:'Cinzel',serif;}
-  .log-line.defeat{color:#fca5a5;font-family:'Cinzel',serif;}
-  .battle-controls{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;}
-  .start-battle-btn{
-    flex:1;padding:8px;background:linear-gradient(135deg,var(--crimson),var(--crimson2));
-    border:1px solid #ef4444;border-radius:6px;color:#fff;
-    font-family:'Cinzel',serif;font-size:11px;cursor:pointer;
-    letter-spacing:1px;transition:all 0.2s;user-select:none;
-  }
-  .start-battle-btn:hover{box-shadow:0 0 14px rgba(185,28,28,0.5);}
-  .back-btn{
-    padding:8px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;
-    color:var(--text2);font-family:'Cinzel',serif;font-size:11px;cursor:pointer;
-    transition:all 0.2s;user-select:none;
-  }
-  .back-btn:hover{border-color:var(--gold-dim);color:var(--gold2);}
-
-  /* DIVAN TAB */
-  .event-inactive{text-align:center;padding:20px;color:var(--text3);font-size:12px;}
-
-  /* EVENT MODAL */
-  #event-modal{
-    display:none;position:fixed;inset:0;z-index:1000;
-    background:rgba(0,0,0,0.85);backdrop-filter:blur(4px);
-    align-items:center;justify-content:center;
-  }
-  #event-modal.show{display:flex;}
-  .modal-box{
-    width:min(420px,90vw);background:linear-gradient(135deg,#0f1a10,#0a0f1a);
-    border:2px solid var(--gold-dim);border-radius:12px;padding:20px;
-    box-shadow:0 0 40px rgba(0,0,0,0.9);position:relative;overflow:hidden;
-  }
-  .modal-box::before{
-    content:'';position:absolute;inset:0;border-radius:12px;
-    background:radial-gradient(ellipse at top,rgba(217,119,6,0.05),transparent 60%);pointer-events:none;
-  }
-  .modal-seal{width:40px;height:40px;margin:0 auto 10px;display:block;}
-  .modal-title{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--gold);text-align:center;margin-bottom:6px;letter-spacing:2px;}
-  .modal-text{font-size:12px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:14px;}
-  .modal-choices{display:flex;flex-direction:column;gap:8px;}
-  .choice-btn{
-    padding:10px 14px;border-radius:6px;cursor:pointer;border:1px solid var(--border);
-    background:var(--bg3);transition:all 0.2s;text-align:left;user-select:none;
-  }
-  .choice-btn:hover{border-color:var(--gold-dim);background:rgba(217,119,6,0.08);}
-  .choice-label{font-family:'Cinzel',serif;font-size:10px;color:var(--gold2);margin-bottom:3px;}
-  .choice-effect{font-size:10px;color:var(--text2);}
-  .choice-effect .pos{color:#6ee7b7;}
-  .choice-effect .neg{color:#fca5a5;}
-
-  /* NOTIFICATION */
-  #notif{
-    position:fixed;bottom:16px;right:16px;z-index:2000;
-    display:flex;flex-direction:column;gap:6px;pointer-events:none;
-  }
-  .notif-item{
-    padding:8px 14px;border-radius:6px;font-family:'Cinzel',serif;font-size:10px;
-    letter-spacing:1px;border:1px solid;animation:notif-in 0.3s ease;
-    pointer-events:none;max-width:240px;
-  }
-  .notif-item.success{background:rgba(6,78,59,0.9);border-color:var(--green3);color:#a7f3d0;}
-  .notif-item.warning{background:rgba(92,40,0,0.9);border-color:var(--gold);color:#fde68a;}
-  .notif-item.danger{background:rgba(153,27,27,0.9);border-color:var(--crimson2);color:#fecaca;}
-  @keyframes notif-in{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
-
-  /* ARMY POWER DISPLAY */
-  .army-power-box{background:rgba(6,78,59,0.1);border:1px solid rgba(4,120,87,0.3);border-radius:6px;padding:8px;margin-bottom:8px;}
-  .ap-title{font-family:'Cinzel',serif;font-size:9px;color:#6ee7b7;letter-spacing:1px;margin-bottom:4px;}
-  .ap-value{font-family:'Cinzel',serif;font-size:20px;color:var(--gold2);font-weight:700;}
-  .ap-breakdown{font-size:9px;color:var(--text3);}
-
-  /* DIVAN LOG */
-  .divan-log{margin-top:10px;}
-  .divan-log-title{font-family:'Cinzel',serif;font-size:10px;color:var(--accent);letter-spacing:1px;margin-bottom:6px;}
-  .divan-entry{padding:6px 8px;background:var(--bg3);border-left:3px solid var(--gold-dim);border-radius:0 4px 4px 0;margin-bottom:4px;font-size:10px;color:var(--text2);line-height:1.5;}
-
-  /* Scrollbar for battle log */
-  .battle-log::-webkit-scrollbar{width:3px;}
-  .battle-log::-webkit-scrollbar-track{background:transparent;}
-  .battle-log::-webkit-scrollbar-thumb{background:var(--border);}
-
-  /* GOLD change flash */
-  .flash-pos{animation:flash-pos 0.4s ease;}
-  .flash-neg{animation:flash-neg 0.4s ease;}
-  @keyframes flash-pos{0%,100%{color:var(--gold2);}50%{color:#6ee7b7;text-shadow:0 0 8px #6ee7b7;}}
-  @keyframes flash-neg{0%,100%{color:var(--gold2);}50%{color:#fca5a5;text-shadow:0 0 8px #fca5a5;}}
+  /* UTILS */
+  .stat-bar-track { background: #1a1f2e; border-radius: 4px; height: 8px; width: 100%; overflow: hidden; border: 1px solid #2d3748; }
+  .stat-bar-fill { height: 100%; transition: width 0.3s ease; }
+  
+  .modal-overlay { position: absolute; inset: 0; background: rgba(5,5,5,0.95); z-index: 50; display: flex; flex-direction: column; }
+  .toast { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: #090a0f; border: 1px solid var(--neon-purple); color: var(--neon-purple); padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 700; z-index: 60; box-shadow: 0 0 15px rgba(176,38,255,0.2); letter-spacing: 1px; }
+  
+  .fade-in { animation: fadeIn .3s ease; }
+  @keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+  
+  .log-entry { padding: 6px 0; border-bottom: 1px dashed #1f222e; font-family: -apple-system, sans-serif; }
+  .pulse { animation: pulseAnim 1.5s infinite; }
+  @keyframes pulseAnim { 0%,100%{opacity:1;} 50%{opacity:.5;} }
 </style>
 </head>
 <body>
 
-<!-- PORTRAIT WARNING -->
-<div id="portrait-warn">
-  <svg class="pw-icon" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="20" y="10" width="40" height="60" rx="5" stroke="#d97706" stroke-width="3" fill="none"/>
-    <rect x="28" y="18" width="24" height="44" rx="2" fill="rgba(217,119,6,0.1)"/>
-    <circle cx="40" cy="65" r="3" fill="#d97706"/>
-    <path d="M5 40 L75 40" stroke="#064e3b" stroke-width="2" stroke-dasharray="4 4"/>
-    <path d="M60 32 L75 40 L60 48" fill="#064e3b"/>
-  </svg>
-  <div class="pw-title">Cihazınızı Yan Çevirin!</div>
-  <div class="pw-sub">Bu oyun yalnızca <strong style="color:#d97706">yatay (landscape) modda</strong> oynanabilir. Lütfen cihazınızı döndürün.</div>
+<div id="app">
+  <div id="screen-container" class="screen"></div>
+  <div id="modal-container"></div>
+  <div id="toast-container"></div>
+
+  <nav class="bottom-nav">
+    <div class="nav-btn" data-tab="home" onclick="switchTab('home')">
+      <span class="nav-icon">🏟️</span><span>Kulüp</span>
+    </div>
+    <div class="nav-btn" data-tab="squad" onclick="switchTab('squad')">
+      <span class="nav-icon">⚡</span><span>Kadro</span>
+    </div>
+    <div class="nav-btn" data-tab="facilities" onclick="switchTab('facilities')">
+      <span class="nav-icon">🏗️</span><span>Tesisler</span>
+    </div>
+    <div class="nav-btn" data-tab="market" onclick="switchTab('market')">
+      <span class="nav-icon">🤝</span><span>Market</span>
+    </div>
+    <div class="nav-btn" data-tab="league" onclick="switchTab('league')">
+      <span class="nav-icon">🏆</span><span>Lig</span>
+    </div>
+  </nav>
 </div>
-
-<!-- GAME ROOT -->
-<div id="game-root">
-  <!-- TOP BAR -->
-  <div id="top-bar">
-    <div class="tb-brand">PADİŞAH</div>
-    <div class="res-group">
-      <!-- Gold SVG -->
-      <svg class="res-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="#d97706" stroke="#92400e" stroke-width="1.5"/><circle cx="12" cy="12" r="7" fill="#f59e0b"/><text x="12" y="16" text-anchor="middle" font-size="9" font-weight="bold" fill="#78350f">₺</text></svg>
-      <div class="res-info"><span class="res-lbl">Hazine</span><span class="res-val" id="res-gold">0</span></div>
-    </div>
-    <div class="res-group">
-      <!-- Manpower SVG -->
-      <svg class="res-icon" viewBox="0 0 24 24"><circle cx="12" cy="7" r="3.5" fill="#e8dcc8" stroke="#7a6a50" stroke-width="1"/><path d="M6 20c0-4 2.5-6 6-6s6 2 6 6" fill="#e8dcc8" stroke="#7a6a50" stroke-width="1"/><path d="M3 16c0-3 1.5-4.5 4-5" stroke="#b8a98a" stroke-width="1" stroke-linecap="round" fill="none"/><path d="M21 16c0-3-1.5-4.5-4-5" stroke="#b8a98a" stroke-width="1" stroke-linecap="round" fill="none"/></svg>
-      <div class="res-info"><span class="res-lbl">İnsan Gücü</span><span class="res-val" id="res-manpower">0</span></div>
-    </div>
-    <div class="res-group">
-      <!-- Territory SVG -->
-      <svg class="res-icon" viewBox="0 0 24 24"><path d="M3 18 L12 4 L21 18 Z" fill="rgba(6,78,59,0.4)" stroke="#047857" stroke-width="1.5"/><path d="M7 18 L12 10 L17 18" fill="#064e3b" stroke="#047857" stroke-width="1"/><circle cx="12" cy="4" r="1.5" fill="#f59e0b"/></svg>
-      <div class="res-info"><span class="res-lbl">Toprak</span><span class="res-val" id="res-territory">0</span></div>
-    </div>
-    <div class="res-group">
-      <div class="bar-wrap">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="bar-lbl">Halkın Mutluluğu</span>
-          <span class="bar-pct" id="res-happiness-pct">0%</span>
-        </div>
-        <div class="bar-track"><div class="bar-fill happiness" id="bar-happiness" style="width:0%"></div></div>
-      </div>
-    </div>
-    <div class="res-group" style="border-right:none;">
-      <div class="bar-wrap">
-        <div style="display:flex;justify-content:space-between;align-items:center;">
-          <span class="bar-lbl">Ordu Morali</span>
-          <span class="bar-pct" id="res-morale-pct">0%</span>
-        </div>
-        <div class="bar-track"><div class="bar-fill morale" id="bar-morale" style="width:0%"></div></div>
-      </div>
-    </div>
-    <div class="turn-display">Tur <span class="turn-num" id="turn-num">1</span></div>
-  </div>
-
-  <!-- MAIN LAYOUT -->
-  <div id="main-layout">
-    <!-- SIDEBAR -->
-    <div id="sidebar">
-      <div class="nav-btn active" id="nav-saray" onclick="switchTab('saray')">
-        <svg viewBox="0 0 32 32" fill="none"><rect x="4" y="16" width="24" height="14" rx="1" fill="rgba(217,119,6,0.15)" stroke="#d97706" stroke-width="1.5"/><rect x="10" y="10" width="12" height="8" rx="1" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/><rect x="14" y="4" width="4" height="8" rx="1" fill="rgba(217,119,6,0.15)" stroke="#d97706" stroke-width="1.5"/><rect x="11" y="22" width="4" height="8" fill="rgba(217,119,6,0.2)"/><rect x="17" y="22" width="4" height="8" fill="rgba(217,119,6,0.2)"/><circle cx="16" cy="4" r="1.5" fill="#f59e0b"/></svg>
-        <span>SARAY</span>
-      </div>
-      <div class="nav-btn" id="nav-ordu" onclick="switchTab('ordu')">
-        <svg viewBox="0 0 32 32" fill="none"><path d="M8 24 L16 6 L24 24" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.1)"/><line x1="10" y1="18" x2="22" y2="18" stroke="#d97706" stroke-width="1.5"/><path d="M13 24 L13 28 M19 24 L19 28" stroke="#d97706" stroke-width="1.5"/><circle cx="16" cy="6" r="2" fill="#f59e0b" stroke="#92400e" stroke-width="1"/></svg>
-        <span>ORDU</span>
-      </div>
-      <div class="nav-btn" id="nav-sefer" onclick="switchTab('sefer')">
-        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="11" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><path d="M16 5 L16 27 M5 16 L27 16" stroke="#d97706" stroke-width="1"/><path d="M8 8 L24 24 M24 8 L8 24" stroke="#d97706" stroke-width="0.5" opacity="0.4"/><circle cx="16" cy="16" r="2.5" fill="#f59e0b"/></svg>
-        <span>SEFER</span>
-      </div>
-      <div class="nav-btn" id="nav-divan" onclick="switchTab('divan')">
-        <svg viewBox="0 0 32 32" fill="none"><rect x="6" y="8" width="20" height="16" rx="2" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><line x1="10" y1="13" x2="22" y2="13" stroke="#d97706" stroke-width="1"/><line x1="10" y1="17" x2="18" y2="17" stroke="#d97706" stroke-width="1"/><circle cx="24" cy="8" r="4" fill="#991b1b" stroke="#b91c1c" stroke-width="1"/><text x="24" y="11" text-anchor="middle" font-size="6" fill="#fecaca" font-weight="bold" id="divan-badge-txt">!</text></svg>
-        <span>DİVAN</span>
-      </div>
-
-      <div class="nav-divider"></div>
-
-      <div class="turn-btn" onclick="nextTurn()">
-        <svg viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="11" stroke="#6ee7b7" stroke-width="1.5"/><path d="M16 10 L16 16 L21 19" stroke="#6ee7b7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M22 7 L25 4 M25 4 L25 8 M25 4 L21 4" stroke="#6ee7b7" stroke-width="1.5" stroke-linecap="round"/></svg>
-        TUR ATLA
-      </div>
-    </div>
-
-    <!-- CENTER PANEL -->
-    <div id="center">
-      <!-- SARAY TAB -->
-      <div id="tab-saray" class="tab-panel" style="display:flex;flex-direction:column;height:100%;">
-        <div class="panel-header">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="4" y="16" width="24" height="14" rx="1" fill="rgba(217,119,6,0.15)" stroke="#d97706" stroke-width="1.5"/><rect x="10" y="10" width="12" height="8" rx="1" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/><circle cx="16" cy="4" r="2" fill="#f59e0b"/></svg>
-          <div><div class="panel-title">SARAY</div><div class="panel-sub">Ekonomi, Vergi ve Devlet Düzenlemeleri</div></div>
-        </div>
-        <div class="panel-content">
-          <!-- Tax Rate -->
-          <div class="tax-section">
-            <div class="tax-title">VERGİ ORANI</div>
-            <div class="tax-options">
-              <div class="tax-opt" id="tax-low" onclick="setTax('low')">
-                <span class="tax-val">%5</span>
-                <span>DÜŞÜK</span>
-                <span class="tax-effect" style="color:#6ee7b7;">+Mutluluk</span>
-              </div>
-              <div class="tax-opt active" id="tax-normal" onclick="setTax('normal')">
-                <span class="tax-val">%10</span>
-                <span>NORMAL</span>
-                <span class="tax-effect" style="color:var(--text3);">Dengeli</span>
-              </div>
-              <div class="tax-opt" id="tax-high" onclick="setTax('high')">
-                <span class="tax-val">%20</span>
-                <span>YÜKSEK</span>
-                <span class="tax-effect">-Mutluluk</span>
-              </div>
-            </div>
-          </div>
-          <!-- Upgrades -->
-          <div class="tax-title" style="margin-bottom:6px;">DEVLET İYİLEŞTİRMELERİ</div>
-          <div class="upgrades-grid" id="upgrades-grid"></div>
-        </div>
-      </div>
-
-      <!-- ORDU TAB -->
-      <div id="tab-ordu" class="tab-panel" style="display:none;flex-direction:column;height:100%;">
-        <div class="panel-header">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><path d="M8 24 L16 6 L24 24" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.1)"/><line x1="10" y1="18" x2="22" y2="18" stroke="#d97706" stroke-width="1.5"/><circle cx="16" cy="6" r="2" fill="#f59e0b"/></svg>
-          <div><div class="panel-title">ORDU</div><div class="panel-sub">Kışla ve Asker Yönetimi</div></div>
-        </div>
-        <div class="panel-content">
-          <div class="army-power-box">
-            <div class="ap-title">TOPLAM ORDU GÜCÜ</div>
-            <div class="ap-value" id="army-power-val">0</div>
-            <div class="ap-breakdown" id="army-breakdown">Yeniçeri x0 + Sipahi x0 + Şahi Topu x0</div>
-          </div>
-          <!-- Units -->
-          <div id="units-list"></div>
-          <!-- Upkeep -->
-          <div class="upkeep-box">
-            <div class="upkeep-title">AYLIK BAKIYET (Her Tur)</div>
-            <div class="upkeep-row"><span>Yeniçeri Maaşı</span><span class="upkeep-val" id="up-yeni">0 Altın</span></div>
-            <div class="upkeep-row"><span>Sipahi Maaşı</span><span class="upkeep-val" id="up-sipahi">0 Altın</span></div>
-            <div class="upkeep-row"><span>Top Bakımı</span><span class="upkeep-val" id="up-top">0 Altın</span></div>
-            <div class="upkeep-row" style="border-top:1px solid rgba(153,27,27,0.3);margin-top:4px;padding-top:4px;"><span style="color:#fca5a5;font-family:'Cinzel',serif;font-size:10px;">TOPLAM</span><span class="upkeep-val" id="up-total">0 Altın</span></div>
-          </div>
-        </div>
-      </div>
-
-      <!-- SEFER TAB -->
-      <div id="tab-sefer" class="tab-panel" style="display:none;flex-direction:column;height:100%;">
-        <div id="sefer-list-view" style="display:flex;flex-direction:column;height:100%;">
-          <div class="panel-header">
-            <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="11" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><path d="M16 5 L16 27 M5 16 L27 16" stroke="#d97706" stroke-width="1"/><circle cx="16" cy="16" r="2.5" fill="#f59e0b"/></svg>
-            <div><div class="panel-title">SEFER</div><div class="panel-sub">Savaş Haritası ve Fetihler</div></div>
-          </div>
-          <div class="panel-content" id="empires-list"></div>
-        </div>
-
-        <!-- Battle View (inside sefer tab) -->
-        <div id="battle-view" style="display:none;flex-direction:column;height:100%;">
-          <div class="battle-header">
-            <div class="battle-title" id="battle-title">SAVAŞ BAŞLIYOR</div>
-            <div class="battle-vs" id="battle-vs">Kuvvetleriniz vs Düşman</div>
-          </div>
-          <div class="battle-phases">
-            <div class="phase-indicator" id="phase0"></div>
-            <div class="phase-indicator" id="phase1"></div>
-            <div class="phase-indicator" id="phase2"></div>
-          </div>
-          <div class="battle-log" id="battle-log"></div>
-          <div class="battle-controls">
-            <div class="back-btn" onclick="closeBattle()">GERİ DÖN</div>
-            <div class="start-battle-btn" id="battle-start-btn" onclick="startBattle()">SAVAŞA BAŞLA</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- DIVAN TAB -->
-      <div id="tab-divan" class="tab-panel" style="display:none;flex-direction:column;height:100%;">
-        <div class="panel-header">
-          <svg width="20" height="20" viewBox="0 0 32 32" fill="none"><rect x="6" y="8" width="20" height="16" rx="2" stroke="#d97706" stroke-width="1.5" fill="rgba(217,119,6,0.05)"/><line x1="10" y1="13" x2="22" y2="13" stroke="#d97706" stroke-width="1"/><line x1="10" y1="17" x2="18" y2="17" stroke="#d97706" stroke-width="1"/></svg>
-          <div><div class="panel-title">DİVAN</div><div class="panel-sub">Olaylar ve Kararlar</div></div>
-        </div>
-        <div class="panel-content">
-          <div class="card">
-            <div class="card-title">DİVAN-I HÜMAYUN</div>
-            <div class="card-desc">Devletin en büyük karar meclisi. Her 3 turda bir önemli olaylar ve krizler gündeme gelir. Kararlarınız imparatorluğun kaderini belirler.</div>
-          </div>
-          <div class="divan-log">
-            <div class="divan-log-title">OLAY GEÇMİŞİ</div>
-            <div id="divan-history"></div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- EVENT MODAL -->
-<div id="event-modal">
-  <div class="modal-box">
-    <svg class="modal-seal" viewBox="0 0 40 40"><circle cx="20" cy="20" r="18" stroke="#d97706" stroke-width="2" fill="rgba(217,119,6,0.05)"/><path d="M20 4 L22 16 L34 12 L26 22 L36 28 L24 26 L24 36 L20 26 L16 36 L16 26 L4 28 L14 22 L6 12 L18 16 Z" fill="#d97706" opacity="0.3"/><circle cx="20" cy="20" r="4" fill="#d97706"/></svg>
-    <div class="modal-title" id="modal-title">DİVAN KARARI</div>
-    <div class="modal-text" id="modal-text"></div>
-    <div class="modal-choices" id="modal-choices"></div>
-  </div>
-</div>
-
-<!-- NOTIFICATIONS -->
-<div id="notif"></div>
 
 <script>
-// ============================================================
-// STATE
-// ============================================================
-const S = {
-  turn: 1,
-  gold: 2500,
-  manpower: 500,
-  happiness: 75,
-  morale: 70,
-  territory: 150,
-  population: 1000,
-  taxRate: 'normal',
-  taxRates: {low: 0.05, normal: 0.10, high: 0.20},
-  happinessEffect: {low: 2, normal: 0, high: -4},
+/* =========================================================
+   MAHALLE LİGİ: NEON MENAJER (GELİŞMİŞ SÜRÜM)
+   ========================================================= */
 
-  // Army
-  units: {
-    yeniceri: { count: 50, power: 3, upkeep: 2, name: 'Yeniçeri (Piyade)', manpowerCost: 1, goldCost: 50 },
-    sipahi:   { count: 20, power: 6, upkeep: 5, name: 'Sipahi (Süvari)', manpowerCost: 2, goldCost: 120 },
-    sahiTopu: { count: 5,  power: 12, upkeep: 8, name: 'Şahi Topu (Kuşatma)', manpowerCost: 0, goldCost: 300 },
-  },
+const POZISYONLAR = ["KL", "DEF", "ORT", "FOR"];
+const TAKIM_ISIMLERI = ["Siyah Beyaz FK", "Kızıltepe İdman", "Neon Yıldızlar", "Karakartal Gençlik", "Gölge United", "Cyber Şehir", "Demir Kanatlar", "Zehir SK"];
+const SPONSORLAR = [
+  { id: 's1', ad: 'Turbo Enerji İçeceği', pesinat: 2000, haftalik: 400, aciklama: 'Düşük peşinat, sabit güvenilir gelir.' },
+  { id: 's2', ad: 'Neon Tech Donanım', pesinat: 5000, haftalik: 150, aciklama: 'Yüksek peşinat, düşük haftalık.' },
+  { id: 's3', ad: 'Sokak Giyim A.Ş.', pesinat: 3000, haftalik: 300, aciklama: 'Dengeli sözleşme.' }
+];
 
-  // Upgrades
-  upgrades: [
-    { id:'timar', name:'Tımar Sistemi', desc:'Sipahi toprak geliri. Her tur +50 Altın.', cost: 800, bonus:'+50 Altın/Tur', bought:false, effect:()=>{ S.passiveGold += 50; } },
-    { id:'kervan', name:'Kervansaraylar', desc:'Ticaret yolları. Her tur +80 Altın.', cost:1200, bonus:'+80 Altın/Tur', bought:false, effect:()=>{ S.passiveGold += 80; } },
-    { id:'medrese', name:'Medreseler', desc:'Eğitimli nüfus. +100 İnsan Gücü.', cost:600, bonus:'+100 İnsan Gücü', bought:false, effect:()=>{ S.manpower += 100; } },
-    { id:'tersane', name:'Tersane-i Amire', desc:'Deniz gücü. Toprak +30, Moral +5.', cost:1500, bonus:'+30 Toprak, +5 Moral', bought:false, effect:()=>{ S.territory += 30; S.morale = Math.min(100, S.morale+5); } },
-    { id:'devshirme', name:'Devşirme Sistemi', desc:'Elit asker kaynağı. Yeniçeri gücü +2.', cost:900, bonus:'+2 Yeniceri Gücü', bought:false, effect:()=>{ S.units.yeniceri.power += 2; } },
-    { id:'bab', name:'Bab-ı Ali Divan', desc:'Yönetim etkinliği. Vergi geliri %25 artar.', cost:1100, bonus:'%25 Vergi Bonusu', bought:false, effect:()=>{ S.taxBonus += 0.25; } },
-  ],
-  passiveGold: 0,
-  taxBonus: 0,
-
-  // Empires
-  empires: [
-    { id:'bizans', name:'Bizans İmparatorluğu', power:180, reward:{gold:800, territory:40, morale:15}, conquered:false, color:'#7c3aed' },
-    { id:'venedik', name:'Venedik Cumhuriyeti', power:250, reward:{gold:1200, territory:30, morale:10}, conquered:false, color:'#0369a1' },
-    { id:'safevi', name:'Safevi Devleti', power:350, reward:{gold:1500, territory:60, morale:20}, conquered:false, color:'#b45309' },
-    { id:'kutsal', name:'Kutsal Roma İmparatorluğu', power:500, reward:{gold:2500, territory:100, morale:25}, conquered:false, color:'#be185d' },
-  ],
-
-  // Battle
-  currentEnemy: null,
-  battleRunning: false,
-
-  // Events
-  divanHistory: [],
-  nextEventTurn: 3,
-
-  // Events pool
-  events: [
-    {
-      id:'yeni_isyan', title:'Yeniçeri Ocağı İsyanı!',
-      text:'Yeniçeriler ulufe artışı talep ediyor. Reddetmek ordunun moralini çökertebilir!',
-      choices:[
-        { label:'A) Altın öde (Ulufe ver)', effect:'<span class="pos">+15 Moral</span> <span class="neg">-300 Altın</span>', apply:()=>{ S.gold -= 300; S.morale = Math.min(100,S.morale+15); addDivanHistory('Yeniçeri isyanı: Ulufe ödendi. Moral arttı.'); }},
-        { label:'B) İsyanı sertçe bastır', effect:'<span class="neg">-10 Moral</span> <span class="neg">-100 Nüfus</span> <span class="neg">-10 Mutluluk</span>', apply:()=>{ S.morale = Math.max(0,S.morale-10); S.population -= 100; S.happiness = Math.max(0,S.happiness-10); addDivanHistory('Yeniçeri isyanı bastırıldı. Moral ve nüfus düştü.'); }},
-      ]
-    },
-    {
-      id:'veba', title:'Veba Salgını!',
-      text:'İstanbul\'da veba görüldü. Tedbirler alınmazsa nüfus ciddi düşecek.',
-      choices:[
-        { label:'A) Karantina ilan et', effect:'<span class="neg">-200 Altın</span> <span class="neg">-50 Nüfus</span> <span class="pos">+5 Mutluluk</span>', apply:()=>{ S.gold-=200; S.population-=50; S.happiness=Math.min(100,S.happiness+5); addDivanHistory('Veba: Karantina ilan edildi. Ağır kayıp önlendi.'); }},
-        { label:'B) Görmezden gel', effect:'<span class="neg">-250 Nüfus</span> <span class="neg">-15 Mutluluk</span>', apply:()=>{ S.population-=250; S.happiness=Math.max(0,S.happiness-15); addDivanHistory('Veba salgını: Müdahale edilmedi. Büyük nüfus kaybı.'); }},
-      ]
-    },
-    {
-      id:'tacir', title:'Venedikli Tüccarlar',
-      text:'Venedikli tüccarlar ticaret anlaşması teklif ediyor. Kabul eder misiniz?',
-      choices:[
-        { label:'A) Anlaşmayı kabul et', effect:'<span class="pos">+500 Altın</span> <span class="pos">+10 Mutluluk</span>', apply:()=>{ S.gold+=500; S.happiness=Math.min(100,S.happiness+10); addDivanHistory('Venedik ticaret anlaşması imzalandı. Hazine doldu.'); }},
-        { label:'B) Reddet (Gurur meselesi)', effect:'<span class="pos">+10 Moral</span> <span class="neg">-200 Altın</span>', apply:()=>{ S.morale=Math.min(100,S.morale+10); S.gold-=200; addDivanHistory('Venedik teklifi reddedildi. Asker morali yükseldi.'); }},
-      ]
-    },
-    {
-      id:'halife', title:'Halifelik Talepleri',
-      text:'Mısır\'dan haberci geldi: Memluk sultanı halife unvanını kabul etmenizi istiyor.',
-      choices:[
-        { label:'A) Kabul et (Dini meşruiyet)', effect:'<span class="pos">+20 Mutluluk</span> <span class="pos">+50 Toprak</span>', apply:()=>{ S.happiness=Math.min(100,S.happiness+20); S.territory+=50; addDivanHistory('Halifelik kabul edildi. Halkın desteği arttı.'); }},
-        { label:'B) Reddet (Bağımsız kal)', effect:'<span class="pos">+15 Moral</span> <span class="neg">-10 Mutluluk</span>', apply:()=>{ S.morale=Math.min(100,S.morale+15); S.happiness=Math.max(0,S.happiness-10); addDivanHistory('Halifelik reddedildi. Ordu morali yükseldi.'); }},
-      ]
-    },
-    {
-      id:'deprem', title:'Büyük Deprem!',
-      text:'Anadolu\'da şiddetli bir deprem yaşandı. Kurtarma operasyonu gerekiyor.',
-      choices:[
-        { label:'A) Hazineden yardım gönder', effect:'<span class="neg">-400 Altın</span> <span class="pos">+20 Mutluluk</span>', apply:()=>{ S.gold-=400; S.happiness=Math.min(100,S.happiness+20); addDivanHistory('Deprem: Hazineden yardım gönderildi. Halk memnun.'); }},
-        { label:'B) Yerel valileri görevlendir', effect:'<span class="neg">-5 Mutluluk</span> <span class="pos">+5 Moral</span>', apply:()=>{ S.happiness=Math.max(0,S.happiness-5); S.morale=Math.min(100,S.morale+5); addDivanHistory('Deprem: Valiler görevlendirildi. Halk biraz şikayetçi.'); }},
-      ]
-    },
-  ],
-  usedEvents: [],
+let state = {
+  menajer: "Bedo",
+  kulupAdi: "Siyah Beyaz FK",
+  butce: 10000,
+  hafta: 1,
+  toplamHafta: 14, // 8 takım, çift devreli
+  biletFiyati: 30,
+  taraftarSayisi: 1000,
+  aktifSponsor: null,
+  kadro: [],
+  transferListesi: [],
+  altyapiKesfi: false,
+  ligTakimlari: [],
+  fikstur: [], // Tüm ligin fikstürü
+  aktifTab: "home"
 };
 
-// ============================================================
-// UI HELPERS
-// ============================================================
-function updateUI(){
-  document.getElementById('res-gold').textContent = S.gold.toLocaleString('tr-TR');
-  document.getElementById('res-manpower').textContent = S.manpower.toLocaleString('tr-TR');
-  document.getElementById('res-territory').textContent = S.territory;
-  document.getElementById('res-happiness-pct').textContent = Math.round(S.happiness)+'%';
-  document.getElementById('res-morale-pct').textContent = Math.round(S.morale)+'%';
-  document.getElementById('bar-happiness').style.width = Math.max(0,Math.min(100,S.happiness))+'%';
-  document.getElementById('bar-morale').style.width = Math.max(0,Math.min(100,S.morale))+'%';
-  document.getElementById('turn-num').textContent = S.turn;
-  updateArmyUI();
-  updateUpkeepUI();
+let macSim = { calisiyor: false, dakika: 0, loglar: [], ev:null, rakip:null, zamanlayici: null, bekleyenMaclar: [] };
+
+/* ---------- KURULUM & YARDIMCI FONKSİYONLAR ---------- */
+
+function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+function isimUret() {
+  const adlar = ["Mert","Kaan","Berat","Eren","Caner","Arda","Barış","Doğukan","Cem","Ufuk","Sinan","Volkan"];
+  const soyadlar = ["Yılmaz","Demir","Kaya","Çelik","Şahin","Aslan","Polat","Özdemir","Avcı","Tekin"];
+  return adlar[rnd(0, adlar.length-1)] + " " + soyadlar[rnd(0, soyadlar.length-1)];
 }
 
-function getArmyPower(){
-  return S.units.yeniceri.count * S.units.yeniceri.power +
-         S.units.sipahi.count * S.units.sipahi.power +
-         S.units.sahiTopu.count * S.units.sahiTopu.power;
+function oyuncuUret(poz, minGuc, maxGuc, ozelAd = null) {
+  const p = poz || POZISYONLAR[rnd(0,3)];
+  const taban = rnd(minGuc, maxGuc);
+  return {
+    id: 'p' + Math.random().toString(36).substr(2, 9),
+    ad: ozelAd || isimUret(),
+    pozisyon: p,
+    guc: taban,
+    kondisyon: rnd(75, 100),
+    sakat: false,
+    maas: Math.floor(taban * 1.5),
+    deger: taban * rnd(100, 150),
+    yas: rnd(16, 32)
+  };
 }
 
-function updateArmyUI(){
-  const power = getArmyPower();
-  const apEl = document.getElementById('army-power-val');
-  if(apEl){ apEl.textContent = power; }
-  const brEl = document.getElementById('army-breakdown');
-  if(brEl){ brEl.textContent = `Yeniçeri x${S.units.yeniceri.count} + Sipahi x${S.units.sipahi.count} + Şahi Topu x${S.units.sahiTopu.count}`; }
-}
-
-function updateUpkeepUI(){
-  const yu = S.units.yeniceri.count * S.units.yeniceri.upkeep;
-  const su = S.units.sipahi.count * S.units.sipahi.upkeep;
-  const tu = S.units.sahiTopu.count * S.units.sahiTopu.upkeep;
-  const el = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v+' Altın'; };
-  el('up-yeni', yu); el('up-sipahi', su); el('up-top', tu);
-  const tot = document.getElementById('up-total');
-  if(tot) tot.textContent = (yu+su+tu)+' Altın';
-}
-
-function notify(msg, type='success'){
-  const n = document.getElementById('notif');
-  const el = document.createElement('div');
-  el.className = 'notif-item '+type;
-  el.textContent = msg;
-  n.appendChild(el);
-  setTimeout(()=>{ el.style.transition='opacity 0.4s'; el.style.opacity='0'; setTimeout(()=>el.remove(),400); }, 3000);
-}
-
-// ============================================================
-// TAB SWITCHING
-// ============================================================
-function switchTab(tab){
-  ['saray','ordu','sefer','divan'].forEach(t=>{
-    document.getElementById('tab-'+t).style.display = 'none';
-    document.getElementById('nav-'+t).classList.remove('active');
+function oyunuKur() {
+  // Kadro
+  state.kadro.push(oyuncuUret("KL", 60, 75));
+  for(let i=0; i<4; i++) state.kadro.push(oyuncuUret("DEF", 55, 75));
+  for(let i=0; i<4; i++) state.kadro.push(oyuncuUret("ORT", 55, 75));
+  for(let i=0; i<3; i++) state.kadro.push(oyuncuUret("FOR", 55, 80));
+  
+  // Lig Takımları
+  TAKIM_ISIMLERI.forEach((isim, i) => {
+    state.ligTakimlari.push({
+      id: i===0 ? 'benimTakim' : 't'+i,
+      isim: isim,
+      isUser: i===0,
+      guc: i===0 ? 0 : rnd(55, 85),
+      oynanan:0, gal:0, ber:0, mag:0, at:0, ye:0, puan:0
+    });
   });
-  document.getElementById('tab-'+tab).style.display = 'flex';
-  document.getElementById('nav-'+tab).classList.add('active');
-  if(tab==='sefer'){ closeBattle(); }
+  
+  state.kulupAdi = state.ligTakimlari[0].isim;
+  fiksturOlustur();
+  marketYenile();
+  renderEkran();
+  updateNav();
 }
 
-// ============================================================
-// SARAY
-// ============================================================
-function setTax(rate){
-  S.taxRate = rate;
-  ['low','normal','high'].forEach(r=>{
-    document.getElementById('tax-'+r).classList.toggle('active', r===rate);
+// 8 Takım Çift Devreli Fikstür (Round Robin)
+function fiksturOlustur() {
+  let takimlar = state.ligTakimlari.map(t => t.id);
+  const toplamHafta = (takimlar.length - 1) * 2;
+  state.toplamHafta = toplamHafta;
+  
+  for (let hafta = 1; hafta <= toplamHafta; hafta++) {
+    let haftaMaclari = [];
+    let tur = (hafta > takimlar.length - 1) ? hafta - (takimlar.length - 1) : hafta;
+    
+    // Basit rotasyon (Poligon algoritması mock)
+    let temp = [...takimlar];
+    let sabit = temp.shift();
+    for(let i=0; i<tur-1; i++) temp.unshift(temp.pop());
+    let eslesme = [sabit, ...temp];
+    
+    for(let i=0; i<eslesme.length/2; i++) {
+      let ev = eslesme[i];
+      let dep = eslesme[eslesme.length - 1 - i];
+      if (hafta > takimlar.length - 1) { let t=ev; ev=dep; dep=t; } // 2. devre saha değişimi
+      haftaMaclari.push({ ev, dep, oynandi: false, evSkor: 0, depSkor: 0 });
+    }
+    state.fikstur.push({ hafta, maclar: haftaMaclari });
+  }
+}
+
+function marketYenile() {
+  state.transferListesi = [];
+  for(let i=0; i<4; i++) state.transferListesi.push(oyuncuUret(null, 50, 85));
+}
+
+function takimGucu(id) {
+  if (id === 'benimTakim') {
+    let top = 0; let s = 0;
+    state.kadro.forEach(p => {
+      if(!p.sakat) { top += p.guc * (p.kondisyon/100); s++; }
+    });
+    return s > 0 ? Math.floor(top/s) : 30;
+  }
+  return state.ligTakimlari.find(t=>t.id===id).guc;
+}
+
+/* ---------- EKRAN YÖNETİMİ ---------- */
+function switchTab(tab) { state.aktifTab = tab; renderEkran(); updateNav(); }
+function updateNav() {
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === state.aktifTab);
   });
 }
 
-function renderUpgrades(){
-  const grid = document.getElementById('upgrades-grid');
-  grid.innerHTML = '';
-  S.upgrades.forEach(u=>{
-    const el = document.createElement('div');
-    el.className = 'upgrade-card'+(u.bought?' bought':'');
-    el.innerHTML = `<div class="upg-name">${u.name}</div><div class="upg-desc">${u.desc}</div><div class="upg-bonus">${u.bonus}</div><div class="upg-cost">${u.bought?'':'Maliyet: '+u.cost+' Altın'}</div>`;
-    if(!u.bought){ el.onclick = ()=>buyUpgrade(u.id); }
-    grid.appendChild(el);
-  });
+function renderEkran() {
+  const c = document.getElementById("screen-container");
+  if(state.aktifTab==='home') c.innerHTML = scrHome();
+  else if(state.aktifTab==='squad') c.innerHTML = scrSquad();
+  else if(state.aktifTab==='facilities') c.innerHTML = scrFacilities();
+  else if(state.aktifTab==='market') c.innerHTML = scrMarket();
+  else if(state.aktifTab==='league') c.innerHTML = scrLeague();
+  c.scrollTop = 0;
 }
 
-function buyUpgrade(id){
-  const u = S.upgrades.find(x=>x.id===id);
-  if(!u||u.bought) return;
-  if(S.gold < u.cost){ notify('Yeterli altın yok!','danger'); return; }
-  S.gold -= u.cost;
-  u.bought = true;
-  u.effect();
-  renderUpgrades();
-  updateUI();
-  notify(u.name+' satın alındı!','success');
+function toast(msg) {
+  const t = document.createElement('div'); t.className = 'toast fade-in'; t.textContent = msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
 }
 
-// ============================================================
-// ORDU
-// ============================================================
-function renderUnits(){
-  const list = document.getElementById('units-list');
-  list.innerHTML = '';
-  const unitDefs = [
-    { key:'yeniceri', svgPath: `<path d="M16 4 L16 28 M10 10 L22 10" stroke="#d97706" stroke-width="2" stroke-linecap="round"/><path d="M10 10 L8 16 L16 14 L24 16 L22 10" fill="rgba(217,119,6,0.2)" stroke="#d97706" stroke-width="1"/>` },
-    { key:'sipahi', svgPath: `<ellipse cx="16" cy="22" rx="10" ry="6" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1"/><path d="M16 22 L16 8 M12 12 L20 12" stroke="#d97706" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="7" r="2" fill="#f59e0b"/>` },
-    { key:'sahiTopu', svgPath: `<ellipse cx="16" cy="20" rx="12" ry="5" fill="rgba(217,119,6,0.1)" stroke="#d97706" stroke-width="1.5"/><rect x="10" y="12" width="12" height="8" rx="3" fill="rgba(217,119,6,0.2)" stroke="#d97706" stroke-width="1.5"/><circle cx="8" cy="20" r="3" fill="#92400e" stroke="#d97706" stroke-width="1"/><circle cx="24" cy="20" r="3" fill="#92400e" stroke="#d97706" stroke-width="1"/>` },
-  ];
-  unitDefs.forEach(def=>{
-    const u = S.units[def.key];
-    const el = document.createElement('div');
-    el.className = 'unit-card';
-    el.innerHTML = `
-      <div class="unit-icon"><svg width="28" height="28" viewBox="0 0 32 32" fill="none">${def.svgPath}</svg></div>
-      <div class="unit-info">
-        <div class="unit-name">${u.name}</div>
-        <div class="unit-stats">Güç: <b style="color:var(--gold2)">${u.power}</b> | Bakiyet: <b style="color:#fca5a5">${u.upkeep} Altın/Tur</b> | Maliyet: <b style="color:var(--gold)">${u.goldCost} Altın</b></div>
+/* ---------- 1. KULÜP EKRANI ---------- */
+function scrHome() {
+  const guc = takimGucu('benimTakim');
+  const haftalikGider = state.kadro.reduce((a,b)=>a+b.maas, 0);
+  const siradakiHafta = state.fikstur.find(f => f.maclar.some(m => !m.oynandi));
+  let macKarti = `<p class="text-gray-500 text-sm">Sezon Bitti!</p>`;
+  
+  if (siradakiHafta) {
+    const benimMac = siradakiHafta.maclar.find(m => m.ev === 'benimTakim' || m.dep === 'benimTakim');
+    const rakipId = benimMac.ev === 'benimTakim' ? benimMac.dep : benimMac.ev;
+    const rakip = state.ligTakimlari.find(t => t.id === rakipId);
+    macKarti = `
+      <div class="flex justify-between items-center mb-4">
+        <div class="text-center flex-1"><span class="block font-bold text-lg ${benimMac.ev==='benimTakim'?'accent-text':'text-white'}">${benimMac.ev==='benimTakim' ? state.kulupAdi : rakip.isim}</span><span class="text-xs text-gray-500">Ev Sahibi</span></div>
+        <div class="font-bold text-xl text-gray-600 px-2">VS</div>
+        <div class="text-center flex-1"><span class="block font-bold text-lg ${benimMac.dep==='benimTakim'?'accent-text':'text-white'}">${benimMac.dep==='benimTakim' ? state.kulupAdi : rakip.isim}</span><span class="text-xs text-gray-500">Deplasman</span></div>
       </div>
-      <div class="unit-count">${u.count}</div>
-      <div class="unit-controls">
-        <div class="unit-btn" onclick="recruitUnit('${def.key}')">+</div>
-        <div class="unit-btn" onclick="dismissUnit('${def.key}')">-</div>
-      </div>`;
-    list.appendChild(el);
-  });
-  updateArmyUI();
-  updateUpkeepUI();
-}
+      <button onclick="macBaslat()" class="btn-primary">HAFTAYI OYNA ⚽</button>
+    `;
+  }
 
-function recruitUnit(key){
-  const u = S.units[key];
-  if(S.gold < u.goldCost){ notify('Yeterli altın yok!','danger'); return; }
-  if(u.manpowerCost > 0 && S.manpower < u.manpowerCost){ notify('Yeterli insan gücü yok!','danger'); return; }
-  S.gold -= u.goldCost;
-  S.manpower -= u.manpowerCost;
-  u.count++;
-  renderUnits();
-  updateUI();
-}
-
-function dismissUnit(key){
-  const u = S.units[key];
-  if(u.count <= 0) return;
-  u.count--;
-  renderUnits();
-  updateUI();
-}
-
-// ============================================================
-// SEFER / BATTLE
-// ============================================================
-function renderEmpires(){
-  const list = document.getElementById('empires-list');
-  list.innerHTML = '';
-  S.empires.forEach(emp=>{
-    const pct = Math.min(100, (emp.power/600)*100);
-    const el = document.createElement('div');
-    el.className = 'empire-card'+(emp.conquered?' conquered':'');
-    el.innerHTML = `
-      <div class="empire-header">
-        <div class="empire-icon" style="border-color:${emp.color};background:${emp.color}22">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 2 L14 8 L20 8 L15 12 L17 18 L12 15 L7 18 L9 12 L4 8 L10 8 Z" fill="${emp.color}" stroke="${emp.color}" stroke-width="0.5"/></svg>
+  return `
+    <div class="fade-in">
+      <div class="flex justify-between items-end mb-4">
+        <div>
+          <h1 class="text-2xl font-bold text-white tracking-wider">${state.kulupAdi}</h1>
+          <p class="text-sm text-gray-400">Menajer: <span class="accent-text">${state.menajer}</span> | Hafta ${state.hafta}/${state.toplamHafta}</p>
         </div>
-        <div><div class="empire-name">${emp.name}</div><div class="empire-status">${emp.conquered?'FETHEDİLDİ':'Bağımsız Devlet'}</div></div>
+        <div class="text-right">
+          <p class="text-xs text-gray-500 uppercase tracking-widest">Kasa</p>
+          <p class="text-xl font-bold text-white">${state.butce.toLocaleString('tr-TR')} ₺</p>
+        </div>
       </div>
-      <div class="empire-power-bar"><div class="empire-power-fill" style="width:${pct}%;background:linear-gradient(90deg,${emp.color},${emp.color}bb)"></div></div>
-      <div class="empire-stats">
-        <div class="empire-stat">Savunma Gücü: <span>${emp.power}</span></div>
-        <div class="empire-stat">Kazanç: <span>${emp.reward.gold} Altın</span></div>
-        <div class="empire-stat">Toprak: <span>+${emp.reward.territory}</span></div>
+
+      <div class="card">
+        <p class="text-xs text-gray-500 uppercase mb-2">Genel Durum</p>
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm font-bold text-gray-300">Ortalama Güç</span>
+          <span class="text-lg font-bold accent-text">${guc}</span>
+        </div>
+        <div class="stat-bar-track mb-4"><div class="stat-bar-fill" style="width:${guc}%; background:var(--neon-green)"></div></div>
+        
+        <div class="flex justify-between border-t border-gray-800 pt-2 text-sm">
+          <span class="text-gray-400">Maaş Gideri: <span class="text-red-400">-${haftalikGider}₺</span></span>
+          <span class="text-gray-400">Taraftar: <span class="text-white">${state.taraftarSayisi}</span></span>
+        </div>
       </div>
-      ${emp.conquered
-        ? '<div class="conquered-badge">FETHEDILDI - TOPRAKLARINIZDA</div>'
-        : `<div class="sefere-btn" onclick="openBattle('${emp.id}')">SAVAŞ AÇ</div>`}`;
-    list.appendChild(el);
+
+      <div class="card" style="border-color: var(--neon-green)">
+        <p class="text-xs accent-text uppercase mb-3 font-bold tracking-widest">Sıradaki Karşılaşma</p>
+        ${macKarti}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- 2. KADRO EKRANI ---------- */
+function scrSquad() {
+  const list = [...state.kadro].sort((a,b) => b.guc - a.guc);
+  const html = list.map(p => `
+    <div class="card flex items-center gap-3 ${p.sakat ? 'opacity-70' : ''} mb-2">
+      <div class="font-bold text-xs w-8 text-center" style="color:var(--neon-purple)">${p.pozisyon}</div>
+      <div class="flex-1">
+        <p class="text-sm font-bold text-white">${p.ad} <span class="text-xs text-gray-500 ml-1">Yaş: ${p.yas}</span> ${p.sakat ? '🤕' : ''}</p>
+        <div class="flex gap-4 mt-1 text-xs">
+          <span>Güç: <b class="${p.guc>75?'accent-text':'text-gray-300'}">${p.guc}</b></span>
+          <span>Kond: <b class="${p.kondisyon<50?'text-red-400':'text-gray-300'}">%${p.kondisyon}</b></span>
+        </div>
+      </div>
+      <div class="text-right flex flex-col items-end gap-1">
+        <span class="text-xs font-bold text-gray-400">${p.maas}₺</span>
+        <button onclick="oyuncuKov('${p.id}')" class="text-[10px] bg-red-900 bg-opacity-30 text-red-400 px-2 py-1 rounded">Gönder</button>
+      </div>
+    </div>
+  `).join("");
+
+  return `<div class="fade-in"><h2 class="text-xl font-bold mb-3 uppercase tracking-wider text-white">A Takım Kadrosu</h2>${html}</div>`;
+}
+
+function oyuncuKov(id) {
+  if(state.kadro.length <= 11) { toast("Kadroda en az 11 oyuncu kalmalı!"); return; }
+  state.kadro = state.kadro.filter(p => p.id !== id);
+  toast("Oyuncu takımdan gönderildi."); renderEkran();
+}
+
+/* ---------- 3. TESİSLER (ANTRENMAN & ALTYAPI) ---------- */
+function scrFacilities() {
+  return `
+    <div class="fade-in space-y-4">
+      <h2 class="text-xl font-bold uppercase tracking-wider text-white">Kulüp Tesisleri</h2>
+      
+      <div class="card">
+        <h3 class="font-bold text-white mb-1 flex items-center gap-2">🏋️ Taktik Antrenman</h3>
+        <p class="text-xs text-gray-400 mb-3">Tüm takımın gücünü geliştirmek için özel hoca tut. (Maliyet: 1500₺)</p>
+        <button onclick="tesisIslem('antrenman')" class="btn-action w-full">Antrenman Yaptır (1500₺)</button>
+      </div>
+
+      <div class="card">
+        <h3 class="font-bold text-white mb-1 flex items-center gap-2">🏥 Kulüp Doktoru</h3>
+        <p class="text-xs text-gray-400 mb-3">Sakatları iyileştir ve tüm takımın kondisyonunu %100'e fulle. (Maliyet: 800₺)</p>
+        <button onclick="tesisIslem('tedavi')" class="btn-action w-full" style="border-color:#38bdf8; color:#38bdf8;">Tedavi Uygula (800₺)</button>
+      </div>
+
+      <div class="card" style="border-color: var(--neon-purple)">
+        <h3 class="font-bold text-white mb-1 flex items-center gap-2" style="color:var(--neon-purple)">🛹 Mahalle Parkı (Altyapı)</h3>
+        <p class="text-xs text-gray-400 mb-3">Mahallede top oynayan yetenekli gençleri keşfet. Şansına göre dünya yıldızı bile çıkabilir! (Maliyet: 2500₺)</p>
+        <button onclick="tesisIslem('altyapi')" class="btn-action w-full" style="background:var(--neon-purple); color:#fff;">Sokaklarda Yetenek Ara (2500₺)</button>
+      </div>
+    </div>
+  `;
+}
+
+function tesisIslem(tip) {
+  if (tip === 'antrenman') {
+    if(state.butce < 1500) return toast("Yetersiz bütçe!");
+    state.butce -= 1500;
+    state.kadro.forEach(p => { if(Math.random()>0.3) p.guc = Math.min(99, p.guc + rnd(1,3)); });
+    toast("Takım antrenmanı tamamlandı! Güçler arttı.");
+  } 
+  else if (tip === 'tedavi') {
+    if(state.butce < 800) return toast("Yetersiz bütçe!");
+    state.butce -= 800;
+    state.kadro.forEach(p => { p.kondisyon = 100; p.sakat = false; });
+    toast("Tüm takımın kondisyonu yenilendi, sakatlar iyileşti.");
+  }
+  else if (tip === 'altyapi') {
+    if(state.butce < 2500) return toast("Yetersiz bütçe!");
+    state.butce -= 2500;
+    
+    // Özel Bedo Easter Egg: İlk altyapı her zaman Ömer Faruk Muş
+    let yeniYetenek;
+    if (!state.altyapiKesfi) {
+      yeniYetenek = oyuncuUret("ORT", 70, 85, "Ömer Faruk Muş");
+      yeniYetenek.yas = 17;
+      state.altyapiKesfi = true;
+      toast("⭐ İNANILMAZ! Mahalle parkında 'Ömer Faruk Muş' adında müthiş bir yetenek bulduk!");
+    } else {
+      yeniYetenek = oyuncuUret(null, 45, 75);
+      yeniYetenek.yas = rnd(15, 18);
+      toast(`Genç yetenek ${yeniYetenek.ad} takıma katıldı.`);
+    }
+    state.kadro.push(yeniYetenek);
+  }
+  renderEkran();
+}
+
+/* ---------- 4. MARKET & SPONSOR ---------- */
+function scrMarket() {
+  const spHTML = SPONSORLAR.map(s => `
+    <div class="border border-gray-800 rounded p-3 mb-2 ${state.aktifSponsor?.id === s.id ? 'bg-gray-900 border-green-500' : ''}">
+      <div class="flex justify-between">
+        <span class="font-bold text-sm text-white">${s.ad}</span>
+        ${state.aktifSponsor?.id === s.id 
+          ? `<span class="text-xs accent-text font-bold">Aktif</span>` 
+          : `<button onclick="sponsorSec('${s.id}')" class="text-xs text-green-400 bg-green-900 bg-opacity-20 px-2 py-1 rounded">Anlaş</button>`}
+      </div>
+      <p class="text-[10px] text-gray-500 mt-1">${s.aciklama}</p>
+      <div class="flex gap-3 mt-2 text-xs">
+        <span class="text-gray-400">Peşinat: <b class="text-white">${s.pesinat}₺</b></span>
+        <span class="text-gray-400">Haftalık: <b class="text-white">${s.haftalik}₺</b></span>
+      </div>
+    </div>
+  `).join("");
+
+  const trHTML = state.transferListesi.map(p => `
+    <div class="flex justify-between items-center border-b border-gray-800 py-2">
+      <div>
+        <p class="text-sm font-bold text-white">${p.ad} <span class="text-xs text-gray-500">(${p.pozisyon})</span></p>
+        <p class="text-xs text-gray-400">Güç: ${p.guc} | Yaş: ${p.yas}</p>
+      </div>
+      <div class="text-right">
+        <p class="text-sm font-bold text-blue-400 mb-1">${p.deger}₺</p>
+        <button onclick="transferAl('${p.id}')" class="btn-action">Satın Al</button>
+      </div>
+    </div>
+  `).join("");
+
+  return `
+    <div class="fade-in space-y-4">
+      <h2 class="text-xl font-bold uppercase tracking-wider text-white">Finans & Transfer</h2>
+      
+      <div class="card">
+        <h3 class="font-bold text-white mb-2 text-sm uppercase tracking-widest" style="color:var(--neon-purple)">Sponsorluk Anlaşmaları</h3>
+        ${spHTML}
+      </div>
+
+      <div class="card">
+        <h3 class="font-bold text-white mb-2 text-sm uppercase tracking-widest accent-text">Transfer Pazarı</h3>
+        ${trHTML}
+      </div>
+    </div>
+  `;
+}
+
+function sponsorSec(id) {
+  if(state.aktifSponsor) return toast("Zaten bir sponsorun var! Sezon sonu değişir.");
+  const s = SPONSORLAR.find(x => x.id === id);
+  state.aktifSponsor = s;
+  state.butce += s.pesinat;
+  toast(`${s.ad} ile anlaşıldı! Peşinat kasaya eklendi.`);
+  renderEkran();
+}
+
+function transferAl(id) {
+  const p = state.transferListesi.find(x => x.id === id);
+  if(state.butce < p.deger) return toast("Bütçe yetersiz!");
+  state.butce -= p.deger;
+  state.transferListesi = state.transferListesi.filter(x => x.id !== id);
+  state.kadro.push(p);
+  toast(`${p.ad} takıma katıldı!`);
+  renderEkran();
+}
+
+/* ---------- 5. LİG & PUAN DURUMU ---------- */
+function scrLeague() {
+  const siralama = [...state.ligTakimlari].sort((a,b) => b.puan - a.puan || (b.at-b.ye) - (a.at-a.ye));
+  const tabloHTML = siralama.map((t, i) => `
+    <tr class="border-b border-gray-800 ${t.isUser ? 'bg-gray-900' : ''}">
+      <td class="py-2 text-xs text-gray-500">${i+1}</td>
+      <td class="py-2 text-sm font-bold ${t.isUser ? 'accent-text' : 'text-gray-300'}">${t.isim}</td>
+      <td class="py-2 text-xs text-center text-gray-400">${t.oynanan}</td>
+      <td class="py-2 text-xs text-center text-white font-bold">${t.puan}</td>
+    </tr>
+  `).join("");
+
+  const aktifHafta = state.fikstur[state.hafta - 1];
+  const fikHTML = aktifHafta ? aktifHafta.maclar.map(m => {
+    let evT = state.ligTakimlari.find(t=>t.id===m.ev);
+    let depT = state.ligTakimlari.find(t=>t.id===m.dep);
+    return `
+      <div class="flex justify-between text-xs py-1 border-b border-gray-800 last:border-0">
+        <span class="${evT.isUser?'accent-text font-bold':'text-gray-400'} flex-1 text-right">${evT.isim}</span>
+        <span class="px-3 text-white font-bold">${m.oynandi ? `${m.evSkor} - ${m.depSkor}` : 'v'}</span>
+        <span class="${depT.isUser?'accent-text font-bold':'text-gray-400'} flex-1">${depT.isim}</span>
+      </div>
+    `;
+  }).join("") : '<p class="text-xs text-gray-500">Sezon tamamlandı.</p>';
+
+  return `
+    <div class="fade-in space-y-4">
+      <h2 class="text-xl font-bold uppercase tracking-wider text-white">Siber Mahalle Ligi</h2>
+      
+      <div class="card p-0 overflow-hidden">
+        <div class="bg-gray-900 p-2 text-center text-xs text-gray-400 font-bold uppercase">Puan Durumu</div>
+        <table class="w-full text-left px-2">
+          <thead>
+            <tr class="border-b border-gray-700 text-[10px] text-gray-500">
+              <th class="py-1 px-1 w-6">#</th><th>Takım</th><th class="text-center w-8">O</th><th class="text-center w-8">P</th>
+            </tr>
+          </thead>
+          <tbody>${tabloHTML}</tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <h3 class="font-bold text-white mb-2 text-sm uppercase tracking-widest text-center">Hafta ${state.hafta} Fikstürü</h3>
+        ${fikHTML}
+      </div>
+    </div>
+  `;
+}
+
+/* ---------- MAÇ MOTORU ---------- */
+function macBaslat() {
+  const aktifHafta = state.fikstur[state.hafta - 1];
+  if(!aktifHafta) return;
+
+  const benimMac = aktifHafta.maclar.find(m => m.ev === 'benimTakim' || m.dep === 'benimTakim');
+  const digerMaclar = aktifHafta.maclar.filter(m => m !== benimMac);
+
+  // Diğer maçları hızlıca simüle et
+  digerMaclar.forEach(m => {
+    let gucEv = takimGucu(m.ev); let gucDep = takimGucu(m.dep);
+    m.evSkor = rngGol(gucEv, gucDep, true);
+    m.depSkor = rngGol(gucDep, gucEv, false);
+    m.oynandi = true;
+    macSonucIsle(m);
   });
+
+  // Kullanıcı Maçı Simülasyonu
+  macSim = {
+    calisiyor: true, dakika: 0, loglar: [],
+    ev: state.ligTakimlari.find(t=>t.id===benimMac.ev),
+    dep: state.ligTakimlari.find(t=>t.id===benimMac.dep),
+    evSkor: 0, depSkor: 0,
+    gucEv: takimGucu(benimMac.ev),
+    gucDep: takimGucu(benimMac.dep),
+    macRef: benimMac
+  };
+
+  renderMac();
+  macSim.zamanlayici = setInterval(ilerletMac, 400);
 }
 
-let battleEnemy = null;
-let battleTimeout = null;
-
-function openBattle(empId){
-  battleEnemy = S.empires.find(e=>e.id===empId);
-  if(!battleEnemy||battleEnemy.conquered) return;
-  document.getElementById('sefer-list-view').style.display = 'none';
-  document.getElementById('battle-view').style.display = 'flex';
-  document.getElementById('battle-title').textContent = `SAVAŞ: ${battleEnemy.name.toUpperCase()}`;
-  document.getElementById('battle-vs').textContent = `Ordu Gücünüz: ${getArmyPower()} vs Düşman: ${battleEnemy.power}`;
-  document.getElementById('battle-log').innerHTML = '<div class="log-line" style="color:var(--text3);">Savaşı başlatmak için düğmeye basın...</div>';
-  document.getElementById('battle-start-btn').style.display = 'block';
-  document.getElementById('battle-start-btn').disabled = false;
-  [0,1,2].forEach(i=>{ const p=document.getElementById('phase'+i); p.className='phase-indicator'; });
-  S.battleRunning = false;
+function rngGol(saldiran, savunan, evSahibi) {
+  let fark = saldiran - savunan;
+  if(evSahibi) fark += 5; // Ev sahibi avantajı
+  let sans = 0.15 + (fark * 0.01);
+  let gol = 0;
+  for(let i=0; i<5; i++) { if(Math.random() < sans) gol++; }
+  return gol;
 }
 
-function closeBattle(){
-  document.getElementById('sefer-list-view').style.display = 'flex';
-  document.getElementById('battle-view').style.display = 'none';
-  if(battleTimeout){ clearTimeout(battleTimeout); battleTimeout=null; }
-  S.battleRunning = false;
+function renderMac() {
+  const html = `
+    <div class="modal-overlay fade-in p-4" id="match-ui">
+      <div class="card mt-10 text-center relative" style="border-color:var(--neon-purple)">
+        <div class="text-xs text-gray-400 mb-2 pulse" id="m-dakika">⏱ 0'</div>
+        <div class="flex justify-between items-center text-xl font-bold text-white mb-4">
+          <div class="flex-1 text-right pr-4 ${macSim.ev.isUser?'accent-text':''}">${macSim.ev.isim}</div>
+          <div class="bg-gray-900 px-4 py-2 rounded border border-gray-700" id="m-skor">0 - 0</div>
+          <div class="flex-1 text-left pl-4 ${macSim.dep.isUser?'accent-text':''}">${macSim.dep.isim}</div>
+        </div>
+        <div id="m-loglar" class="h-48 overflow-y-auto text-left space-y-2 bg-black bg-opacity-50 p-2 rounded text-xs"></div>
+        <button id="m-kapat" class="btn-primary mt-4 hidden" onclick="macBitir()">Devam Et</button>
+      </div>
+    </div>
+  `;
+  document.getElementById('modal-container').innerHTML = html;
 }
 
-function addLog(text, cls=''){
-  const log = document.getElementById('battle-log');
-  const el = document.createElement('div');
-  el.className = 'log-line'+(cls?' '+cls:'');
-  el.textContent = text;
-  log.appendChild(el);
-  log.scrollTop = log.scrollHeight;
+function mLog(msg, color="text-gray-400") {
+  const div = document.getElementById("m-loglar");
+  if(!div) return;
+  div.innerHTML += `<div class="log-entry ${color}">${msg}</div>`;
+  div.scrollTop = div.scrollHeight;
 }
 
-function delay(ms){ return new Promise(r=>{ battleTimeout=setTimeout(r,ms); }); }
+function ilerletMac() {
+  macSim.dakika += 9;
+  document.getElementById("m-dakika").innerText = `⏱ ${macSim.dakika}'`;
 
-async function startBattle(){
-  if(S.battleRunning) return;
-  if(getArmyPower() === 0){ notify('Ordu olmadan savaşamazsınız!','danger'); return; }
-  S.battleRunning = true;
-  document.getElementById('battle-start-btn').style.display = 'none';
-  document.getElementById('battle-log').innerHTML = '';
+  // Anlık olay hesapla
+  let evSansi = 0.08 + ((macSim.gucEv - macSim.gucDep)*0.002);
+  let depSansi = 0.06 + ((macSim.gucDep - macSim.gucEv)*0.002);
 
-  const myPower = getArmyPower();
-  const moralCoeff = 0.5 + (S.morale / 200);
-  const myTotal = Math.floor(myPower * moralCoeff);
-  const enemyPower = battleEnemy.power;
-  const randomMod = Math.floor((Math.random()-0.5)*enemyPower*0.3);
-  const enemyTotal = enemyPower + randomMod;
-
-  // PHASE 0: Okçu Çatışması
-  document.getElementById('phase0').classList.add('active');
-  addLog('--- FAZ 1: OKÇU ÇATIŞMASI ---','phase-header');
-  await delay(600);
-  addLog('İki ordu karşı karşıya geldi. Okçular mevzi aldı...');
-  await delay(700);
-  const yeniceriBonus = S.units.yeniceri.count * 2;
-  addLog(`Yeniçeri tüfekçilerimiz ateş açtı! (+${yeniceriBonus} hasar)`);
-  await delay(600);
-  if(S.units.yeniceri.count > 30){
-    addLog('Düşman ön safları büyük kayıp verdi!');
+  if (Math.random() < evSansi) {
+    macSim.evSkor++;
+    mLog(`⚽ ${macSim.ev.isim} golü buldu!`, macSim.ev.isUser ? "accent-text font-bold" : "text-red-400 font-bold");
+  } else if (Math.random() < depSansi) {
+    macSim.depSkor++;
+    mLog(`⚽ ${macSim.dep.isim} topu ağlara gönderdi.`, macSim.dep.isUser ? "accent-text font-bold" : "text-red-400 font-bold");
   } else {
-    addLog('Yetersiz tüfekçi... Düşman kararlı ilerliyor.');
-  }
-  await delay(500);
-  document.getElementById('phase0').classList.remove('active');
-  document.getElementById('phase0').classList.add('done');
-
-  // PHASE 1: Süvari Hücumu
-  document.getElementById('phase1').classList.add('active');
-  addLog('--- FAZ 2: SÜVARİ HÜCUMU ---','phase-header');
-  await delay(600);
-  if(S.units.sipahi.count > 10){
-    addLog(`${S.units.sipahi.count} Sipahi süvarisi düşman hatlarını yardı!`);
-    await delay(700);
-    addLog('Düşman süvari birliği bozguna uğradı!');
-  } else {
-    addLog('Sipahi birlikleri yetersiz. Düşman savunması sağlam.');
-    await delay(700);
-    addLog('Merkezimizde bir gedik açıldı!');
-  }
-  await delay(500);
-  document.getElementById('phase1').classList.remove('active');
-  document.getElementById('phase1').classList.add('done');
-
-  // PHASE 2: Sur Kuşatması
-  document.getElementById('phase2').classList.add('active');
-  addLog('--- FAZ 3: SUR KUŞATMASI ---','phase-header');
-  await delay(600);
-  if(S.units.sahiTopu.count > 0){
-    addLog(`Şahi topları ateşlendi! Surlarda gedik açılıyor...`);
-    await delay(800);
-    addLog(`${S.units.sahiTopu.count} top surlarda büyük tahribat yarattı!`);
-  } else {
-    addLog('Şahi topu yok! Surları aşmak imkansız görünüyor...');
-    await delay(600);
-  }
-  await delay(500);
-  document.getElementById('phase2').classList.remove('active');
-  document.getElementById('phase2').classList.add('done');
-
-  // SONUÇ
-  addLog('--- MUHAREBE SONUCU ---','phase-header');
-  await delay(700);
-  addLog(`Sizin Güç Puanı: ${myTotal} (Güç: ${myPower} × Moral Kat: ${moralCoeff.toFixed(2)})`);
-  addLog(`Düşman Güç Puanı: ${enemyTotal} (Taban: ${enemyPower}, Rastlantı: ${randomMod>=0?'+':''}${randomMod})`);
-  await delay(800);
-
-  if(myTotal >= enemyTotal){
-    // ZAFER
-    const r = battleEnemy.reward;
-    S.gold += r.gold;
-    S.territory += r.territory;
-    S.morale = Math.min(100, S.morale + r.morale);
-    battleEnemy.conquered = true;
-    await delay(400);
-    addLog(`ZAFER! ${battleEnemy.name} fethedildi!`,'victory');
-    addLog(`+${r.gold} Altın | +${r.territory} Toprak | +${r.morale} Moral`,'victory');
-    notify('ZAFER! '+battleEnemy.name+' fethedildi!','success');
-    addDivanHistory(`${battleEnemy.name} fethedildi. +${r.gold} Altın, +${r.territory} Toprak.`);
-  } else {
-    // YENILGI
-    const losses50yeni = Math.floor(S.units.yeniceri.count * 0.5);
-    const losses50sipahi = Math.floor(S.units.sipahi.count * 0.5);
-    S.units.yeniceri.count -= losses50yeni;
-    S.units.sipahi.count -= losses50sipahi;
-    S.morale = Math.max(0, S.morale - 20);
-    if(S.morale < 30){ S.happiness = Math.max(0, S.happiness - 10); }
-    await delay(400);
-    addLog(`HEZIMET! Ordumuz geri çekildi!`,'defeat');
-    addLog(`Yeniçeri kaybı: ${losses50yeni} | Sipahi kaybı: ${losses50sipahi} | Moral: -20`,'defeat');
-    notify('Hezimete uğradınız!','danger');
-    addDivanHistory(`${battleEnemy.name} seferinde hezimete uğradı. Ağır kayıplar.`);
+    const txt = ["Orta saha mücadelesi.","Tehlikeli atak, kaleci kurtardı.","Sert bir faul, hakem uyardı.","Taç atışıyla oyun sürüyor."];
+    mLog(`⏱ ${macSim.dakika}' ${txt[rnd(0,3)]}`);
   }
 
-  updateUI();
-  S.battleRunning = false;
-}
+  document.getElementById("m-skor").innerText = `${macSim.evSkor} - ${macSim.depSkor}`;
 
-// ============================================================
-// DIVAN
-// ============================================================
-function addDivanHistory(text){
-  S.divanHistory.unshift({ text, turn: S.turn });
-  renderDivanHistory();
-}
-
-function renderDivanHistory(){
-  const el = document.getElementById('divan-history');
-  if(!el) return;
-  if(S.divanHistory.length === 0){
-    el.innerHTML = '<div style="color:var(--text3);font-size:11px;text-align:center;padding:12px;">Henüz kayıtlı olay yok.</div>';
-    return;
+  if (macSim.dakika >= 90) {
+    clearInterval(macSim.zamanlayici);
+    document.getElementById("m-dakika").innerText = "Maç Bitti";
+    document.getElementById("m-kapat").classList.remove("hidden");
+    mLog("Hakem maçı bitiren düdüğü çaldı! 🏁", "text-white font-bold");
+    
+    // Yorgunluk
+    state.kadro.forEach(p => { p.kondisyon = Math.max(30, p.kondisyon - rnd(10, 20)); });
   }
-  el.innerHTML = S.divanHistory.slice(0,8).map(d=>`<div class="divan-entry">Tur ${d.turn}: ${d.text}</div>`).join('');
 }
 
-function triggerEvent(){
-  const available = S.events.filter(e=>!S.usedEvents.includes(e.id));
-  if(available.length === 0){ S.usedEvents=[]; return; }
-  const ev = available[Math.floor(Math.random()*available.length)];
-  S.usedEvents.push(ev.id);
-  showModal(ev);
+function macSonucIsle(m) {
+  let tEv = state.ligTakimlari.find(x=>x.id===m.ev);
+  let tDep = state.ligTakimlari.find(x=>x.id===m.dep);
+  tEv.oynanan++; tDep.oynanan++;
+  tEv.at += m.evSkor; tEv.ye += m.depSkor;
+  tDep.at += m.depSkor; tDep.ye += m.evSkor;
+  
+  if(m.evSkor > m.depSkor) { tEv.gal++; tEv.puan+=3; tDep.mag++; }
+  else if(m.depSkor > m.evSkor) { tDep.gal++; tDep.puan+=3; tEv.mag++; }
+  else { tEv.ber++; tDep.ber++; tEv.puan+=1; tDep.puan+=1; }
 }
 
-function showModal(ev){
-  document.getElementById('modal-title').textContent = ev.title;
-  document.getElementById('modal-text').textContent = ev.text;
-  const choicesEl = document.getElementById('modal-choices');
-  choicesEl.innerHTML = '';
-  ev.choices.forEach(c=>{
-    const btn = document.createElement('div');
-    btn.className = 'choice-btn';
-    btn.innerHTML = `<div class="choice-label">${c.label}</div><div class="choice-effect">${c.effect}</div>`;
-    btn.onclick = ()=>{ c.apply(); updateUI(); renderDivanHistory(); closeModal(); notify('Karar verildi.','warning'); };
-    choicesEl.appendChild(btn);
-  });
-  document.getElementById('event-modal').classList.add('show');
+function macBitir() {
+  macSim.macRef.evSkor = macSim.evSkor;
+  macSim.macRef.depSkor = macSim.depSkor;
+  macSim.macRef.oynandi = true;
+  macSonucIsle(macSim.macRef);
+  
+  // Ekonomi
+  const maasGideri = state.kadro.reduce((a,b)=>a+b.maas, 0);
+  const spGeliri = state.aktifSponsor ? state.aktifSponsor.haftalik : 0;
+  const biletGeliri = Math.floor(state.taraftarSayisi * (state.biletFiyati / 50) * rnd(80,100)/100);
+  state.butce += (spGeliri + biletGeliri) - maasGideri;
+
+  // Taraftar Değişimi
+  let benimPuan = macSim.ev.isUser ? (macSim.evSkor>macSim.depSkor?3:macSim.evSkor===macSim.depSkor?1:0) : (macSim.depSkor>macSim.evSkor?3:macSim.evSkor===macSim.depSkor?1:0);
+  if(benimPuan===3) state.taraftarSayisi += rnd(20, 50);
+  else if(benimPuan===0) state.taraftarSayisi -= rnd(10, 30);
+
+  state.hafta++;
+  marketYenile();
+  
+  document.getElementById("match-ui").remove();
+  toast(`Bilet: +${biletGeliri}₺ | Sponsor: +${spGeliri}₺ | Maaş: -${maasGideri}₺`);
+  renderEkran();
 }
 
-function closeModal(){
-  document.getElementById('event-modal').classList.remove('show');
-}
-
-// ============================================================
-// TURN
-// ============================================================
-function nextTurn(){
-  // Gold income from taxes
-  const taxIncome = Math.floor(S.population * S.taxRates[S.taxRate] * (1 + S.taxBonus));
-  // Army upkeep
-  const upkeep = S.units.yeniceri.count * S.units.yeniceri.upkeep +
-                 S.units.sipahi.count * S.units.sipahi.upkeep +
-                 S.units.sahiTopu.count * S.units.sahiTopu.upkeep;
-  const netGold = taxIncome + S.passiveGold - upkeep;
-  S.gold += netGold;
-
-  // Happiness effects on gold / morale
-  const happinessDelta = S.happinessEffect[S.taxRate];
-  S.happiness = Math.max(0, Math.min(100, S.happiness + happinessDelta));
-
-  // Morale passive drift
-  if(S.happiness > 60){ S.morale = Math.min(100, S.morale + 1); }
-  else if(S.happiness < 30){ S.morale = Math.max(0, S.morale - 2); }
-
-  // Low morale effects
-  if(S.morale < 20){
-    S.happiness = Math.max(0, S.happiness - 5);
-    notify('Ordu morali çok düşük! Ayaklanma riski var!','danger');
-  }
-
-  // Bankruptcy
-  if(S.gold < 0){ S.gold = 0; S.morale = Math.max(0, S.morale - 10); notify('Hazine boş! Asker maaşları ödenemedi!','danger'); }
-
-  S.turn++;
-
-  // Notify turn income
-  notify(`+${taxIncome} Vergi | +${S.passiveGold} Pasif | -${upkeep} Bakiyet = ${netGold>0?'+':''}${netGold} Altın`, netGold>=0?'success':'danger');
-
-  // Divan event
-  if(S.turn >= S.nextEventTurn){
-    S.nextEventTurn = S.turn + 3;
-    setTimeout(triggerEvent, 500);
-  }
-
-  updateUI();
-  renderUnits();
-  renderEmpires();
-  renderDivanHistory();
-}
-
-// ============================================================
-// INIT
-// ============================================================
-function init(){
-  renderUpgrades();
-  renderUnits();
-  renderEmpires();
-  renderDivanHistory();
-  updateUI();
-}
-
-init();
+/* ---------- START ---------- */
+window.onload = () => { oyunuKur(); };
 </script>
 </body>
 </html>
