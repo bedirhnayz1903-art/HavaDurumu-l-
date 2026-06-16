@@ -1,224 +1,1064 @@
-{
-  "questions": [
-    {
-      "questionNumber": 1,
-      "question": "Bir ürünün fiyatı 200 TL'dir. Bu ürüne $\\%10$ zam yapılırsa yeni fiyatı kaç TL olur?",
-      "answerOptions": [
-        {
-          "text": "220",
-          "rationale": "Bir sayının %10'unu bulmak için sondan bir sıfır sileriz. 200'ün %10'u 20 TL'dir. Zam dediği için ekleriz: 200 + 20 = 220 TL.",
-          "isCorrect": true
-        },
-        {
-          "text": "210",
-          "rationale": "Doğrudan yüzde oranını sayıya eklemiş olabilirsin, paranın değerine göre yüzde hesaplamalısın.",
-          "isCorrect": false
-        },
-        {
-          "text": "180",
-          "rationale": "Bu sonuç zam yerine %10 indirim yapılsaydı doğru olurdu.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "Bir sayının %10'u, o sayının 10'da 1'idir (yani bir sıfır silmektir)."
-    },
-    {
-      "questionNumber": 2,
-      "question": "$x + 5 = -2$ olduğuna göre $x$ kaçtır?",
-      "answerOptions": [
-        {
-          "text": "-7",
-          "rationale": "Hangi sayıya 5 eklersek -2 yapar? Tabii ki -7. Ya da +5 karşıya -5 olarak geçer; -2 ve -5 toplamda -7 yapar.",
-          "isCorrect": true
-        },
-        {
-          "text": "3",
-          "rationale": "İşaretleri dikkate almadan 5'ten 2'yi çıkarmış olabilirsin.",
-          "isCorrect": false
-        },
-        {
-          "text": "-3",
-          "rationale": "Pozitif ve negatif sayıların toplama mantığına tekrar göz atmalısın.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "5 lira paran varken kaç lira borçlanırsan net -2 liraya (borca) düşersin?"
-    },
-    {
-      "questionNumber": 3,
-      "question": "Bir sınıftaki öğrencilerin yarısı ($\\%50$'si) gözlüklüdür. Gözlüklü öğrenci sayısı 15 ise sınıf mevcudu kaçtır?",
-      "answerOptions": [
-        {
-          "text": "30",
-          "rationale": "%50 demek yarısı demektir. Yarısı 15 olan sınıfın tamamı 15 x 2 = 30 kişidir.",
-          "isCorrect": true
-        },
-        {
-          "text": "25",
-          "rationale": "Yüzde oranıyla sayıyı karıştırmış olabilirsin.",
-          "isCorrect": false
-        },
-        {
-          "text": "60",
-          "rationale": "Yarısını bulmak yerine yanlışlıkla iki kez çarpmış olabilirsin.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "%50 ifadesinin 'yarım' anlamına geldiğini düşün."
-    },
-    {
-      "questionNumber": 4,
-      "question": "Bir daire grafiğinde $\\%50$'lik bir dilim kaç derecelik merkez açıyla gösterilir?",
-      "answerOptions": [
-        {
-          "text": "180",
-          "rationale": "Dairenin tamamı 360 derecedir. %50 yarısı demek olduğu için 360'ın yarısı 180 derecedir.",
-          "isCorrect": true
-        },
-        {
-          "text": "90",
-          "rationale": "90 derece dairenin çeyreğidir, yani %25'e denk gelir.",
-          "isCorrect": false
-        },
-        {
-          "text": "100",
-          "rationale": "Yüzde sembolü ile derece ölçüsü karıştırılmamalıdır.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "Dairenin tam turunun 360 derece olduğunu hatırla ve yarısını bul."
-    },
-    {
-      "questionNumber": 5,
-      "question": "$2x = 10$ ise $4x$ ifadesinin değeri kaçtır?",
-      "answerOptions": [
-        {
-          "text": "20",
-          "rationale": "2x ifadesi 4x olurken 2 katına çıkmıştır. O halde sonuç da 2 katına çıkar: 10 x 2 = 20.",
-          "isCorrect": true
-        },
-        {
-          "text": "5",
-          "rationale": "Bu x'in kendi değeridir, soruda 4x isteniyor.",
-          "isCorrect": false
-        },
-        {
-          "text": "40",
-          "rationale": "Kat ilişkisini doğrudan 4 ile çarparak hata yapmış olabilirsin.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "x'i bulmadan da yapabilirsin: 4x, 2x'in tam iki katıdır."
-    },
-    {
-      "questionNumber": 6,
-      "question": "Tümler iki açıdan biri 40 derece ise diğeri kaç derecedir?",
-      "answerOptions": [
-        {
-          "text": "50",
-          "rationale": "Tümler açıların toplamı 90 derecedir. 90 - 40 = 50 derece bulunur.",
-          "isCorrect": true
-        },
-        {
-          "text": "140",
-          "rationale": "Bu bütünler açının cevabıdır (toplamları 180 olan).",
-          "isCorrect": false
-        },
-        {
-          "text": "40",
-          "rationale": "Açıların eşit olduğu söylenmemiştir.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "'Tümler' kelimesinin toplamı 90 dereceye tamamladığını hatırla."
-    },
-    {
-      "questionNumber": 7,
-      "question": "30 liralık bir kitaba $\\%100$ zam gelirse kitabın yeni fiyatı kaç lira olur?",
-      "answerOptions": [
-        {
-          "text": "60",
-          "rationale": "%100 zam, bir şeyin kendi değeri kadar artması (yani 2 katına çıkması) demektir. 30 + 30 = 60 TL.",
-          "isCorrect": true
-        },
-        {
-          "text": "30",
-          "rationale": "Zam yapılmıştır, fiyatın aynı kalması imkansızdır.",
-          "isCorrect": false
-        },
-        {
-          "text": "130",
-          "rationale": "%100 oranını doğrudan 100 TL olarak fiyata eklemiş olabilirsin.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "Bir şeyin %100'ü kendisi kadardır."
-    },
-    {
-      "questionNumber": 8,
-      "question": "Bütünler iki açının toplamı kaç derecedir?",
-      "answerOptions": [
-        {
-          "text": "180",
-          "rationale": "Bütünler açılar birbirini doğru açıya, yani 180 dereceye tamamlar.",
-          "isCorrect": true
-        },
-        {
-          "text": "90",
-          "rationale": "Toplamı 90 olan açılara tümler açılar denir.",
-          "isCorrect": false
-        },
-        {
-          "text": "360",
-          "rationale": "360 derece tam açıdır.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "Doğru açı (düz çizgi) üzerindeki komşu iki açıyı hayal et."
-    },
-    {
-      "questionNumber": 9,
-      "question": "Ardışık üç sayının ortalaması 15 ise bu sayıların ortancası (ortadaki sayı) kaçtır?",
-      "answerOptions": [
-        {
-          "text": "15",
-          "rationale": "Ardışık sayı dizilerinde eğer veri sayısı tek ise aritmetik ortalama her zaman tam ortadaki sayıya eşittir. Yani sayılar 14, 15 ve 16'dır.",
-          "isCorrect": true
-        },
-        {
-          "text": "14",
-          "rationale": "14 bu dizinin en küçük sayısıdır.",
-          "isCorrect": false
-        },
-        {
-          "text": "16",
-          "rationale": "16 bu dizinin en büyük sayısıdır.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "Ardışık sayılarda ortalama, tam ortadaki sayıyı verir."
-    },
-    {
-      "questionNumber": 10,
-      "question": "Bir kutudaki 20 bilyenin 5 tanesi mavi kalanı kırmızıdır. Kutudaki bilyelerin yüzde kaçı mavidir?",
-      "answerOptions": [
-        {
-          "text": "%25",
-          "rationale": "5 sayısı 20'nin 4'te 1'idir (çeyreğidir). Çeyrek de yüzdelik olarak %25'e eşittir.",
-          "isCorrect": true
-        },
-        {
-          "text": "%5",
-          "rationale": "Doğrudan bilye sayısını yüzde olarak düşünmüş olabilirsin.",
-          "isCorrect": false
-        },
-        {
-          "text": "%50",
-          "rationale": "%50 olması için bilyelerin yarısı (10 tane) mavi olmalıydı.",
-          "isCorrect": false
-        }
-      ],
-      "hint": "5 bilye, toplam 20 bilyenin kaçta kaçıdır? (Genişletmeyi düşün)."
-    }
-  ]
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>İksir Dükkanı Simülasyonu</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html, body { width:100%; height:100%; overflow:hidden; font-family:'Trebuchet MS', sans-serif; background:#0a0118; }
+
+  #game-container {
+    position:relative;
+    width:100%;
+    height:100%;
+    background: radial-gradient(ellipse at center, #1a0a2e 0%, #0a0118 100%);
+    overflow:hidden;
+  }
+
+  /* ---------- ÜST BİLGİ ÇUBUĞU ---------- */
+  #top-bar {
+    position:absolute; top:0; left:0; width:100%;
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 14px;
+    background:linear-gradient(180deg, rgba(20,5,40,0.95), rgba(20,5,40,0.6));
+    border-bottom:2px solid #ff2fd6;
+    box-shadow:0 0 15px rgba(255,47,214,0.5);
+    z-index:50;
+  }
+  #coin-display {
+    color:#ffd700; font-weight:bold; font-size:16px;
+    text-shadow:0 0 8px #ffae00;
+    display:flex; align-items:center; gap:6px;
+  }
+  #title-display {
+    color:#7ce8ff; font-size:13px; text-shadow:0 0 8px #00eaff;
+  }
+  #combo-display{
+    color:#ff8fe0; font-size:11px; text-shadow:0 0 6px #ff2fd6; min-width:50px; text-align:right;
+  }
+
+  /* ---------- DÜKKAN SAHNESİ ---------- */
+  #shop-scene {
+    position:absolute; top:46px; left:0; width:100%; height:calc(100% - 46px - 90px);
+    overflow:hidden;
+  }
+  #shop-bg {
+    position:absolute; width:100%; height:100%;
+    background:
+      radial-gradient(circle at 50% 20%, rgba(140,0,255,0.25), transparent 60%),
+      linear-gradient(180deg, #1a0a2e 0%, #120420 70%, #0a0118 100%);
+  }
+  .star{ position:absolute; width:2px; height:2px; background:#fff; border-radius:50%; opacity:0.6; animation:twinkle 3s infinite ease-in-out; }
+  @keyframes twinkle{ 0%,100%{opacity:0.2;} 50%{opacity:0.9;} }
+
+  .shelf {
+    position:absolute; width:70px; height:90px;
+    background:linear-gradient(180deg,#3a1d5e,#21103a);
+    border:2px solid #ff2fd6; border-radius:4px;
+    box-shadow:0 0 10px rgba(255,47,214,0.4);
+  }
+  #shelf-left { top:15%; left:5%; }
+  #shelf-right { top:15%; right:5%; }
+  .shelf-bottle { width:14px; height:20px; border-radius:2px 2px 6px 6px; margin:4px auto; }
+  .shelf-label{ position:absolute; bottom:-16px; width:100%; text-align:center; font-size:9px; color:#7ce8ff; }
+
+  #witch-counter {
+    position:absolute; bottom:0; left:50%; transform:translateX(-50%);
+    width:90%; max-width:420px; height:35%;
+    display:flex; justify-content:center; align-items:flex-end;
+  }
+  #counter-table {
+    position:absolute; bottom:0; width:100%; height:45%;
+    background:linear-gradient(180deg,#4a2a6e,#2a1245);
+    border-top:3px solid #ff2fd6;
+    box-shadow:0 -5px 20px rgba(255,47,214,0.4);
+    border-radius:10px 10px 0 0;
+  }
+
+  #witch-wrap {
+    position:absolute; bottom:30%; left:8%;
+    width:90px; height:140px;
+    transform: scaleX(-1);
+    filter: drop-shadow(0 0 10px #b300ff);
+    animation: witchIdle 2.5s ease-in-out infinite;
+  }
+  @keyframes witchIdle { 0%,100%{ transform: scaleX(-1) translateY(0); } 50%{ transform: scaleX(-1) translateY(-4px); } }
+
+  #customer-area {
+    position:absolute; bottom:32%; right:6%;
+    width:80px; height:130px;
+    display:none;
+    animation: customerIn 0.5s ease-out;
+  }
+  @keyframes customerIn { from{ opacity:0; transform:translateX(40px);} to{ opacity:1; transform:translateX(0);} }
+
+  #speech-bubble {
+    position:absolute; bottom:100%; right:-10px; margin-bottom:8px;
+    width:170px; max-width:60vw;
+    background:#fdf6ff; color:#2a1245; border-radius:12px;
+    padding:8px 10px; font-size:12px; line-height:1.3;
+    box-shadow:0 0 12px rgba(255,255,255,0.4);
+    display:none;
+  }
+  #speech-bubble::after {
+    content:''; position:absolute; bottom:-8px; right:20px;
+    border-width:8px 8px 0 8px; border-style:solid;
+    border-color:#fdf6ff transparent transparent transparent;
+  }
+
+  #patience-bar-wrap {
+    position:absolute; top:-18px; left:0; width:100%; height:8px;
+    background:rgba(0,0,0,0.4); border-radius:4px; overflow:hidden;
+    border:1px solid #ff2fd6;
+  }
+  #patience-bar {
+    height:100%; width:100%;
+    background:linear-gradient(90deg,#00ff7b,#ffee00,#ff2d2d);
+    transition:width 0.3s linear;
+  }
+
+  /* ---------- ALT TELEFON ARAYÜZÜ ---------- */
+  #phone-dock {
+    position:absolute; bottom:0; left:0; width:100%; height:90px;
+    background:linear-gradient(180deg,#1a0a2e,#0a0118);
+    border-top:2px solid #00eaff;
+    box-shadow:0 0 20px rgba(0,234,255,0.4);
+    display:flex; align-items:center; justify-content:center; gap:14px;
+    z-index:60;
+  }
+  .dock-btn{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+  }
+  #phone-icon, #shop-dock-icon {
+    width:58px; height:58px; border-radius:14px;
+    background:linear-gradient(145deg,#2a1245,#120420);
+    border:2px solid #00eaff;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 15px rgba(0,234,255,0.6);
+    position:relative;
+    animation:phonePulse 1.8s ease-in-out infinite;
+  }
+  #shop-dock-icon{ border-color:#ffd700; box-shadow:0 0 15px rgba(255,215,0,0.6); animation:none; }
+  @keyframes phonePulse { 0%,100%{ box-shadow:0 0 12px rgba(0,234,255,0.5);} 50%{ box-shadow:0 0 22px rgba(0,234,255,0.9);} }
+  #phone-icon svg, #shop-dock-icon svg { width:30px; height:30px; }
+  #phone-badge {
+    position:absolute; top:-6px; right:-6px;
+    background:#ff2d2d; color:#fff; font-size:11px; font-weight:bold;
+    width:20px; height:20px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center;
+    box-shadow:0 0 6px #ff2d2d;
+    display:none;
+  }
+  .dock-label-txt{ color:#7ce8ff; font-size:10px; text-shadow:0 0 6px #00eaff; }
+
+  /* ---------- İKSİR YAPMA EKRANI ---------- */
+  #brew-screen {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    background:linear-gradient(180deg,#0a0118,#1a0a2e);
+    display:none; flex-direction:column;
+    z-index:200;
+  }
+  #brew-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; border-bottom:2px solid #ff2fd6;
+    box-shadow:0 0 15px rgba(255,47,214,0.4);
+  }
+  #brew-back {
+    color:#fff; background:#3a1d5e; border:1px solid #ff2fd6;
+    border-radius:8px; padding:6px 12px; font-size:13px;
+  }
+  #brew-order {
+    color:#ffd700; font-size:12px; text-align:right; max-width:60%;
+  }
+  #brew-timer-wrap { padding:8px 14px; }
+  #brew-timer-bar-bg {
+    width:100%; height:10px; background:rgba(255,255,255,0.1); border-radius:5px; overflow:hidden;
+    border:1px solid #00eaff;
+  }
+  #brew-timer-bar { height:100%; width:100%; background:linear-gradient(90deg,#00eaff,#7ce8ff); }
+
+  #cauldron-area { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; position:relative; }
+  #cauldron-svg-wrap { width:160px; height:160px; filter:drop-shadow(0 0 20px #b300ff); }
+  #cauldron-status { margin-top:10px; color:#fdf6ff; font-size:13px; min-height:18px; text-align:center; padding:0 20px; }
+  #recipe-hint { margin-top:6px; color:#7ce8ff; font-size:11px; text-align:center; opacity:0.85; min-height:14px; }
+  #drop-zone { position:absolute; width:140px; height:140px; border-radius:50%; top:calc(50% - 70px); left:calc(50% - 70px); }
+  #drop-zone.drag-over { box-shadow:0 0 0 6px rgba(0,255,123,0.5) inset; border-radius:50%; }
+
+  #ingredient-tray {
+    display:flex; flex-wrap:wrap; gap:8px; justify-content:center;
+    padding:10px 10px 14px; background:rgba(20,5,40,0.6);
+    border-top:1px solid #ff2fd6; max-height:34%; overflow-y:auto;
+  }
+  .ingredient-chip {
+    width:58px; height:70px; border-radius:10px;
+    background:linear-gradient(180deg,#3a1d5e,#21103a);
+    border:2px solid #00eaff; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:3px;
+    touch-action:none; cursor:grab; position:relative;
+  }
+  .ingredient-chip .ing-icon { width:24px; height:24px; }
+  .ingredient-chip .ing-name { font-size:8px; color:#fdf6ff; text-align:center; padding:0 2px; }
+  .ingredient-chip .ing-count { position:absolute; top:-6px; right:-6px; background:#ffd700; color:#2a1245; font-size:10px; font-weight:bold; border-radius:50%; width:18px; height:18px; display:flex; align-items:center; justify-content:center; }
+  .ingredient-chip.dragging { opacity:0.5; }
+  .ingredient-chip.locked { opacity:0.3; pointer-events:none; }
+  .ingredient-chip.empty { opacity:0.4; pointer-events:none; }
+
+  #brew-action-btn {
+    margin:8px auto 12px; display:block;
+    background:linear-gradient(145deg,#ff2fd6,#b300ff); color:#fff;
+    border:none; border-radius:30px; padding:12px 36px; font-size:15px; font-weight:bold;
+    box-shadow:0 0 18px rgba(255,47,214,0.6);
+  }
+  #brew-action-btn:disabled { opacity:0.35; }
+  #brew-clear-btn{
+    margin:0 auto 6px; display:block; background:transparent; color:#ff8fae;
+    border:1px solid #ff5d5d; border-radius:20px; padding:5px 16px; font-size:11px;
+  }
+
+  /* ---------- MAĞAZA EKRANI ---------- */
+  #shop-screen {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    background:linear-gradient(180deg,#0a0118,#1a0a2e);
+    display:none; flex-direction:column; z-index:200;
+  }
+  #shop-header { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; border-bottom:2px solid #00eaff; }
+  #shop-list { flex:1; overflow-y:auto; padding:10px; display:grid; grid-template-columns:1fr 1fr; gap:10px; align-content:start; }
+  .shop-item { background:linear-gradient(180deg,#2a1245,#1a0a2e); border:2px solid #ff2fd6; border-radius:10px; padding:8px; display:flex; flex-direction:column; align-items:center; gap:4px; }
+  .shop-item .ing-icon { width:30px; height:30px; }
+  .shop-item-name { color:#fdf6ff; font-size:11px; text-align:center; }
+  .shop-item-price { color:#ffd700; font-size:11px; }
+  .shop-item-buy { background:#00eaff; color:#0a0118; border:none; border-radius:14px; padding:5px 14px; font-size:11px; font-weight:bold; margin-top:2px; }
+  .shop-item-buy:disabled { background:#555; color:#999; }
+  .shop-item.locked { opacity:0.5; }
+  .shop-item-locked-tag { color:#ff5d5d; font-size:9px; text-align:center; }
+  .shop-item-owned{ color:#7ce8ff; font-size:9px; }
+
+  /* ---------- TUTORIAL ---------- */
+  #tutorial-overlay {
+    position:absolute; top:0; left:0; width:100%; height:100%;
+    background:rgba(0,0,0,0.6); z-index:9999; display:none;
+    align-items:flex-end; justify-content:center;
+    pointer-events:none; /* overlay tıklamayı bloklamaz, sadece kutu engeller */
+  }
+  #tutorial-box {
+    background:linear-gradient(180deg,#2a1245,#1a0a2e);
+    border:2px solid #ffd700; border-radius:14px 14px 0 0;
+    padding:16px; width:100%; max-width:480px;
+    box-shadow:0 0 25px rgba(255,215,0,0.4);
+    pointer-events:auto;
+  }
+  #tutorial-text { color:#fdf6ff; font-size:13px; line-height:1.5; margin-bottom:12px; }
+  #tutorial-next {
+    background:#ffd700; color:#2a1245; border:none; border-radius:20px;
+    padding:9px 22px; font-size:13px; font-weight:bold; display:block; margin-left:auto;
+  }
+  #tutorial-skip{
+    background:transparent; color:#999; border:none; font-size:11px; margin-right:auto; display:block;
+  }
+  #tutorial-footer{ display:flex; justify-content:space-between; align-items:center; }
+  .tutorial-highlight {
+    box-shadow:0 0 0 4px #ffd700, 0 0 20px 6px rgba(255,215,0,0.7) !important;
+    z-index:10000 !important; position:relative !important; pointer-events:auto !important;
+  }
+  #tutorial-arrow{
+    position:absolute; font-size:30px; color:#ffd700; text-shadow:0 0 10px #ffd700;
+    z-index:10000; display:none; animation:bounceArrow 1s infinite;
+  }
+  @keyframes bounceArrow{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(8px);} }
+
+  /* ---------- TOAST / SONUÇ ---------- */
+  #toast {
+    position:absolute; top:50px; left:50%; transform:translateX(-50%);
+    background:rgba(20,5,40,0.95); border:2px solid #00ff7b; color:#fdf6ff;
+    padding:10px 20px; border-radius:30px; font-size:13px; z-index:600;
+    display:none; box-shadow:0 0 15px rgba(0,255,123,0.5); text-align:center; max-width:80%;
+  }
+  #toast.fail { border-color:#ff2d2d; box-shadow:0 0 15px rgba(255,45,45,0.5); }
+
+  #levelup-banner {
+    position:absolute; top:40%; left:50%; transform:translate(-50%,-50%) scale(0.6);
+    background:linear-gradient(145deg,#ffd700,#ff8c00); color:#2a1245; font-weight:bold;
+    padding:18px 30px; border-radius:16px; text-align:center; z-index:700;
+    box-shadow:0 0 40px rgba(255,215,0,0.8); display:none; opacity:0;
+    transition:opacity 0.4s, transform 0.4s;
+  }
+  #levelup-banner.show { display:block; opacity:1; transform:translate(-50%,-50%) scale(1); }
+  #levelup-banner .lvl-title { font-size:20px; }
+  #levelup-banner .lvl-sub { font-size:12px; margin-top:4px; }
+
+  #floating-coin{
+    position:absolute; font-size:14px; color:#ffd700; font-weight:bold; text-shadow:0 0 6px #ffae00;
+    pointer-events:none; z-index:800; animation:floatUp 1s forwards;
+  }
+  @keyframes floatUp{ 0%{opacity:1; transform:translateY(0);} 100%{opacity:0; transform:translateY(-50px);} }
+
+  ::-webkit-scrollbar { width:5px; }
+  ::-webkit-scrollbar-thumb { background:#ff2fd6; border-radius:3px; }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+
+  <div id="top-bar">
+    <div id="coin-display">🪙 <span id="coin-amount">50</span></div>
+    <div id="title-display">🎓 <span id="rank-name">Çırak</span></div>
+    <div id="combo-display"></div>
+  </div>
+
+  <div id="shop-scene">
+    <div id="shop-bg"></div>
+
+    <div class="shelf" id="shelf-left">
+      <div class="shelf-bottle" style="background:#7ce8ff;box-shadow:0 0 6px #7ce8ff;"></div>
+      <div class="shelf-bottle" style="background:#ff6fb5;box-shadow:0 0 6px #ff6fb5;"></div>
+      <div class="shelf-label">Mağaza</div>
+    </div>
+    <div class="shelf" id="shelf-right">
+      <div class="shelf-bottle" style="background:#b3ff6f;box-shadow:0 0 6px #b3ff6f;"></div>
+      <div class="shelf-bottle" style="background:#ffd76f;box-shadow:0 0 6px #ffd76f;"></div>
+      <div class="shelf-label">Mağaza</div>
+    </div>
+
+    <div id="customer-area">
+      <div id="patience-bar-wrap"><div id="patience-bar"></div></div>
+      <div id="speech-bubble"></div>
+      <svg id="customer-svg" viewBox="0 0 80 130" width="80" height="130"></svg>
+    </div>
+
+    <div id="witch-counter">
+      <div id="counter-table"></div>
+      <div id="witch-wrap">
+        <svg viewBox="0 0 90 140" width="90" height="140">
+          <polygon points="45,5 25,55 65,55" fill="#3a1d5e" stroke="#ff2fd6" stroke-width="2"/>
+          <ellipse cx="45" cy="55" rx="26" ry="6" fill="#2a1245" stroke="#ff2fd6" stroke-width="2"/>
+          <circle cx="45" cy="15" r="4" fill="#ffd700"/>
+          <ellipse cx="45" cy="70" rx="16" ry="17" fill="#b3ff8f"/>
+          <circle cx="40" cy="68" r="2" fill="#1a0a2e"/>
+          <circle cx="50" cy="68" r="2" fill="#1a0a2e"/>
+          <path d="M40 76 Q45 80 50 76" stroke="#1a0a2e" stroke-width="1.5" fill="none"/>
+          <path d="M52 65 Q60 60 58 70" stroke="#b3ff8f" stroke-width="5" fill="none" stroke-linecap="round"/>
+          <path d="M22 130 Q25 85 45 85 Q65 85 68 130 Z" fill="#2a1245" stroke="#ff2fd6" stroke-width="2"/>
+          <path d="M30 130 Q33 95 45 95 Q57 95 60 130 Z" fill="#3a1d5e"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div id="phone-dock">
+    <div class="dock-btn" id="phone-dock-btn">
+      <div id="phone-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#00eaff" stroke-width="1.6">
+          <rect x="6" y="2" width="12" height="20" rx="2"/>
+          <line x1="10" y1="19" x2="14" y2="19"/>
+        </svg>
+        <div id="phone-badge">!</div>
+      </div>
+      <div class="dock-label-txt">İksir Yap</div>
+    </div>
+    <div class="dock-btn" id="shop-dock-btn">
+      <div id="shop-dock-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="#ffd700" stroke-width="1.6">
+          <path d="M3 7l1-4h16l1 4"/>
+          <path d="M3 7h18v13H3z"/>
+          <path d="M9 11a3 3 0 006 0"/>
+        </svg>
+      </div>
+      <div class="dock-label-txt">Mağaza</div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <div id="levelup-banner">
+    <div class="lvl-title">⭐ SEVİYE ATLADIN!</div>
+    <div class="lvl-sub" id="levelup-text"></div>
+  </div>
+
+  <div id="brew-screen">
+    <div id="brew-header">
+      <button id="brew-back">⬅ Dükkana Dön</button>
+      <div id="brew-order"></div>
+    </div>
+    <div id="brew-timer-wrap">
+      <div id="brew-timer-bar-bg"><div id="brew-timer-bar"></div></div>
+    </div>
+    <div id="cauldron-area">
+      <div id="cauldron-svg-wrap">
+        <svg id="cauldron-svg" viewBox="0 0 100 100" width="160" height="160">
+          <ellipse cx="50" cy="85" rx="38" ry="8" fill="#1a0a2e"/>
+          <path d="M14 50 Q14 90 50 90 Q86 90 86 50 Z" fill="#2a1245" stroke="#ff2fd6" stroke-width="2.5"/>
+          <ellipse cx="50" cy="50" rx="36" ry="10" fill="#3a1d5e" stroke="#00eaff" stroke-width="2"/>
+          <ellipse id="potion-liquid" cx="50" cy="50" rx="30" ry="6" fill="#5d2e8f"/>
+        </svg>
+      </div>
+      <div id="drop-zone"></div>
+      <div id="cauldron-status">Malzemeleri kazana sürükle</div>
+      <div id="recipe-hint"></div>
+    </div>
+    <button id="brew-clear-btn">Kazanı Temizle ✕</button>
+    <div id="ingredient-tray"></div>
+    <button id="brew-action-btn" disabled>İksiri Tamamla</button>
+  </div>
+
+  <div id="shop-screen">
+    <div id="shop-header">
+      <button id="shop-back" style="color:#fff;background:#3a1d5e;border:1px solid #00eaff;border-radius:8px;padding:6px 12px;font-size:13px;">⬅ Geri</button>
+      <div id="shop-title-coin" style="color:#ffd700;font-size:13px;">🪙 <span id="shop-coin-amount">0</span></div>
+    </div>
+    <div id="shop-list"></div>
+  </div>
+
+  <div id="tutorial-overlay">
+    <div id="tutorial-box">
+      <div id="tutorial-text"></div>
+      <div id="tutorial-footer">
+        <button id="tutorial-skip">Atla</button>
+        <button id="tutorial-next">İleri ➜</button>
+      </div>
+    </div>
+  </div>
+  <div id="tutorial-arrow">👇</div>
+
+</div>
+
+<script>
+/* =====================================================================
+   İKSİR DÜKKANI SİMÜLASYONU - Geliştirilmiş Sürüm
+   Modüler yapı: DATA -> STATE -> AUDIO -> CUSTOMER -> BREW -> SHOP -> TUTORIAL -> EVENTS -> INIT
+   ===================================================================== */
+
+const INGREDIENTS_DB = {
+  su:        { name:"Kaynak Suyu",      color:"#7ce8ff", price:0,   tier:0 },
+  ot:        { name:"Şifa Otu",         color:"#7dff8f", price:0,   tier:0 },
+  bal:       { name:"Yaban Balı",       color:"#ffd76f", price:5,   tier:0 },
+  tuz:       { name:"Deniz Tuzu",       color:"#e9e9e9", price:5,   tier:0 },
+  lavanta:   { name:"Lavanta",          color:"#c79bff", price:8,   tier:0 },
+  biberiye:  { name:"Biberiye",         color:"#6fbf73", price:8,   tier:0 },
+  kokmantar: { name:"Kök Mantar",       color:"#a9744f", price:12,  tier:1 },
+  korbocek:  { name:"Kör Böcek Kanadı", color:"#8f6fae", price:15,  tier:1 },
+  yildiztoz: { name:"Yıldız Tozu",      color:"#ffe7a3", price:25,  tier:1 },
+  kedigozu:  { name:"Kedi Gözü Otu",    color:"#9bff5a", price:25,  tier:1 },
+  ejderpul:  { name:"Ejderha Pulu",     color:"#ff5d5d", price:60,  tier:2 },
+  ayisigi:   { name:"Ay Işığı Özü",     color:"#cfe8ff", price:70,  tier:2 },
+  feniksTuy: { name:"Anka Tüyü",        color:"#ff9a3c", price:90,  tier:2 },
+  golgeOzu:  { name:"Gölge Özü",        color:"#5a3d8f", price:100, tier:2 },
+};
+
+const POTIONS_DB = {
+  cesaret:   { name:"Cesaret İksiri",       recipe:["ot","bal"],                 reward:12, color:"#ff8f3c" },
+  huzur:     { name:"Huzur İksiri",         recipe:["su","lavanta"],             reward:12, color:"#8fc7ff" },
+  enerji:    { name:"Enerji İksiri",        recipe:["bal","biberiye"],           reward:14, color:"#ffe34f" },
+  zihinAcan: { name:"Zihin Açan İksir",     recipe:["su","ot","kokmantar"],      reward:22, color:"#7dffb0" },
+  ask:       { name:"Aşk İksiri",           recipe:["bal","lavanta","kedigozu"], reward:26, color:"#ff6fb5" },
+  unutus:    { name:"Unutuş İksiri",        recipe:["su","korbocek","golgeOzu"], reward:34, color:"#5a3d8f" },
+  sans:      { name:"Şans İksiri",          recipe:["yildiztoz","bal","ot"],     reward:30, color:"#ffe7a3" },
+  guc:       { name:"Güç İksiri",           recipe:["ejderpul","tuz","biberiye"],reward:48, color:"#ff5d5d" },
+  ruyaIsigi: { name:"Rüya Işığı İksiri",    recipe:["ayisigi","lavanta","su"],   reward:50, color:"#cfe8ff" },
+  yeniden:   { name:"Yeniden Doğuş İksiri", recipe:["feniksTuy","ot","bal","yildiztoz"], reward:65, color:"#ff9a3c" },
+};
+
+const PROBLEMS_DB = [
+  { text:"Sevgilimden ayrıldım, kalbim kırık... 💔", potion:"huzur" },
+  { text:"Yarın çok önemli bir sınavım var, zihnim dağınık.", potion:"zihinAcan" },
+  { text:"Kendimi çok yorgun ve bitkin hissediyorum.", potion:"enerji" },
+  { text:"Biri beni çok kızdırdı, içimde cesaret arıyorum.", potion:"cesaret" },
+  { text:"Aşkımı fark etmiyor, ona ilaç gibi bir şey gerek.", potion:"ask" },
+  { text:"Kötü bir anıyı unutmak istiyorum, beni rahat bırakmıyor.", potion:"unutus" },
+  { text:"Şu kumarhanede şansım hiç yaver gitmiyor.", potion:"sans" },
+  { text:"Çok güçsüz hissediyorum, savaşa hazırlanmam gerek.", potion:"guc" },
+  { text:"Geceleri kötü rüyalar görüyorum, ışığa ihtiyacım var.", potion:"ruyaIsigi" },
+  { text:"Hayatımı sıfırdan kurmak istiyorum, yeni bir başlangıç...", potion:"yeniden" },
+  { text:"Stresten uyuyamıyorum, huzur bulmam lazım.", potion:"huzur" },
+  { text:"Derslerime konsantre olamıyorum.", potion:"zihinAcan" },
+  { text:"İçimde tuhaf bir korku var, cesaret lazım bana.", potion:"cesaret" },
+  { text:"Enerjim sıfırı tüketti, ayakta zor duruyorum.", potion:"enerji" },
+];
+
+const CUSTOMER_NAMES = ["Elif","Mehmet","Aylin","Burak","Selin","Kaan","Derya","Tolga","Naz","Emre","Yağmur","Cem"];
+
+const RANKS = [
+  { minCoin:0,    name:"Çırak" },
+  { minCoin:200,  name:"Kalfa" },
+  { minCoin:600,  name:"Usta" },
+  { minCoin:1500, name:"Büyük Usta" },
+  { minCoin:3000, name:"İksir Lordu" },
+];
+
+const state = {
+  coins: 50,
+  totalEarned: 0,
+  rankIndex: 0,
+  inventory: { su:99, ot:99, bal:3, tuz:2, lavanta:2, biberiye:1 },
+  unlockedIngredients: new Set(["su","ot","bal","tuz","lavanta","biberiye"]),
+  currentCustomer: null,
+  patience: 100,
+  patienceTimer: null,
+  selectedPotionIngredients: [],
+  brewTimerInterval: null,
+  brewTimeLeft: 0,
+  brewMax: 0,
+  tutorialActive: false,
+  tutorialStep: -1,
+  comboCount: 0,
+  spawnTimeout: null,
+};
+
+/* ---------------------- SES (Web Audio API) ---------------------- */
+const AudioFX = (() => {
+  let ctx = null;
+  function getCtx(){ if (!ctx) ctx = new (window.AudioContext || window.webkitAudioContext)(); return ctx; }
+  function tone(freq, dur, type="sine", vol=0.15, delay=0){
+    try{
+      const c = getCtx(); const t0 = c.currentTime + delay;
+      const osc = c.createOscillator(); const gain = c.createGain();
+      osc.type = type; osc.frequency.setValueAtTime(freq, t0);
+      gain.gain.setValueAtTime(vol, t0);
+      gain.gain.exponentialRampToValueAtTime(0.001, t0 + dur);
+      osc.connect(gain); gain.connect(c.destination);
+      osc.start(t0); osc.stop(t0 + dur);
+    }catch(e){}
+  }
+  return {
+    click(){ tone(520,0.07,"triangle",0.12); },
+    drop(){ tone(300,0.1,"sine",0.15); tone(420,0.1,"sine",0.1,0.05); },
+    success(){ tone(523,0.12,"triangle",0.18); tone(659,0.12,"triangle",0.16,0.1); tone(784,0.18,"triangle",0.18,0.2); },
+    fail(){ tone(180,0.25,"sawtooth",0.15); tone(120,0.3,"sawtooth",0.12,0.1); },
+    coin(){ tone(880,0.08,"square",0.1); tone(1100,0.08,"square",0.08,0.06); },
+    levelup(){ tone(440,0.1,"triangle",0.18); tone(554,0.1,"triangle",0.18,0.1); tone(659,0.1,"triangle",0.18,0.2); tone(880,0.25,"triangle",0.2,0.3); },
+    knock(){ tone(150,0.08,"square",0.1); }
+  };
+})();
+
+function $(sel){ return document.querySelector(sel); }
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+function showToast(msg, fail=false){
+  const t = $("#toast");
+  t.textContent = msg;
+  t.classList.toggle("fail", fail);
+  t.style.display = "block";
+  clearTimeout(t._hideTimeout);
+  t._hideTimeout = setTimeout(()=> t.style.display="none", 2200);
 }
+
+function spawnFloatingCoin(amount){
+  const el = document.createElement("div");
+  el.id = "floating-coin";
+  el.textContent = "+" + amount + " 🪙";
+  el.style.left = "calc(50% - 20px)";
+  el.style.top = "120px";
+  $("#game-container").appendChild(el);
+  setTimeout(()=> el.remove(), 1000);
+}
+
+function getCurrentRank(){
+  let r = RANKS[0];
+  for (const rk of RANKS) if (state.totalEarned >= rk.minCoin) r = rk;
+  return r;
+}
+function refreshTopBar(){
+  $("#coin-amount").textContent = state.coins;
+  $("#rank-name").textContent = getCurrentRank().name;
+  $("#combo-display").textContent = state.comboCount > 1 ? `🔥 x${state.comboCount}` : "";
+}
+
+/* ---------------------- MÜŞTERİ SİSTEMİ ---------------------- */
+function spawnCustomer(){
+  if (state.tutorialActive) return;
+  const problem = rand(PROBLEMS_DB);
+  const name = rand(CUSTOMER_NAMES);
+  state.currentCustomer = { name, problem, potionId: problem.potion };
+
+  const area = $("#customer-area");
+  area.style.display = "block";
+  drawCustomerSVG();
+
+  const bubble = $("#speech-bubble");
+  bubble.style.display = "block";
+  bubble.textContent = `${name}: "${problem.text}"`;
+
+  $("#phone-badge").style.display = "flex";
+  AudioFX.knock();
+
+  state.patience = 100;
+  updatePatienceBar();
+  clearInterval(state.patienceTimer);
+  state.patienceTimer = setInterval(()=>{
+    state.patience -= 0.55;
+    if (state.patience <= 0){
+      state.patience = 0; updatePatienceBar();
+      customerLeavesAngry();
+    } else updatePatienceBar();
+  }, 200);
+}
+function updatePatienceBar(){ $("#patience-bar").style.width = state.patience + "%"; }
+
+function customerLeavesAngry(){
+  clearInterval(state.patienceTimer);
+  showToast(`${state.currentCustomer?.name || "Müşteri"} sabırsızlanıp dükkanı terk etti! 😠`, true);
+  AudioFX.fail();
+  state.comboCount = 0;
+  refreshTopBar();
+  endCustomerVisit();
+}
+
+function endCustomerVisit(){
+  $("#customer-area").style.display = "none";
+  $("#speech-bubble").style.display = "none";
+  $("#phone-badge").style.display = "none";
+  state.currentCustomer = null;
+  clearInterval(state.patienceTimer);
+  clearTimeout(state.spawnTimeout);
+  state.spawnTimeout = setTimeout(spawnCustomer, 2500 + Math.random()*2000);
+}
+
+function drawCustomerSVG(){
+  const svg = $("#customer-svg");
+  const skin = rand(["#f3c89a","#e0a878","#caa06a"]);
+  const cloth = rand(["#4fa3ff","#ff6f9c","#9b59ff","#5ed99b","#ffb347"]);
+  svg.innerHTML = `
+    <ellipse cx="40" cy="38" rx="14" ry="15" fill="${skin}"/>
+    <path d="M28 30 Q40 18 52 30 L52 26 Q40 14 28 26 Z" fill="#2a1a0a"/>
+    <circle cx="35" cy="37" r="1.8" fill="#1a0a2e"/>
+    <circle cx="45" cy="37" r="1.8" fill="#1a0a2e"/>
+    <path d="M35 44 Q40 41 45 44" stroke="#1a0a2e" stroke-width="1.3" fill="none"/>
+    <path d="M18 125 Q20 70 40 68 Q60 70 62 125 Z" fill="${cloth}"/>
+    <rect x="14" y="60" width="10" height="35" rx="4" fill="${cloth}" transform="rotate(-15 14 60)"/>
+  `;
+}
+
+/* ---------------------- İKSİR EKRANI ---------------------- */
+function openBrewScreen(){
+  if (!state.currentCustomer && !(state.tutorialActive && state.tutorialStep===2)){
+    showToast("Şu anda bekleyen bir müşteri yok.");
+    return;
+  }
+  AudioFX.click();
+  $("#brew-screen").style.display = "flex";
+  state.selectedPotionIngredients = [];
+  resetCauldronVisual();
+
+  const order = (state.tutorialActive && state.tutorialStep===2)
+    ? "Eğitim: Cesaret İksiri yap (Şifa Otu + Yaban Balı)"
+    : `${state.currentCustomer.name} bekliyor: "${state.currentCustomer.problem.text}"`;
+  $("#brew-order").textContent = order;
+
+  renderIngredientTray();
+  startBrewTimer();
+
+  if (state.tutorialActive && state.tutorialStep===2){
+    setTimeout(()=> goToTutorialStep(3), 300);
+  }
+}
+
+function closeBrewScreen(){
+  $("#brew-screen").style.display = "none";
+  clearInterval(state.brewTimerInterval);
+}
+
+function startBrewTimer(){
+  clearInterval(state.brewTimerInterval);
+  state.brewMax = 45;
+  state.brewTimeLeft = state.brewMax;
+  updateBrewTimerBar();
+  state.brewTimerInterval = setInterval(()=>{
+    if (state.tutorialActive) return; // eğitimde süre işlemesin
+    state.brewTimeLeft -= 1;
+    updateBrewTimerBar();
+    if (state.brewTimeLeft <= 0){
+      clearInterval(state.brewTimerInterval);
+      showToast("Süre doldu! İksir bozuldu.", true);
+      AudioFX.fail();
+      closeBrewScreen();
+      state.comboCount = 0; refreshTopBar();
+      customerLeavesAngry();
+    }
+  }, 1000);
+}
+function updateBrewTimerBar(){
+  const pct = Math.max(0, (state.brewTimeLeft / state.brewMax) * 100);
+  $("#brew-timer-bar").style.width = pct + "%";
+}
+
+function renderIngredientTray(){
+  const tray = $("#ingredient-tray");
+  tray.innerHTML = "";
+  Object.keys(INGREDIENTS_DB).forEach(id=>{
+    const ing = INGREDIENTS_DB[id];
+    const unlocked = state.unlockedIngredients.has(id);
+    const owned = state.inventory[id] || 0;
+
+    const chip = document.createElement("div");
+    chip.className = "ingredient-chip";
+    if (!unlocked) chip.classList.add("locked");
+    else if (owned <= 0) chip.classList.add("empty");
+    chip.dataset.id = id;
+    chip.innerHTML = `
+      <svg class="ing-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="${ing.color}" stroke="#1a0a2e" stroke-width="1.5"/></svg>
+      <div class="ing-name">${ing.name}</div>
+      <div class="ing-count">${unlocked ? owned : "🔒"}</div>
+    `;
+    if (unlocked && owned > 0) attachDragEvents(chip, id);
+    tray.appendChild(chip);
+  });
+}
+
+function attachDragEvents(chip, ingId){
+  let dragGhost = null;
+  function startDrag(x,y){
+    AudioFX.click();
+    chip.classList.add("dragging");
+    dragGhost = chip.cloneNode(true);
+    dragGhost.style.position = "fixed";
+    dragGhost.style.pointerEvents = "none";
+    dragGhost.style.zIndex = 999;
+    dragGhost.style.opacity = "0.85";
+    dragGhost.style.width = chip.offsetWidth + "px";
+    document.body.appendChild(dragGhost);
+    moveGhost(x,y);
+  }
+  function moveGhost(x,y){
+    if (!dragGhost) return;
+    dragGhost.style.left = (x - dragGhost.offsetWidth/2) + "px";
+    dragGhost.style.top = (y - dragGhost.offsetHeight/2) + "px";
+  }
+  function endDrag(x,y){
+    chip.classList.remove("dragging");
+    const dropZone = $("#drop-zone");
+    const rect = dropZone.getBoundingClientRect();
+    const inside = x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
+    if (dragGhost){ dragGhost.remove(); dragGhost=null; }
+    dropZone.classList.remove("drag-over");
+    if (inside) addIngredientToCauldron(ingId);
+  }
+  function checkOverDropzone(x,y){
+    const dropZone = $("#drop-zone");
+    const rect = dropZone.getBoundingClientRect();
+    const inside = x>=rect.left && x<=rect.right && y>=rect.top && y<=rect.bottom;
+    dropZone.classList.toggle("drag-over", inside);
+  }
+  chip.addEventListener("mousedown", e=>{
+    e.preventDefault(); startDrag(e.clientX, e.clientY);
+    function onMove(ev){ moveGhost(ev.clientX, ev.clientY); checkOverDropzone(ev.clientX, ev.clientY); }
+    function onUp(ev){ endDrag(ev.clientX, ev.clientY); document.removeEventListener("mousemove", onMove); document.removeEventListener("mouseup", onUp); }
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onUp);
+  });
+  chip.addEventListener("touchstart", e=>{ e.preventDefault(); const t=e.touches[0]; startDrag(t.clientX,t.clientY); }, {passive:false});
+  chip.addEventListener("touchmove", e=>{ e.preventDefault(); const t=e.touches[0]; moveGhost(t.clientX,t.clientY); checkOverDropzone(t.clientX,t.clientY); }, {passive:false});
+  chip.addEventListener("touchend", e=>{ const t=e.changedTouches[0]; endDrag(t.clientX,t.clientY); });
+}
+
+function addIngredientToCauldron(ingId){
+  if ((state.inventory[ingId]||0) <= 0){
+    showToast("Bu malzemeden hiç kalmadı! Mağazadan al.", true);
+    return;
+  }
+  state.inventory[ingId] -= 1;
+  state.selectedPotionIngredients.push(ingId);
+  AudioFX.drop();
+  renderIngredientTray();
+  updateCauldronStatus();
+
+  if (state.tutorialActive && state.tutorialStep===3 && state.selectedPotionIngredients.length>=2){
+    goToTutorialStep(4);
+  }
+}
+
+function clearCauldron(){
+  state.selectedPotionIngredients.forEach(id=> state.inventory[id] = (state.inventory[id]||0)+1);
+  state.selectedPotionIngredients = [];
+  renderIngredientTray();
+  resetCauldronVisual();
+}
+
+function resetCauldronVisual(){
+  $("#potion-liquid").setAttribute("fill", "#5d2e8f");
+  $("#cauldron-status").textContent = "Malzemeleri kazana sürükle";
+  $("#recipe-hint").textContent = "";
+  $("#brew-action-btn").disabled = true;
+}
+
+function updateCauldronStatus(){
+  const names = state.selectedPotionIngredients.map(id=>INGREDIENTS_DB[id].name);
+  $("#cauldron-status").textContent = names.length ? "Kazanda: " + names.join(", ") : "Malzemeleri kazana sürükle";
+
+  const matched = matchPotion(state.selectedPotionIngredients);
+  if (matched){
+    $("#potion-liquid").setAttribute("fill", POTIONS_DB[matched].color);
+    $("#recipe-hint").textContent = `✨ ${POTIONS_DB[matched].name} hazır görünüyor!`;
+    $("#brew-action-btn").disabled = false;
+  } else {
+    $("#brew-action-btn").disabled = state.selectedPotionIngredients.length === 0;
+    $("#recipe-hint").textContent = "";
+  }
+}
+
+function matchPotion(arr){
+  const sorted = [...arr].sort().join(",");
+  for (const pid in POTIONS_DB){
+    if ([...POTIONS_DB[pid].recipe].sort().join(",") === sorted) return pid;
+  }
+  return null;
+}
+
+function completeBrew(){
+  const matched = matchPotion(state.selectedPotionIngredients);
+
+  if (state.tutorialActive){
+    if (matched === "cesaret"){
+      AudioFX.success();
+      showToast("Harika! İlk iksirini yaptın. 🎉");
+      closeBrewScreen();
+      goToTutorialStep(5);
+    } else {
+      AudioFX.fail();
+      showToast("Bu tarif değil. Şifa Otu + Yaban Balı dene.", true);
+    }
+    return;
+  }
+
+  if (!state.currentCustomer){ closeBrewScreen(); return; }
+
+  const neededPotion = state.currentCustomer.potionId;
+  clearInterval(state.brewTimerInterval);
+
+  if (matched === neededPotion){
+    const potion = POTIONS_DB[matched];
+    state.comboCount += 1;
+    const comboBonus = Math.min(state.comboCount-1, 5) * 2;
+    const reward = potion.reward + comboBonus;
+    state.coins += reward;
+    state.totalEarned += reward;
+    AudioFX.success();
+    setTimeout(()=>AudioFX.coin(), 150);
+    spawnFloatingCoin(reward);
+    showToast(`${state.currentCustomer.name} çok mutlu! +${reward} 🪙` + (comboBonus>0 ? ` (Kombo bonus +${comboBonus})` : ""));
+    refreshTopBar();
+    checkRankUp();
+  } else if (matched){
+    showToast("Yanlış iksir! Müşteri istediğini bulamadı.", true);
+    AudioFX.fail();
+    state.comboCount = 0; refreshTopBar();
+  } else {
+    showToast("Tarif eşleşmedi, malzemeler boşa gitti.", true);
+    AudioFX.fail();
+    state.comboCount = 0; refreshTopBar();
+  }
+
+  closeBrewScreen();
+  endCustomerVisit();
+}
+
+function checkRankUp(){
+  const newRank = getCurrentRank();
+  const idx = RANKS.indexOf(newRank);
+  if (idx > state.rankIndex){
+    state.rankIndex = idx;
+    showLevelUp(newRank.name);
+  }
+}
+function showLevelUp(rankName){
+  AudioFX.levelup();
+  const banner = $("#levelup-banner");
+  $("#levelup-text").textContent = `Artık bir "${rankName}" sın!`;
+  banner.classList.add("show");
+  setTimeout(()=> banner.classList.remove("show"), 2200);
+}
+
+/* ---------------------- MAĞAZA ---------------------- */
+function openShop(){
+  AudioFX.click();
+  $("#shop-screen").style.display = "flex";
+  $("#shop-coin-amount").textContent = state.coins;
+  renderShop();
+  if (state.tutorialActive && state.tutorialStep===6) goToTutorialStep(7);
+}
+function closeShop(){ $("#shop-screen").style.display = "none"; }
+
+function renderShop(){
+  const list = $("#shop-list");
+  list.innerHTML = "";
+  const rankIdx = RANKS.indexOf(getCurrentRank());
+
+  Object.keys(INGREDIENTS_DB).forEach(id=>{
+    const ing = INGREDIENTS_DB[id];
+    const tierLocked = ing.tier > rankIdx;
+    const owned = state.inventory[id] || 0;
+
+    const card = document.createElement("div");
+    card.className = "shop-item" + (tierLocked ? " locked" : "");
+    card.innerHTML = `
+      <svg class="ing-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="${ing.color}" stroke="#1a0a2e" stroke-width="1.5"/></svg>
+      <div class="shop-item-name">${ing.name}</div>
+      ${tierLocked
+        ? `<div class="shop-item-locked-tag">🔒 Seviye gerekli</div>`
+        : `<div class="shop-item-owned">Stok: ${owned}</div>
+           <div class="shop-item-price">${ing.price===0?"Ücretsiz":"🪙 "+ing.price}</div>
+           <button class="shop-item-buy" data-id="${id}">${ing.price===0 ? "Topla" : "Satın Al"}</button>`
+      }
+    `;
+    list.appendChild(card);
+  });
+
+  list.querySelectorAll(".shop-item-buy").forEach(btn=>{
+    btn.addEventListener("click", ()=> buyIngredient(btn.dataset.id));
+  });
+}
+
+function buyIngredient(id){
+  const ing = INGREDIENTS_DB[id];
+  if (ing.price > 0 && state.coins < ing.price){
+    showToast("Yeterli coin'in yok!", true);
+    return;
+  }
+  state.coins -= ing.price;
+  state.inventory[id] = (state.inventory[id]||0) + 1;
+  state.unlockedIngredients.add(id);
+  AudioFX.coin();
+  refreshTopBar();
+  $("#shop-coin-amount").textContent = state.coins;
+  showToast(`${ing.name} satın alındı!`);
+  renderShop();
+}
+
+/* ---------------------- ÖĞRETİCİ (TUTORIAL) - state-machine tabanlı ---------------------- */
+/*
+  Her adım: text, hedef eleman (highlight), ok pozisyonu, ve "next" butonunun görünür olup olmadığı.
+  Adımlar arasında geçiş hem "İleri" butonuyla hem de ilgili elemana dokunarak tetiklenebilir.
+*/
+const TUTORIAL_STEPS = [
+  { text:"Dükkanına hoş geldin, genç cadı! Sana iksir yapmayı öğreteceğim. Hazırsan ilerle.", target:null, showNext:true },
+  { text:"Önce malzeme stoğuna göz atalım. Sol veya sağ raftaki mağaza simgesine dokun.", target:"#shelf-left, #shelf-right", showNext:false, arrowAt:"#shelf-left" },
+  { text:"Süper! Şimdi geri dön ve alttaki 'İksir Yap' simgesine dokunarak kazan ekranını aç.", target:"#phone-dock-btn", showNext:false, arrowAt:"#phone-dock-btn" },
+  { text:"Şimdi alttaki tepsiden 'Şifa Otu' ve 'Yaban Balı' malzemelerini kazana (ortadaki daire) sürükle.", target:null, showNext:true },
+  { text:"Mükemmel! Malzemeler kazanda. Şimdi 'İksiri Tamamla' butonuna dokun.", target:"#brew-action-btn", showNext:false, arrowAt:"#brew-action-btn" },
+  { text:"Tebrikler, ilk iksirini yaptın! 🎉 Artık gerçek müşteriler gelecek. Devam et.", target:null, showNext:true },
+  { text:"Yeni ve nadir malzemeler için coin biriktirip mağazadan alışveriş yapabilirsin. Mağaza simgesine dokun.", target:"#shop-dock-btn", showNext:false, arrowAt:"#shop-dock-btn" },
+  { text:"Burası mağaza! Seviyen yükseldikçe ejderha pulu, ay ışığı özü gibi nadir malzemelerin kilidi açılır. Geri dön ve dükkanı işletmeye başla!", target:"#shop-back", showNext:false, arrowAt:"#shop-back" },
+];
+
+function startTutorial(){
+  state.tutorialActive = true;
+  $("#tutorial-overlay").style.display = "flex";
+  goToTutorialStep(0);
+}
+
+function goToTutorialStep(stepIndex){
+  // önceki highlight ve arrow temizle
+  document.querySelectorAll(".tutorial-highlight").forEach(el=>el.classList.remove("tutorial-highlight"));
+  $("#tutorial-arrow").style.display = "none";
+
+  if (stepIndex >= TUTORIAL_STEPS.length){
+    endTutorial();
+    return;
+  }
+  state.tutorialStep = stepIndex;
+  const step = TUTORIAL_STEPS[stepIndex];
+
+  $("#tutorial-text").textContent = step.text;
+  $("#tutorial-next").style.display = step.showNext ? "inline-block" : "none";
+  $("#tutorial-overlay").style.display = "flex";
+
+  if (step.target){
+    document.querySelectorAll(step.target).forEach(el=> el.classList.add("tutorial-highlight"));
+  }
+  if (step.arrowAt){
+    const el = $(step.arrowAt);
+    if (el){
+      const r = el.getBoundingClientRect();
+      const arrow = $("#tutorial-arrow");
+      arrow.style.left = (r.left + r.width/2 - 15) + "px";
+      arrow.style.top = (r.top - 38) + "px";
+      arrow.style.display = "block";
+    }
+  }
+
+  // adım 3 kazana malzeme sürüklenmesini beklediği için overlay'i ekrandan kaldırıp
+  // sadece metin kutusunu gösteriyoruz, brew-screen tam etkileşimli olsun
+  if (stepIndex === 3 || stepIndex === 4){
+    $("#tutorial-overlay").style.pointerEvents = "none";
+  } else {
+    $("#tutorial-overlay").style.pointerEvents = step.target ? "none" : "auto";
+  }
+}
+
+function endTutorial(){
+  state.tutorialActive = false;
+  state.tutorialStep = -1;
+  document.querySelectorAll(".tutorial-highlight").forEach(el=>el.classList.remove("tutorial-highlight"));
+  $("#tutorial-overlay").style.display = "none";
+  $("#tutorial-arrow").style.display = "none";
+  closeBrewScreen();
+  closeShop();
+  showToast("Eğitim tamamlandı! İyi şanslar genç cadı. ✨");
+  spawnCustomer();
+}
+
+$("#tutorial-next").addEventListener("click", ()=>{
+  AudioFX.click();
+  goToTutorialStep(state.tutorialStep + 1);
+});
+$("#tutorial-skip").addEventListener("click", ()=>{
+  AudioFX.click();
+  endTutorial();
+});
+
+/* ---------------------- OLAY DİNLEYİCİLERİ ---------------------- */
+$("#phone-dock-btn").addEventListener("click", ()=>{
+  if (state.tutorialActive && state.tutorialStep===2){ openBrewScreen(); return; }
+  if (!state.tutorialActive) openBrewScreen();
+});
+$("#brew-back").addEventListener("click", ()=>{
+  if (state.tutorialActive && (state.tutorialStep===3 || state.tutorialStep===4)) return; // tutorial sırasında çıkışı kilitle
+  closeBrewScreen();
+});
+$("#brew-action-btn").addEventListener("click", completeBrew);
+$("#brew-clear-btn").addEventListener("click", clearCauldron);
+
+$("#shelf-left").addEventListener("click", ()=>{
+  if (state.tutorialActive && state.tutorialStep===1){ goToTutorialStep(2); return; }
+  openShop();
+});
+$("#shelf-right").addEventListener("click", ()=>{
+  if (state.tutorialActive && state.tutorialStep===1){ goToTutorialStep(2); return; }
+  openShop();
+});
+$("#shop-dock-btn").addEventListener("click", openShop);
+$("#shop-back").addEventListener("click", ()=>{
+  closeShop();
+  if (state.tutorialActive && state.tutorialStep===7){ endTutorial(); }
+});
+
+window.addEventListener("resize", ()=>{
+  // pencere boyutu değişirse ok pozisyonunu güncelle
+  if (state.tutorialActive){
+    const step = TUTORIAL_STEPS[state.tutorialStep];
+    if (step && step.arrowAt) goToTutorialStep(state.tutorialStep);
+  }
+});
+
+/* ---------------------- BAŞLATMA ---------------------- */
+function createStars(){
+  const bg = $("#shop-bg");
+  for (let i=0;i<25;i++){
+    const s = document.createElement("div");
+    s.className = "star";
+    s.style.left = Math.random()*100 + "%";
+    s.style.top = Math.random()*60 + "%";
+    s.style.animationDelay = (Math.random()*3) + "s";
+    bg.appendChild(s);
+  }
+}
+
+function initGame(){
+  refreshTopBar();
+  createStars();
+  startTutorial();
+}
+
+window.addEventListener("load", initGame);
+</script>
+</body>
+  </html>
