@@ -482,6 +482,118 @@
   }
   .day-range b{ color:var(--ink); }
 
+  /* ---- Outfit / activity suggestion ---- */
+  .outfit-card{
+    background: linear-gradient(135deg, var(--accent-soft), transparent);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:16px;
+    margin-bottom:16px;
+    box-shadow:var(--shadow);
+  }
+  .outfit-top{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    margin-bottom:8px;
+  }
+  .outfit-icon{ font-size:24px; }
+  .outfit-title{ font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); }
+  .outfit-text{ font-size:13px; line-height:1.6; }
+  .outfit-tags{
+    display:flex;
+    gap:6px;
+    margin-top:10px;
+    flex-wrap:wrap;
+  }
+  .outfit-tag{
+    font-size:11px;
+    padding:4px 10px;
+    border-radius:20px;
+    background:var(--card);
+    border:1px solid var(--line);
+  }
+
+  /* ---- Share card ---- */
+  .share-btn-row{
+    display:flex;
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .share-btn-row button{
+    flex:1;
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:10px 0;
+    font-size:12px;
+    font-weight:600;
+    color:var(--ink-soft);
+    cursor:pointer;
+    box-shadow:var(--shadow);
+  }
+  .share-btn-row button:hover{ background:var(--accent-soft); color:var(--accent); }
+
+  #shareCanvas{
+    display:none;
+  }
+  .share-preview-overlay{
+    position:fixed;
+    inset:0;
+    background:rgba(10,12,18,0.6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    z-index:60;
+    padding:20px;
+  }
+  .share-preview-box{
+    background:var(--card);
+    border-radius:18px;
+    padding:18px;
+    max-width:340px;
+    width:100%;
+  }
+  .share-preview-box img{
+    width:100%;
+    border-radius:12px;
+    margin-bottom:14px;
+    display:block;
+  }
+  .share-preview-actions{
+    display:flex;
+    gap:8px;
+  }
+  .share-preview-actions button{
+    flex:1;
+    border:none;
+    border-radius:10px;
+    padding:11px 0;
+    font-size:13px;
+    font-weight:600;
+    cursor:pointer;
+    font-family:inherit;
+  }
+  .share-preview-actions .download{ background:var(--ink); color:var(--paper); }
+  .share-preview-actions .close{ background:transparent; border:1px solid var(--line); color:var(--ink-soft); }
+
+  /* ---- Cache / freshness badge ---- */
+  .freshness{
+    font-size:9.5px;
+    color:var(--ink-soft);
+    opacity:0.75;
+    display:flex;
+    align-items:center;
+    gap:4px;
+  }
+  .freshness .dot{
+    width:6px; height:6px;
+    border-radius:50%;
+    background:var(--good);
+    display:inline-block;
+  }
+  .freshness.stale .dot{ background:var(--warn); }
+
   /* ---- Alert banner ---- */
   .alert-banner{
     background: rgba(193,71,63,0.10);
@@ -786,6 +898,7 @@
     <div id="fullView">
       <div class="hero">
         <div class="updated-at" id="updatedAt"></div>
+        <div class="freshness" id="freshnessBadge" style="position:absolute; top:30px; right:18px;"><span class="dot"></span><span id="freshnessText">canlı</span></div>
         <div class="hero-row">
           <div class="hero-icon" id="heroIcon">☀️</div>
           <div>
@@ -816,6 +929,19 @@
           <div class="stat-label">Hava Kalitesi</div>
           <div class="stat-value tag" id="statAqi">—</div>
         </div>
+      </div>
+
+      <div class="outfit-card">
+        <div class="outfit-top">
+          <span class="outfit-icon" id="outfitIcon">🧥</span>
+          <span class="outfit-title">Bugün ne giysem?</span>
+        </div>
+        <div class="outfit-text" id="outfitText">—</div>
+        <div class="outfit-tags" id="outfitTags"></div>
+      </div>
+
+      <div class="share-btn-row">
+        <button onclick="shareWeatherCard()">📤 Hava durumu kartı paylaş</button>
       </div>
 
       <div class="sun-card">
@@ -936,6 +1062,18 @@
     <input type="text" id="cityInput" class="modal-input" placeholder="Şehir adı yaz (örn. İzmir)" oninput="onCitySearchInput()">
     <div id="cityResults"></div>
     <div class="modal-close" onclick="closeAddCity()">Kapat</div>
+  </div>
+</div>
+
+<canvas id="shareCanvas" width="640" height="800"></canvas>
+
+<div id="sharePreviewOverlay" class="share-preview-overlay hidden" onclick="if(event.target===this) closeSharePreview()">
+  <div class="share-preview-box">
+    <img id="sharePreviewImg" src="" alt="Hava durumu kartı">
+    <div class="share-preview-actions">
+      <button class="download" onclick="downloadShareImage()">İndir</button>
+      <button class="close" onclick="closeSharePreview()">Kapat</button>
+    </div>
   </div>
 </div>
 
@@ -1212,7 +1350,33 @@ function persistCities(){
   }catch(e){}
 }
 
-async function loadCityWeather(city){
+const CACHE_TTL_MS = 10 * 60 * 1000; // 10 dakika
+
+function getCachedWeather(cityId){
+  try{
+    const raw = localStorage.getItem('weatherCache_' + cityId);
+    if(!raw) return null;
+    const parsed = JSON.parse(raw);
+    if(Date.now() - parsed.savedAt > CACHE_TTL_MS * 6) return null; // 1 saatten eskiyse hiç kullanma
+    return parsed;
+  }catch(e){ return null; }
+}
+function setCachedWeather(cityId, weather, aqi){
+  try{
+    localStorage.setItem('weatherCache_' + cityId, JSON.stringify({ weather, aqi, savedAt: Date.now() }));
+  }catch(e){}
+}
+
+async function loadCityWeather(city, opts={}){
+  const cached = !opts.forceRefresh && getCachedWeather(city.id);
+  if(cached && !city.data){
+    // Anında cache'den göster, arka planda tazele
+    city.data = cached.weather;
+    city.aqi = cached.aqi;
+    city.dataAge = Date.now() - cached.savedAt;
+    renderCityChips();
+    if(city.id === state.activeCityId) renderWeather(city);
+  }
   try{
     const [weather, aqi] = await Promise.all([
       fetchWeather(city.lat, city.lon),
@@ -1220,19 +1384,24 @@ async function loadCityWeather(city){
     ]);
     city.data = weather;
     city.aqi = aqi;
+    city.dataAge = 0;
+    setCachedWeather(city.id, weather, aqi);
     renderCityChips();
     if(city.id === state.activeCityId) renderWeather(city);
     checkAlerts(city);
   }catch(e){
-    if(city.id === state.activeCityId){
-      showState('error', { title:'Veri alınamadı', icon:'📡', msg:'Bu şehir için hava durumu verisi alınamadı. Bağlantını kontrol edip tekrar dene.' });
+    if(!city.data){
+      if(city.id === state.activeCityId){
+        showState('error', { title:'Veri alınamadı', icon:'📡', msg:'Bu şehir için hava durumu verisi alınamadı. Bağlantını kontrol edip tekrar dene.' });
+      }
     }
+    // city.data zaten cache'den geldiyse (eski ama mevcut), sessizce geç — kullanıcı bayat veri rozetini görür
   }
 }
 
 function refreshActive(){
   const c = getActiveCity();
-  if(c) loadCityWeather(c);
+  if(c) loadCityWeather(c, { forceRefresh:true });
 }
 
 // ============ Şehir ekleme modalı ============
@@ -1288,12 +1457,23 @@ function addCity(r){
 function renderWeather(city){
   const data = city.data;
   $('placeName').textContent = city.name;
-  $('placeSub').textContent = city.sub;
+  $('placeSub').textContent = city.sub + (city.isCurrent && city.accuracy ? ` · konum doğruluğu ~${Math.round(city.accuracy)}m` : '');
 
   const cur = data.current;
   const info = weatherInfo(cur.weather_code, cur.is_day);
   const category = weatherCategory(cur.weather_code);
   renderWeatherFx(category);
+
+  // Tazelik rozeti
+  const ageMs = city.dataAge || 0;
+  const badge = $('freshnessBadge');
+  if(ageMs > CACHE_TTL_MS){
+    badge.classList.add('stale');
+    $('freshnessText').textContent = Math.round(ageMs/60000) + ' dk önceki veri';
+  } else {
+    badge.classList.remove('stale');
+    $('freshnessText').textContent = 'canlı';
+  }
 
   // FULL
   $('heroIcon').textContent = info.icon;
@@ -1427,6 +1607,167 @@ function renderWeather(city){
 
   // Alert banner (sayfa içi, görsel)
   renderAlertBanner(city);
+
+  // Kıyafet/aktivite önerisi
+  renderOutfitSuggestion(city);
+}
+
+function renderOutfitSuggestion(city){
+  const cur = city.data.current;
+  const temp = cur.apparent_temperature;
+  const rainProb = city.data.daily.precipitation_probability_max[0] ?? 0;
+  const wind = cur.wind_speed_10m;
+  const uvVal = cur.uv_index ?? city.data.daily.uv_index_max?.[0] ?? 0;
+  const category = weatherCategory(cur.weather_code);
+
+  let icon = '🧥', text = '', tags = [];
+
+  if(temp <= 0){
+    icon = '🧥'; text = 'Dondurucu soğuk. Kalın mont, bere, eldiven ve atkı şart.';
+    tags = ['Kalın mont', 'Bere & eldiven', 'Termal iç giyim'];
+  } else if(temp <= 8){
+    icon = '🧥'; text = 'Soğuk bir gün. Mont veya kalın hırka, içine kazak giymek iyi olur.';
+    tags = ['Mont', 'Kazak', 'Kapalı ayakkabı'];
+  } else if(temp <= 15){
+    icon = '🧶'; text = 'Serin. Hafif mont ya da hırka yeterli olur.';
+    tags = ['Hırka / ince mont', 'Uzun kollu'];
+  } else if(temp <= 22){
+    icon = '👕'; text = 'Ilıman bir hava. Tişört + ince bir üst yeterli.';
+    tags = ['Tişört', 'İnce ceket (akşam için)'];
+  } else if(temp <= 28){
+    icon = '👕'; text = 'Sıcak. Hafif ve nefes alan kumaşlar tercih et.';
+    tags = ['İnce kumaş', 'Şapka'];
+  } else {
+    icon = '🩳'; text = 'Çok sıcak. Bol su iç, mümkünse öğlen güneşinden kaçın.';
+    tags = ['Şort / hafif giyim', 'Bol su', 'Gölgede kal'];
+  }
+
+  if(rainProb >= 50){
+    text += ' Yağış ihtimali yüksek, şemsiye veya yağmurluk almayı unutma.';
+    tags.push('Şemsiye ☂️');
+  }
+  if(wind >= 30){
+    text += ' Rüzgar kuvvetli, üzerine bir şey alman iyi olur.';
+    tags.push('Rüzgarlık');
+  }
+  if(uvVal >= 6){
+    text += ' UV indeksi yüksek, güneş kremi ve güneş gözlüğü öner.';
+    tags.push('Güneş kremi');
+  }
+  if(category === 'snow'){
+    tags.push('Kaymaz ayakkabı');
+  }
+
+  $('outfitIcon').textContent = icon;
+  $('outfitText').textContent = text;
+  $('outfitTags').innerHTML = tags.map(t => `<span class="outfit-tag">${t}</span>`).join('');
+}
+
+// ============ Paylaşım kartı ============
+function shareWeatherCard(){
+  const city = getActiveCity();
+  if(!city || !city.data) return;
+
+  const canvas = $('shareCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  const isDark = state.theme === 'dark';
+
+  const cur = city.data.current;
+  const info = weatherInfo(cur.weather_code, cur.is_day);
+  const todayMax = city.data.daily.temperature_2m_max[0];
+  const todayMin = city.data.daily.temperature_2m_min[0];
+
+  // Arka plan
+  const grad = ctx.createLinearGradient(0,0,0,H);
+  if(isDark){
+    grad.addColorStop(0, '#191d28');
+    grad.addColorStop(1, '#11141c');
+  } else {
+    grad.addColorStop(0, '#ffffff');
+    grad.addColorStop(1, '#f6f7f5');
+  }
+  ctx.fillStyle = grad;
+  ctx.fillRect(0,0,W,H);
+
+  const inkColor = isDark ? '#eef0f4' : '#1c2230';
+  const softColor = isDark ? '#9aa3b8' : '#5b6478';
+  const accentColor = isDark ? '#5fbab2' : '#2e6f6a';
+
+  ctx.textAlign = 'left';
+
+  // Şehir adı
+  ctx.fillStyle = inkColor;
+  ctx.font = '600 40px Georgia, serif';
+  ctx.fillText(city.name, 48, 100);
+  ctx.fillStyle = softColor;
+  ctx.font = '20px monospace';
+  ctx.fillText(city.sub, 48, 134);
+
+  // Büyük ikon + sıcaklık
+  ctx.font = '140px sans-serif';
+  ctx.fillText(info.icon, 40, 320);
+
+  ctx.fillStyle = inkColor;
+  ctx.font = '600 110px Georgia, serif';
+  ctx.fillText(fmtTemp(cur.temperature_2m), 260, 300);
+  ctx.font = '28px monospace';
+  ctx.fillStyle = softColor;
+  ctx.fillText(info.desc, 264, 345);
+
+  // Alt bilgi satırı
+  ctx.font = '22px monospace';
+  ctx.fillStyle = softColor;
+  ctx.fillText(`Hissedilen ${fmtTemp(cur.apparent_temperature)}  ·  ↑${fmtTemp(todayMax)} ↓${fmtTemp(todayMin)}`, 48, 420);
+  ctx.fillText(`Rüzgar ${Math.round(cur.wind_speed_10m)} km/s  ·  Nem %${Math.round(cur.relative_humidity_2m)}`, 48, 455);
+
+  // Ayraç
+  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(48, 500);
+  ctx.lineTo(W-48, 500);
+  ctx.stroke();
+
+  // 5 günlük mini şerit
+  const daily = city.data.daily;
+  const dayW = (W - 96) / 5;
+  for(let i=0;i<5;i++){
+    const x = 48 + i*dayW + dayW/2;
+    const dInfo = weatherInfo(daily.weather_code[i], 1);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = softColor;
+    ctx.font = '18px monospace';
+    ctx.fillText(dayLabel(daily.time[i], i), x, 545);
+    ctx.font = '36px sans-serif';
+    ctx.fillText(dInfo.icon, x, 595);
+    ctx.fillStyle = inkColor;
+    ctx.font = '600 20px monospace';
+    ctx.fillText(fmtTemp(daily.temperature_2m_max[i]), x, 630);
+    ctx.fillStyle = softColor;
+    ctx.font = '18px monospace';
+    ctx.fillText(fmtTemp(daily.temperature_2m_min[i]), x, 655);
+  }
+
+  // Footer
+  ctx.textAlign = 'center';
+  ctx.fillStyle = accentColor;
+  ctx.font = '600 18px monospace';
+  ctx.fillText('Hava Durumu  ·  Open-Meteo', W/2, H-40);
+
+  const dataUrl = canvas.toDataURL('image/png');
+  $('sharePreviewImg').src = dataUrl;
+  $('sharePreviewOverlay').classList.remove('hidden');
+}
+function closeSharePreview(){
+  $('sharePreviewOverlay').classList.add('hidden');
+}
+function downloadShareImage(){
+  const link = document.createElement('a');
+  const city = getActiveCity();
+  link.download = `hava-durumu-${(city?.name || 'kart').toLowerCase()}.png`;
+  link.href = $('sharePreviewImg').src;
+  link.click();
 }
 
 function renderAlertBanner(city){
@@ -1562,15 +1903,15 @@ async function init(){
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
       try{
-        const { latitude, longitude } = pos.coords;
+        const { latitude, longitude, accuracy } = pos.coords;
         const place = await reverseGeocode(latitude, longitude);
         const id = 'current';
         let city = state.cities.find(c => c.id === id);
         if(!city){
-          city = { id, name: place.name, sub: place.sub, lat: latitude, lon: longitude, isCurrent:true, data:null };
+          city = { id, name: place.name, sub: place.sub, lat: latitude, lon: longitude, isCurrent:true, data:null, accuracy };
           state.cities.unshift(city);
         } else {
-          city.name = place.name; city.sub = place.sub; city.lat = latitude; city.lon = longitude;
+          city.name = place.name; city.sub = place.sub; city.lat = latitude; city.lon = longitude; city.accuracy = accuracy;
         }
         state.activeCityId = id;
         renderCityChips();
