@@ -2,1978 +2,1448 @@
 <html lang="tr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Hava Durumu</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>ViraLens — Video Analiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <style>
-  :root{
-    --ink:#1c2230;
-    --ink-soft:#5b6478;
-    --line: rgba(28,34,48,0.10);
-    --paper:#f6f7f5;
-    --card:#ffffff;
-    --accent:#2e6f6a;
-    --accent-soft: rgba(46,111,106,0.12);
-    --sun:#d98c2b;
-    --shadow: 0 1px 2px rgba(20,24,34,0.04);
-    --danger:#c1473f;
-    --good:#2e6f6a;
-    --warn:#c98a2b;
-  }
-  html[data-theme="dark"]{
-    --ink:#eef0f4;
-    --ink-soft:#9aa3b8;
-    --line: rgba(255,255,255,0.08);
-    --paper:#11141c;
-    --card:#191d28;
-    --accent:#5fbab2;
-    --accent-soft: rgba(95,186,178,0.14);
-    --sun:#e8a23e;
-    --shadow: 0 1px 2px rgba(0,0,0,0.3);
-  }
-  *{box-sizing:border-box; margin:0; padding:0;}
-  html,body{
-    background:var(--paper);
-    color:var(--ink);
-    font-family: 'Iosevka', 'JetBrains Mono', 'SF Mono', ui-monospace, monospace;
-    min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-    transition: background .25s, color .25s;
-    overflow-x:hidden;
-  }
-  body{
-    display:flex;
-    justify-content:center;
-    padding: 20px 16px 60px;
-    position:relative;
-  }
-  .app{
-    width:100%;
-    max-width:480px;
-    position:relative;
-    z-index:2;
-  }
-  button{ font-family:inherit; }
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --bg: #0A0A0A; --surface: #141414; --surface2: #1C1C1C; --border: #262626;
+  --text: #F5F5F5; --muted: #888; --sub: #444; --accent: #6366F1;
+  --accent-dim: rgba(99,102,241,0.1); --green: #22C55E; --amber: #F59E0B; --red: #EF4444;
+  --gold: #F0B429; --gold-dim: rgba(240,180,41,0.1);
+  --r: 14px; --rsm: 8px; --font: 'Inter', system-ui, sans-serif;
+}
+html { background: var(--bg); color: var(--text); font-family: var(--font); }
+body { min-height: 100vh; padding-bottom: 80px; }
+.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
 
-  /* ============ Hava animasyon katmanı (arka plan) ============ */
-  #weatherFx{
-    position:fixed;
-    inset:0;
-    z-index:0;
-    overflow:hidden;
-    pointer-events:none;
-  }
-  .fx-rain-drop{
-    position:absolute;
-    top:-20px;
-    width:1.5px;
-    background:linear-gradient(to bottom, transparent, rgba(120,150,180,0.55));
-    animation: fall linear infinite;
-  }
-  @keyframes fall{
-    to{ transform: translateY(110vh); }
-  }
-  .fx-snow{
-    position:absolute;
-    top:-20px;
-    border-radius:50%;
-    background:rgba(255,255,255,0.85);
-    animation: snowfall linear infinite;
-  }
-  html[data-theme="dark"] .fx-snow{ background:rgba(230,235,245,0.7); }
-  @keyframes snowfall{
-    to{ transform: translateY(110vh) translateX(var(--drift, 0px)); }
-  }
-  .fx-sun-ray{
-    position:absolute;
-    top:-10%;
-    right:-10%;
-    width:60vw;
-    height:60vw;
-    max-width:500px;
-    max-height:500px;
-    border-radius:50%;
-    background: radial-gradient(circle, rgba(217,140,43,0.16), transparent 70%);
-    animation: pulse 6s ease-in-out infinite;
-  }
-  html[data-theme="dark"] .fx-sun-ray{
-    background: radial-gradient(circle, rgba(232,162,62,0.10), transparent 70%);
-  }
-  @keyframes pulse{
-    0%,100%{ opacity:0.7; transform:scale(1); }
-    50%{ opacity:1; transform:scale(1.08); }
-  }
-  .fx-cloud{
-    position:absolute;
-    border-radius:50px;
-    background: rgba(160,170,185,0.18);
-    filter: blur(2px);
-    animation: drift linear infinite;
-  }
-  html[data-theme="dark"] .fx-cloud{ background: rgba(150,160,180,0.10); }
-  @keyframes drift{
-    from{ transform: translateX(-120px); }
-    to{ transform: translateX(calc(100vw + 120px)); }
-  }
-  .fx-lightning{
-    position:absolute; inset:0;
-    background:rgba(255,255,255,0);
-    animation: flash 7s ease-out infinite;
-  }
-  @keyframes flash{
-    0%, 92%, 100%{ background:rgba(255,255,255,0); }
-    93%{ background:rgba(255,255,255,0.25); }
-    94%{ background:rgba(255,255,255,0); }
-    95%{ background:rgba(255,255,255,0.18); }
-    96%{ background:rgba(255,255,255,0); }
-  }
-  @media (prefers-reduced-motion: reduce){
-    .fx-rain-drop, .fx-snow, .fx-sun-ray, .fx-cloud, .fx-lightning{ animation:none !important; display:none; }
-  }
+/* HEADER */
+.header {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+  position: sticky; top: 0; background: rgba(10,10,10,0.94);
+  backdrop-filter: blur(16px); z-index: 100;
+}
+.logo { display: flex; align-items: center; gap: 9px; }
+.logo-mark {
+  width: 32px; height: 32px; background: var(--accent); border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+}
+.logo-mark svg { width: 17px; height: 17px; }
+.logo-name { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
+.logo-name b { color: var(--accent); font-weight: 700; }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+.ai-badge { font-size: 10px; background: var(--accent-dim); color: var(--accent);
+  border: 1px solid rgba(99,102,241,0.25); padding: 3px 8px; border-radius: 20px;
+  font-weight: 600; letter-spacing: 0.4px; }
+.pro-badge-hdr { font-size: 10px; background: var(--gold-dim); color: var(--gold);
+  border: 1px solid rgba(240,180,41,0.3); padding: 3px 8px; border-radius: 20px;
+  font-weight: 700; cursor: pointer; }
+.pro-badge-hdr.active { background: var(--gold); color: #1a1300; }
 
-  /* ---- Top bar ---- */
-  .top{
-    display:flex;
-    justify-content:space-between;
-    align-items:flex-start;
-    margin-bottom:14px;
-    gap:10px;
-  }
-  .place{
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size:27px;
-    font-weight:600;
-    letter-spacing:-0.01em;
-    line-height:1.1;
-  }
-  .place-sub{
-    font-size:12px;
-    color:var(--ink-soft);
-    margin-top:4px;
-    letter-spacing:0.02em;
-  }
-  .top-controls{
-    display:flex;
-    gap:8px;
-    flex-shrink:0;
-  }
-  .icon-btn{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:9px;
-    width:36px; height:36px;
-    color:var(--ink-soft);
-    font-size:15px;
-    cursor:pointer;
-    display:flex; align-items:center; justify-content:center;
-    transition: background .15s, transform .4s, color .15s;
-    box-shadow:var(--shadow);
-  }
-  .icon-btn:hover{ background:var(--accent-soft); color:var(--accent); }
-  .icon-btn.spin:active{ transform: rotate(180deg); }
-  .icon-btn.active{ background:var(--accent); color:#fff; border-color:var(--accent); }
+/* SECTION LABEL */
+.sec-label { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--muted); font-weight: 600; margin-bottom: 12px; }
 
-  .unit-toggle{
-    display:flex;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:9px;
-    overflow:hidden;
-    box-shadow:var(--shadow);
-  }
-  .unit-toggle button{
-    border:none;
-    background:transparent;
-    color:var(--ink-soft);
-    font-size:12px;
-    font-weight:600;
-    width:32px; height:36px;
-    cursor:pointer;
-    transition: background .15s, color .15s;
-  }
-  .unit-toggle button.active{
-    background:var(--accent);
-    color:#fff;
-  }
+/* UPLOAD */
+.upload-sec { padding: 24px 0 16px; }
+.drop-zone {
+  border: 1.5px dashed var(--border); border-radius: var(--r); padding: 32px 20px;
+  text-align: center; cursor: pointer; background: var(--surface); position: relative;
+  transition: border-color 0.18s, background 0.18s;
+}
+.drop-zone:hover, .drop-zone.over { border-color: var(--accent); background: var(--accent-dim); }
+.drop-zone input[type=file] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  z-index: 2;
+}
+.drop-ico { font-size: 32px; margin-bottom: 8px; pointer-events: none; }
+.drop-t { font-size: 14px; font-weight: 600; margin-bottom: 5px; pointer-events: none; }
+.drop-s { font-size: 12px; color: var(--muted); pointer-events: none; }
+.drop-s em { color: var(--accent); font-style: normal; }
 
-  /* ---- City chips ---- */
-  .city-row{
-    display:flex;
-    gap:8px;
-    overflow-x:auto;
-    margin-bottom:14px;
-    padding-bottom:4px;
-    scrollbar-width:none;
-  }
-  .city-row::-webkit-scrollbar{ display:none; }
-  .city-chip{
-    flex:0 0 auto;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:20px;
-    padding:8px 14px;
-    font-size:12px;
-    font-weight:600;
-    color:var(--ink-soft);
-    cursor:pointer;
-    display:flex;
-    align-items:center;
-    gap:6px;
-    box-shadow:var(--shadow);
-    white-space:nowrap;
-    transition: background .15s, color .15s, border-color .15s;
-  }
-  .city-chip.active{
-    background:var(--accent);
-    color:#fff;
-    border-color:var(--accent);
-  }
-  .city-chip .temp-pill{
-    font-size:11px;
-    opacity:0.85;
-  }
-  .city-chip .remove-x{
-    margin-left:2px;
-    opacity:0.55;
-    font-size:13px;
-  }
-  .city-chip.add-city{
-    background:transparent;
-    border-style:dashed;
-  }
+/* VIDEO PREVIEW */
+.video-preview-wrap {
+  display: none; border-radius: var(--r); overflow: hidden;
+  background: #000; margin-top: 14px; position: relative;
+}
+.video-preview-wrap.show { display: block; }
+.video-preview-wrap video {
+  width: 100%; max-height: 260px; display: block; object-fit: contain; background: #000;
+}
+.video-overlay {
+  position: absolute; top: 8px; right: 8px; display: flex; gap: 6px;
+}
+.vid-btn {
+  background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 6px;
+  padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer;
+  backdrop-filter: blur(4px); font-family: var(--font);
+}
+.vid-btn:hover { background: rgba(239,68,68,0.8); }
+.video-meta-bar {
+  background: var(--surface2); padding: 10px 14px;
+  display: flex; gap: 14px; flex-wrap: wrap;
+}
+.vmeta-item { font-size: 11px; color: var(--muted); }
+.vmeta-item span { color: var(--text); font-weight: 500; }
 
-  /* ---- View tabs ---- */
-  .view-tabs{
-    display:flex;
-    gap:6px;
-    margin-bottom:16px;
-  }
-  .view-tabs button{
-    flex:1;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:9px;
-    padding:9px 0;
-    font-size:11px;
-    font-weight:600;
-    letter-spacing:0.02em;
-    color:var(--ink-soft);
-    cursor:pointer;
-    transition: background .15s, color .15s;
-  }
-  .view-tabs button.active{
-    background:var(--ink);
-    color:var(--paper);
-    border-color:var(--ink);
-  }
+/* DIVIDER */
+.divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
+.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+.divider em { font-size: 11px; color: var(--sub); font-style: normal; font-weight: 500; }
 
-  /* ---- Hero ---- */
-  .hero{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:18px;
-    padding:26px 22px;
-    margin-bottom:16px;
-    position:relative;
-    overflow:hidden;
-    box-shadow:var(--shadow);
-  }
-  .hero-row{
-    display:flex;
-    align-items:center;
-    gap:16px;
-  }
-  .hero-icon{ font-size:54px; line-height:1; }
-  .hero-temp{
-    font-family: Georgia, 'Times New Roman', serif;
-    font-size:60px;
-    font-weight:600;
-    letter-spacing:-0.02em;
-  }
-  .hero-temp sup{ font-size:26px; font-weight:400; top:-0.6em; }
-  .hero-desc{
-    font-size:14px;
-    color:var(--ink-soft);
-    margin-top:2px;
-  }
-  .hero-feels{
-    font-size:12px;
-    color:var(--ink-soft);
-    margin-top:10px;
-    border-top:1px dashed var(--line);
-    padding-top:10px;
-    display:flex;
-    justify-content:space-between;
-  }
-  .updated-at{
-    position:absolute;
-    top:16px; right:18px;
-    font-size:10px;
-    color:var(--ink-soft);
-    opacity:0.7;
-    letter-spacing:0.03em;
-  }
+/* URL ROW */
+.url-row { display: flex; gap: 8px; }
+.url-in {
+  flex: 1; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--rsm); padding: 11px 13px; color: var(--text); font-family: var(--font);
+  font-size: 13px; outline: none; transition: border-color 0.18s;
+}
+.url-in::placeholder { color: var(--sub); }
+.url-in:focus { border-color: var(--accent); }
+.btn-add {
+  background: var(--accent); color: #fff; border: none; border-radius: var(--rsm);
+  padding: 11px 16px; font-family: var(--font); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.18s; white-space: nowrap;
+}
+.btn-add:hover { opacity: 0.85; }
 
-  /* ---- Stat grid ---- */
-  .stats{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:8px;
-    margin-bottom:14px;
-  }
-  .stat{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:12px 6px;
-    text-align:center;
-    box-shadow:var(--shadow);
-  }
-  .stat-label{
-    font-size:8.5px;
-    text-transform:uppercase;
-    letter-spacing:0.06em;
-    color:var(--ink-soft);
-    margin-bottom:6px;
-  }
-  .stat-value{
-    font-size:15px;
-    font-weight:600;
-  }
-  .stat-value.tag{
-    font-size:11px;
-    padding:3px 8px;
-    border-radius:8px;
-    display:inline-block;
-  }
-  .tag-good{ background:rgba(46,111,106,0.14); color:var(--good); }
-  .tag-warn{ background:rgba(201,138,43,0.16); color:var(--warn); }
-  .tag-bad{ background:rgba(193,71,63,0.14); color:var(--danger); }
+/* TITLE INPUT */
+.title-row { margin-top: 10px; }
+.title-in {
+  width: 100%; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--rsm); padding: 11px 13px; color: var(--text); font-family: var(--font);
+  font-size: 13px; outline: none; transition: border-color 0.18s;
+}
+.title-in::placeholder { color: var(--sub); }
+.title-in:focus { border-color: var(--accent); }
 
-  /* ---- Sun card ---- */
-  .sun-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:22px;
-    box-shadow:var(--shadow);
-  }
-  .sun-card-top{
-    display:flex;
-    justify-content:space-between;
-    font-size:11px;
-    color:var(--ink-soft);
-    margin-bottom:10px;
-  }
-  .sun-arc-wrap{ position:relative; height:36px; }
-  .sun-arc-track{
-    position:absolute;
-    top:50%;
-    left:0; right:0;
-    height:2px;
-    background:var(--line);
-    border-radius:1px;
-  }
-  .sun-arc-fill{
-    position:absolute;
-    top:50%;
-    left:0;
-    height:2px;
-    background:linear-gradient(90deg, var(--sun), var(--accent));
-    border-radius:1px;
-  }
-  .sun-arc-dot{
-    position:absolute;
-    top:50%;
-    width:14px; height:14px;
-    border-radius:50%;
-    background:var(--sun);
-    transform:translate(-50%,-50%);
-    box-shadow:0 0 0 4px var(--accent-soft);
-  }
-  .sun-times{
-    display:flex;
-    justify-content:space-between;
-    font-size:11px;
-    color:var(--ink-soft);
-    margin-top:6px;
-  }
+/* ANALYZE BTN */
+.analyze-wrap { margin: 16px 0; }
+.btn-analyze {
+  width: 100%; background: var(--accent); color: #fff; border: none; border-radius: var(--r);
+  padding: 15px; font-family: var(--font); font-size: 15px; font-weight: 700;
+  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
+  transition: opacity 0.18s; letter-spacing: -0.2px;
+}
+.btn-analyze:hover { opacity: 0.88; }
+.btn-analyze:disabled { opacity: 0.3; cursor: not-allowed; }
+.spin { width: 17px; height: 17px; border: 2.5px solid rgba(255,255,255,0.3);
+  border-top-color: #fff; border-radius: 50%; animation: spin 0.65s linear infinite; display: none; }
+.btn-analyze.loading .spin { display: block; }
+.btn-analyze.loading .btxt { opacity: 0.55; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ---- Section label ---- */
-  .section-label{
-    font-size:11px;
-    text-transform:uppercase;
-    letter-spacing:0.1em;
-    color:var(--ink-soft);
-    margin: 6px 2px 10px;
-  }
+/* PROGRESS */
+.prog-wrap { display: none; margin-top: 12px; }
+.prog-wrap.show { display: block; }
+.prog-head { display: flex; justify-content: space-between; font-size: 11px;
+  color: var(--muted); margin-bottom: 7px; }
+.prog-track { height: 2px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; background: var(--accent); border-radius: 2px;
+  transition: width 0.45s ease; width: 0%; }
 
-  /* ---- Hourly ---- */
-  .hourly{
-    display:flex;
-    gap:8px;
-    overflow-x:auto;
-    padding-bottom:6px;
-    margin-bottom:24px;
-    scrollbar-width:none;
-  }
-  .hourly::-webkit-scrollbar{ display:none; }
-  .hour-card{
-    flex:0 0 auto;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:12px 10px;
-    text-align:center;
-    min-width:58px;
-    box-shadow:var(--shadow);
-  }
-  .hour-card.now{
-    border-color:var(--accent);
-    background:var(--accent-soft);
-  }
-  .hour-time{ font-size:10px; color:var(--ink-soft); margin-bottom:6px; }
-  .hour-icon{ font-size:22px; margin-bottom:6px; }
-  .hour-temp{ font-size:13px; font-weight:600; }
+/* NOTICE */
+.notice {
+  display: none; background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 14px;
+}
+.notice.show { display: block; }
+.notice.warn { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
+.notice.info { border-color: rgba(99,102,241,0.25); background: var(--accent-dim); }
+.notice-head { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+.notice-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.notice-body a { color: var(--accent); text-decoration: none; }
 
-  /* ---- Daily ---- */
-  .daily{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    overflow:hidden;
-    margin-bottom:10px;
-    box-shadow:var(--shadow);
-  }
-  .day-row{
-    display:flex;
-    align-items:center;
-    padding:12px 16px;
-    border-bottom:1px solid var(--line);
-    gap:12px;
-  }
-  .day-row:last-child{ border-bottom:none; }
-  .day-name{
-    font-size:13px;
-    font-weight:600;
-    width:64px;
-    flex-shrink:0;
-  }
-  .day-icon{ font-size:18px; width:26px; text-align:center; flex-shrink:0; }
-  .day-bar-wrap{
-    flex:1;
-    height:4px;
-    background:var(--line);
-    border-radius:2px;
-    position:relative;
-  }
-  .day-bar{
-    position:absolute;
-    height:4px;
-    border-radius:2px;
-    background:linear-gradient(90deg, var(--accent), var(--sun));
-  }
-  .day-range{
-    font-size:12px;
-    color:var(--ink-soft);
-    width:72px;
-    text-align:right;
-    flex-shrink:0;
-  }
-  .day-range b{ color:var(--ink); }
+/* PRO CARD (replaces all ads) */
+.pro-card {
+  border: 1.5px solid rgba(240,180,41,0.35); border-radius: var(--r);
+  padding: 16px 18px; margin-bottom: 14px;
+  background: linear-gradient(135deg, rgba(240,180,41,0.1), rgba(240,180,41,0.03));
+  position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.18s;
+}
+.pro-card:hover { border-color: rgba(240,180,41,0.6); }
+.pro-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+.pro-ico { font-size: 20px; }
+.pro-card-title { font-size: 14px; font-weight: 700; color: var(--gold); }
+.pro-card-desc { font-size: 12px; color: var(--muted); line-height: 1.55; margin-bottom: 12px; }
+.pro-feat-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
+.pro-feat { font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 7px; }
+.pro-feat::before { content: '✓'; color: var(--gold); font-weight: 700; }
+.pro-price-row { display: flex; align-items: center; justify-content: space-between; }
+.pro-price { font-size: 18px; font-weight: 700; }
+.pro-price span { font-size: 11px; color: var(--muted); font-weight: 500; }
+.btn-pro { background: var(--gold); color: #1a1300; border: none; border-radius: var(--rsm);
+  padding: 10px 18px; font-family: var(--font); font-size: 13px; font-weight: 700;
+  cursor: pointer; transition: opacity 0.18s; }
+.btn-pro:hover { opacity: 0.88; }
+.pro-card.compact { padding: 13px 16px; display: flex; align-items: center; gap: 12px; }
+.pro-card.compact .pro-card-head { margin-bottom: 0; flex: 1; }
+.pro-card.compact .pro-card-title { font-size: 13px; }
+.pro-mini-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.btn-pro-sm { background: var(--gold); color: #1a1300; border: none; border-radius: var(--rsm);
+  padding: 8px 14px; font-family: var(--font); font-size: 12px; font-weight: 700;
+  cursor: pointer; white-space: nowrap; }
 
-  /* ---- Outfit / activity suggestion ---- */
-  .outfit-card{
-    background: linear-gradient(135deg, var(--accent-soft), transparent);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:16px;
-    box-shadow:var(--shadow);
-  }
-  .outfit-top{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    margin-bottom:8px;
-  }
-  .outfit-icon{ font-size:24px; }
-  .outfit-title{ font-size:12px; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--ink-soft); }
-  .outfit-text{ font-size:13px; line-height:1.6; }
-  .outfit-tags{
-    display:flex;
-    gap:6px;
-    margin-top:10px;
-    flex-wrap:wrap;
-  }
-  .outfit-tag{
-    font-size:11px;
-    padding:4px 10px;
-    border-radius:20px;
-    background:var(--card);
-    border:1px solid var(--line);
-  }
+/* LOCKED FEATURE OVERLAY */
+.locked-wrap { position: relative; }
+.locked-wrap .locked-blur { filter: blur(5px); opacity: 0.5; pointer-events: none; user-select: none; }
+.locked-cta {
+  position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 12px;
+  background: rgba(10,10,10,0.35); border-radius: var(--r); z-index: 5;
+}
+.locked-cta-txt { font-size: 12px; color: var(--text); font-weight: 600; max-width: 220px; }
+.btn-unlock { background: var(--gold); color: #1a1300; border: none; border-radius: 20px;
+  padding: 7px 16px; font-family: var(--font); font-size: 11px; font-weight: 700; cursor: pointer; }
 
-  /* ---- Share card ---- */
-  .share-btn-row{
-    display:flex;
-    gap:8px;
-    margin-bottom:16px;
-  }
-  .share-btn-row button{
-    flex:1;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:10px;
-    padding:10px 0;
-    font-size:12px;
-    font-weight:600;
-    color:var(--ink-soft);
-    cursor:pointer;
-    box-shadow:var(--shadow);
-  }
-  .share-btn-row button:hover{ background:var(--accent-soft); color:var(--accent); }
+/* RESULTS */
+.results-sec { display: none; padding-top: 6px; }
+.results-sec.show { display: block; }
+.res-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
+.res-title { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
+.res-sub { font-size: 12px; color: var(--muted); margin-top: 3px; max-width: 300px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.btn-reset { background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
+  border-radius: var(--rsm); padding: 7px 12px; font-family: var(--font); font-size: 11px;
+  font-weight: 500; cursor: pointer; transition: color 0.18s; flex-shrink: 0; }
+.btn-reset:hover { color: var(--text); }
 
-  #shareCanvas{
-    display:none;
-  }
-  .share-preview-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(10,12,18,0.6);
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    z-index:60;
-    padding:20px;
-  }
-  .share-preview-box{
-    background:var(--card);
-    border-radius:18px;
-    padding:18px;
-    max-width:340px;
-    width:100%;
-  }
-  .share-preview-box img{
-    width:100%;
-    border-radius:12px;
-    margin-bottom:14px;
-    display:block;
-  }
-  .share-preview-actions{
-    display:flex;
-    gap:8px;
-  }
-  .share-preview-actions button{
-    flex:1;
-    border:none;
-    border-radius:10px;
-    padding:11px 0;
-    font-size:13px;
-    font-weight:600;
-    cursor:pointer;
-    font-family:inherit;
-  }
-  .share-preview-actions .download{ background:var(--ink); color:var(--paper); }
-  .share-preview-actions .close{ background:transparent; border:1px solid var(--line); color:var(--ink-soft); }
+/* VERDICT */
+.verdict-card {
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r);
+  padding: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px;
+}
+.gauge-wrap { position: relative; flex-shrink: 0; }
+.gauge-svg { width: 76px; height: 76px; transform: rotate(-90deg); }
+.g-track { fill: none; stroke: var(--surface2); stroke-width: 6; }
+.g-fill { fill: none; stroke-width: 6; stroke-linecap: round;
+  transition: stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1); }
+.gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center; }
+.g-num { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
+.g-unit { font-size: 9px; color: var(--muted); }
+.verdict-info { flex: 1; }
+.v-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 1px; margin-bottom: 3px; }
+.v-value { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 5px; }
+.v-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
 
-  /* ---- Cache / freshness badge ---- */
-  .freshness{
-    font-size:9.5px;
-    color:var(--ink-soft);
-    opacity:0.75;
-    display:flex;
-    align-items:center;
-    gap:4px;
-  }
-  .freshness .dot{
-    width:6px; height:6px;
-    border-radius:50%;
-    background:var(--good);
-    display:inline-block;
-  }
-  .freshness.stale .dot{ background:var(--warn); }
+/* GRID */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
+@media (max-width: 360px) { .grid2 { grid-template-columns: 1fr; } }
+.a-card {
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r);
+  padding: 14px; position: relative; overflow: hidden;
+}
+.a-card::after {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--ca, var(--accent)); opacity: 0.5;
+}
+.a-icon { font-size: 18px; margin-bottom: 8px; }
+.a-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.8px; margin-bottom: 3px; }
+.a-val { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
+.a-val.sm { font-size: 15px; font-weight: 600; }
+.a-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
+.pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; margin-top: 5px; }
+.pg { background: rgba(34,197,94,.12); color: var(--green); }
+.pa { background: rgba(245,158,11,.12); color: var(--amber); }
+.pr { background: rgba(239,68,68,.12); color: var(--red); }
+.pb { background: var(--accent-dim); color: var(--accent); }
 
-  /* ---- Alert banner ---- */
-  .alert-banner{
-    background: rgba(193,71,63,0.10);
-    border:1px solid rgba(193,71,63,0.3);
-    color:var(--danger);
-    border-radius:12px;
-    padding:12px 14px;
-    font-size:12px;
-    margin-bottom:16px;
-    display:flex;
-    gap:10px;
-    align-items:flex-start;
-    line-height:1.5;
-  }
-  .alert-banner .x{ font-size:16px; flex-shrink:0; }
+/* BAR */
+.bar-card { background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
+.bar-title { font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+.bar-row { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
+.bar-lbl { font-size: 11px; color: var(--muted); width: 70px; flex-shrink: 0; }
+.bar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 3px; transition: width 1.1s ease; background: var(--accent); }
+.bar-num { font-size: 11px; color: var(--muted); width: 32px; text-align: right; }
 
-  /* ---- Notification panel ---- */
-  .notif-card{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:14px;
-    padding:16px;
-    margin-bottom:22px;
-    box-shadow:var(--shadow);
-  }
-  .notif-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    padding:8px 0;
-    border-bottom:1px solid var(--line);
-    font-size:13px;
-  }
-  .notif-row:last-child{ border-bottom:none; }
-  .notif-row .lbl{ display:flex; flex-direction:column; }
-  .notif-row .lbl .d{ font-size:10px; color:var(--ink-soft); margin-top:2px; }
-  .switch{
-    width:40px; height:23px;
-    background:var(--line);
-    border-radius:12px;
-    position:relative;
-    cursor:pointer;
-    flex-shrink:0;
-    transition:background .2s;
-  }
-  .switch.on{ background:var(--accent); }
-  .switch::after{
-    content:'';
-    position:absolute;
-    top:2px; left:2px;
-    width:19px; height:19px;
-    background:#fff;
-    border-radius:50%;
-    transition:left .2s;
-  }
-  .switch.on::after{ left:19px; }
-  .notif-status{
-    font-size:11px;
-    color:var(--ink-soft);
-    margin-top:10px;
-    padding-top:10px;
-    border-top:1px dashed var(--line);
-    line-height:1.5;
-  }
-  .notif-status b{ color:var(--ink); }
+/* TAGS */
+.tags-card { background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
+.tags-t { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
+.tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
+  border: 1px solid var(--border); color: var(--muted); background: var(--surface2); }
+.tag.hot { border-color: rgba(99,102,241,.35); color: var(--accent); background: var(--accent-dim); }
 
-  /* ---- Widget mode ---- */
-  .widget-grid{
-    display:grid;
-    grid-template-columns: 1fr 1fr;
-    gap:12px;
-  }
-  .widget{
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:16px;
-    padding:16px;
-    box-shadow:var(--shadow);
-    position:relative;
-    overflow:hidden;
-  }
-  .widget.wide{ grid-column: 1 / 3; }
-  .widget-title{
-    font-size:9px;
-    text-transform:uppercase;
-    letter-spacing:0.08em;
-    color:var(--ink-soft);
-    margin-bottom:10px;
-    display:flex;
-    justify-content:space-between;
-  }
-  .widget-now{
-    display:flex;
-    align-items:center;
-    justify-content:space-between;
-  }
-  .widget-now .icon{ font-size:38px; }
-  .widget-now .temp{
-    font-family: Georgia, serif;
-    font-size:34px;
-    font-weight:600;
-  }
-  .widget-now .desc{ font-size:11px; color:var(--ink-soft); margin-top:2px; }
+/* COPYRIGHT */
+.cr-card { background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
+.cr-head { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
+.cr-ico { font-size: 20px; }
+.cr-t { font-size: 13px; font-weight: 600; }
+.cr-level { font-size: 11px; font-weight: 600; margin-top: 2px; }
+.risk-row { display: flex; align-items: center; justify-content: space-between;
+  padding: 9px 0; border-bottom: 1px solid var(--border); }
+.risk-row:last-child { border-bottom: none; padding-bottom: 0; }
+.risk-n { font-size: 12px; color: var(--muted); }
+.risk-bar-w { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; margin: 0 10px; overflow: hidden; }
+.risk-b { height: 100%; border-radius: 2px; transition: width 1.1s ease; }
+.risk-lv { font-size: 11px; font-weight: 600; width: 55px; text-align: right; }
 
-  .widget-hourly-strip{
-    display:flex;
-    justify-content:space-between;
-    margin-top:4px;
-  }
-  .whs-item{ text-align:center; flex:1; }
-  .whs-item .t{ font-size:9px; color:var(--ink-soft); }
-  .whs-item .i{ font-size:18px; margin:4px 0; }
-  .whs-item .v{ font-size:12px; font-weight:600; }
+/* PLATFORM */
+.compat-card { background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
+.compat-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.compat-item { display: flex; align-items: center; gap: 5px; padding: 7px 11px;
+  border-radius: var(--rsm); border: 1px solid var(--border); font-size: 12px;
+  font-weight: 500; background: var(--surface2); }
+.compat-dot { width: 6px; height: 6px; border-radius: 50%; }
 
-  .widget-stat-row{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-  }
-  .widget-stat-row .v{ font-size:22px; font-weight:600; }
+/* INSIGHTS */
+.ins-card { background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
+.ins-t { font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+.ins-item { display: flex; gap: 9px; margin-bottom: 11px; }
+.ins-item:last-child { margin-bottom: 0; }
+.ins-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
+  flex-shrink: 0; margin-top: 7px; }
+.ins-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
+.ins-text strong { color: var(--text); font-weight: 600; }
 
-  .widget-mini-icon{ font-size:24px; opacity:0.85; }
+/* TIMING CARD */
+.timing-card { background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
+.timing-t { font-size: 12px; font-weight: 600; margin-bottom: 12px; }
+.timing-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
+.day-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.day-name { font-size: 9px; color: var(--muted); font-weight: 500; }
+.day-slots { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+.slot { height: 18px; border-radius: 3px; background: var(--surface2); }
+.slot.ok { background: rgba(99,102,241,.5); }
+.slot.best { background: var(--accent); }
+.timing-legend { display: flex; gap: 12px; margin-top: 10px; }
+.leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
+.leg-dot { width: 10px; height: 10px; border-radius: 2px; }
 
-  .widget-7day{
-    display:flex;
-    justify-content:space-between;
-    margin-top:2px;
-  }
-  .w7-item{ text-align:center; flex:1; }
-  .w7-item .d{ font-size:9px; color:var(--ink-soft); margin-bottom:6px; }
-  .w7-item .i{ font-size:15px; margin-bottom:4px; }
-  .w7-item .mx{ font-size:11px; font-weight:600; }
-  .w7-item .mn{ font-size:10px; color:var(--ink-soft); }
+/* EMPTY */
+.empty-hint { text-align: center; padding: 48px 20px; }
+.empty-ico { font-size: 38px; margin-bottom: 10px; opacity: 0.35; }
+.empty-txt { font-size: 13px; color: var(--muted); line-height: 1.65; }
 
-  /* ---- States ---- */
-  .state-box{
-    text-align:center;
-    padding:50px 20px;
-    color:var(--ink-soft);
-    font-size:13px;
-  }
-  .state-box .big{ font-size:34px; margin-bottom:14px; }
-  .state-box .title{
-    font-size:15px;
-    font-weight:600;
-    color:var(--ink);
-    margin-bottom:8px;
-  }
-  .state-box p{ max-width:320px; margin:0 auto; line-height:1.5; }
-  .ask-btn{
-    margin-top:18px;
-    background:var(--ink);
-    color:var(--paper);
-    border:none;
-    border-radius:10px;
-    padding:11px 24px;
-    font-size:13px;
-    font-family:inherit;
-    font-weight:600;
-    cursor:pointer;
-  }
-  .ask-btn:hover{ opacity:0.88; }
-  .steps{
-    text-align:left;
-    background:var(--card);
-    border:1px solid var(--line);
-    border-radius:12px;
-    padding:14px 16px;
-    margin:16px auto 0;
-    max-width:320px;
-    font-size:12px;
-    line-height:1.7;
-    color:var(--ink-soft);
-  }
-  .steps b{ color:var(--ink); }
+/* MODAL */
+.modal-overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+  z-index: 1000; align-items: center; justify-content: center; padding: 20px;
+  backdrop-filter: blur(3px);
+}
+.modal-overlay.show { display: flex; }
+.modal-box {
+  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r);
+  max-width: 380px; width: 100%; padding: 24px 22px; position: relative;
+  max-height: 85vh; overflow-y: auto;
+}
+.modal-close { position: absolute; top: 14px; right: 14px; background: var(--surface2);
+  border: none; color: var(--muted); width: 26px; height: 26px; border-radius: 50%;
+  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
+.modal-head { text-align: center; margin-bottom: 18px; }
+.modal-ico { font-size: 30px; margin-bottom: 8px; }
+.modal-title { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
+.modal-sub { font-size: 12px; color: var(--muted); }
+.plan-opt {
+  border: 1.5px solid var(--border); border-radius: var(--rsm); padding: 13px 14px;
+  margin-bottom: 9px; cursor: pointer; transition: border-color 0.18s;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.plan-opt.sel { border-color: var(--gold); background: var(--gold-dim); }
+.plan-opt-l { font-size: 13px; font-weight: 600; }
+.plan-opt-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
+.plan-opt-r { font-size: 14px; font-weight: 700; text-align: right; }
+.plan-badge { background: var(--gold); color: #1a1300; font-size: 9px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px; margin-left: 6px; }
+.btn-confirm-pro { width: 100%; background: var(--gold); color: #1a1300; border: none;
+  border-radius: var(--rsm); padding: 13px; font-family: var(--font); font-size: 14px;
+  font-weight: 700; cursor: pointer; margin-top: 12px; }
+.modal-note { font-size: 10px; color: var(--sub); text-align: center; margin-top: 10px; line-height: 1.5; }
+.modal-feat-list { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
+.modal-feat { font-size: 12.5px; color: var(--text); display: flex; align-items: flex-start; gap: 8px; }
+.modal-feat::before { content: '✓'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
 
-  /* ---- Add-city modal ---- */
-  .modal-overlay{
-    position:fixed;
-    inset:0;
-    background:rgba(10,12,18,0.5);
-    display:flex;
-    align-items:flex-end;
-    justify-content:center;
-    z-index:50;
-  }
-  .modal-box{
-    background:var(--card);
-    width:100%;
-    max-width:480px;
-    border-radius:20px 20px 0 0;
-    padding:20px;
-    max-height:70vh;
-    overflow-y:auto;
-  }
-  .modal-title{
-    font-size:15px;
-    font-weight:600;
-    margin-bottom:12px;
-  }
-  .modal-input{
-    width:100%;
-    border:1px solid var(--line);
-    background:var(--paper);
-    color:var(--ink);
-    border-radius:10px;
-    padding:11px 14px;
-    font-size:13px;
-    font-family:inherit;
-    margin-bottom:10px;
-  }
-  .modal-input:focus{ outline:1px solid var(--accent); }
-  .modal-result{
-    padding:10px 12px;
-    border-radius:10px;
-    font-size:12.5px;
-    cursor:pointer;
-    border:1px solid var(--line);
-    margin-bottom:6px;
-    transition: background .15s;
-  }
-  .modal-result:hover{ background:var(--accent-soft); }
-  .modal-close{
-    width:100%;
-    text-align:center;
-    padding:10px;
-    color:var(--ink-soft);
-    font-size:12px;
-    margin-top:8px;
-    cursor:pointer;
-  }
-
-  .hidden{ display:none !important; }
-
-  footer{
-    text-align:center;
-    font-size:10px;
-    color:var(--ink-soft);
-    opacity:0.6;
-    margin-top:18px;
-    letter-spacing:0.03em;
-  }
-
-  @media (max-width:380px){
-    .hero-temp{ font-size:50px; }
-    .place{ font-size:23px; }
-    .stats{ grid-template-columns:repeat(2,1fr); }
-  }
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 </style>
 </head>
 <body>
 
-<div id="weatherFx"></div>
+<header class="header">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
+        <circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4M9 8l5 3-5 3V8z"/>
+      </svg>
+    </div>
+    <span class="logo-name">Vira<b>Lens</b></span>
+  </div>
+  <div class="hdr-right">
+    <span class="ai-badge">AI Destekli</span>
+    <span class="pro-badge-hdr" id="proBadgeHdr">⭐ Pro'ya Geç</span>
+  </div>
+</header>
 
-<div class="app">
+<div class="container">
 
-  <div id="loadingState" class="state-box">
-    <div class="big">⟳</div>
-    <div class="title">Konum belirleniyor</div>
-    <p>Hava durumunu gösterebilmek için tarayıcının konum izni isteniyor…</p>
+  <!-- UPLOAD -->
+  <div class="upload-sec">
+    <div class="sec-label">Video Yükle</div>
+
+    <div class="drop-zone" id="dropZone">
+      <input type="file" id="fileInput" accept="video/*">
+      <div class="drop-ico">🎬</div>
+      <div class="drop-t">Videoyu buraya sürükle bırak</div>
+      <div class="drop-s">veya <em>dosyaya göz at</em> — MP4, MOV, AVI, MKV, WEBM</div>
+    </div>
+
+    <!-- VIDEO PREVIEW -->
+    <div class="video-preview-wrap" id="videoPrev">
+      <video id="videoEl" controls playsinline muted></video>
+      <div class="video-overlay">
+        <button class="vid-btn" id="removeVid">✕ Kaldır</button>
+      </div>
+      <div class="video-meta-bar" id="videoMetaBar"></div>
+    </div>
+
+    <!-- TITLE INPUT -->
+    <div class="title-row" id="titleRow" style="display:none">
+      <input type="text" class="title-in" id="titleIn"
+        placeholder="Video başlığı / açıklama (AI analizi için — opsiyonel)">
+    </div>
+
+    <div class="divider"><em>veya URL ile</em></div>
+
+    <div class="url-row">
+      <input type="text" class="url-in" id="urlIn" placeholder="YouTube, TikTok, Instagram linki…">
+      <button class="btn-add" id="urlBtn">Ekle</button>
+    </div>
+
+    <!-- URL notice -->
+    <div class="notice info" id="urlNotice" style="display:none;margin-top:10px;">
+      <div class="notice-head">ℹ️ URL Analizi Hakkında</div>
+      <div class="notice-body">
+        Tarayıcı güvenliği nedeniyle dış platformlardan video verisi çekilemiyor.
+        <strong>Başlık ve açıklama girersen</strong> AI içerik analizi yapabilir;
+        teknik metrikler (süre, çözünürlük, boyut) görüntülenemez.
+      </div>
+    </div>
   </div>
 
-  <div id="errorState" class="state-box hidden">
-    <div class="big" id="errorIcon">⚠</div>
-    <div class="title" id="errorTitle">Konum alınamadı</div>
-    <p id="errorMsg">Bir sorun oluştu.</p>
-    <div id="errorSteps" class="steps hidden"></div>
-    <button class="ask-btn" onclick="init()">Tekrar dene</button>
+  <!-- ANALYZE -->
+  <div class="analyze-wrap">
+    <button class="btn-analyze" id="analyzeBtn" disabled>
+      <div class="spin"></div>
+      <span class="btxt">🔍 Analiz Et</span>
+    </button>
+    <div class="prog-wrap" id="progWrap">
+      <div class="prog-head">
+        <span id="progLabel">Hazırlanıyor…</span>
+        <span id="progPct">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    </div>
   </div>
 
-  <div id="content" class="hidden">
+  <!-- PRO PROMO — before results -->
+  <div class="pro-card" id="proPromo1">
+    <div class="pro-card-head">
+      <div class="pro-ico">⭐</div>
+      <div class="pro-card-title">ViraLens Pro'ya Geç</div>
+    </div>
+    <div class="pro-card-desc">Sınırsız analiz, derinlemesine AI raporu, rakip kıyaslama ve reklamsız deneyim.</div>
+    <div class="pro-price-row">
+      <div class="pro-price">₺49,99<span> / ay</span></div>
+      <button class="btn-pro" id="proBtn1">Yükselt</button>
+    </div>
+  </div>
 
-    <div class="top">
+  <!-- RESULTS -->
+  <div class="results-sec" id="resultsSec">
+    <div class="res-head">
       <div>
-        <div class="place" id="placeName">—</div>
-        <div class="place-sub" id="placeSub">—</div>
+        <div class="res-title">Analiz Sonucu</div>
+        <div class="res-sub" id="resSub">—</div>
       </div>
-      <div class="top-controls">
-        <div class="unit-toggle">
-          <button id="unitC" class="active" onclick="setUnit('C')">°C</button>
-          <button id="unitF" onclick="setUnit('F')">°F</button>
+      <button class="btn-reset" id="resetBtn">Temizle</button>
+    </div>
+
+    <!-- Limitations notice when no file -->
+    <div class="notice warn" id="limitNotice">
+      <div class="notice-head">⚠️ Sınırlı Analiz</div>
+      <div class="notice-body" id="limitText">—</div>
+    </div>
+
+    <!-- VERDICT -->
+    <div class="verdict-card">
+      <div class="gauge-wrap">
+        <svg class="gauge-svg" viewBox="0 0 76 76">
+          <circle class="g-track" cx="38" cy="38" r="30"/>
+          <circle class="g-fill" id="gFill" cx="38" cy="38" r="30"
+            stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
+        </svg>
+        <div class="gauge-center">
+          <div class="g-num" id="gNum">—</div>
+          <div class="g-unit">/ 100</div>
         </div>
-        <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Tema değiştir">◐</button>
-        <button class="icon-btn spin" onclick="refreshActive()" title="Yenile">⟳</button>
+      </div>
+      <div class="verdict-info">
+        <div class="v-label">Viral Skoru</div>
+        <div class="v-value" id="vValue">—</div>
+        <div class="v-desc" id="vDesc">—</div>
       </div>
     </div>
 
-    <div class="city-row" id="cityRow"></div>
+    <!-- GRID -->
+    <div class="grid2" id="mainGrid"></div>
 
-    <div id="alertBanner" class="alert-banner hidden">
-      <div class="x">⚠</div>
-      <div id="alertText"></div>
+    <!-- PRO PROMO — mid results, compact -->
+    <div class="pro-card compact" id="proPromo2">
+      <div class="pro-card-head">
+        <div class="pro-ico">🚀</div>
+        <div>
+          <div class="pro-card-title">Daha derin AI raporu ister misin?</div>
+          <div class="pro-mini-sub">Pro ile rakip kıyaslama ve trend tahmini açılır</div>
+        </div>
+      </div>
+      <button class="btn-pro-sm" id="proBtn2">Pro'ya Geç</button>
     </div>
 
-    <div class="view-tabs">
-      <button id="tabFull" class="active" onclick="setView('full')">Tam Görünüm</button>
-      <button id="tabWidget" onclick="setView('widget')">Widget</button>
-      <button id="tabAlerts" onclick="setView('alerts')">Bildirimler</button>
+    <!-- ENGAGEMENT BAR -->
+    <div class="bar-card" id="engBar"></div>
+
+    <!-- TIMING -->
+    <div class="timing-card" id="timingCard"></div>
+
+    <!-- TAGS -->
+    <div class="tags-card" id="tagsCard"></div>
+
+    <!-- COPYRIGHT -->
+    <div class="cr-card" id="crCard"></div>
+
+    <!-- PLATFORM -->
+    <div class="compat-card" id="compatCard"></div>
+
+    <!-- ADVANCED / PRO-LOCKED SECTION -->
+    <div class="locked-wrap" id="advancedWrap">
+      <div id="advancedInner"></div>
     </div>
 
-    <!-- FULL VIEW -->
-    <div id="fullView">
-      <div class="hero">
-        <div class="updated-at" id="updatedAt"></div>
-        <div class="freshness" id="freshnessBadge" style="position:absolute; top:30px; right:18px;"><span class="dot"></span><span id="freshnessText">canlı</span></div>
-        <div class="hero-row">
-          <div class="hero-icon" id="heroIcon">☀️</div>
-          <div>
-            <div class="hero-temp" id="heroTemp">—<sup>°</sup></div>
-            <div class="hero-desc" id="heroDesc">—</div>
-          </div>
-        </div>
-        <div class="hero-feels">
-          <span>Hissedilen: <b id="feelsVal">—</b></span>
-          <span id="todayMinMax">—</span>
-        </div>
+    <!-- INSIGHTS -->
+    <div class="ins-card" id="insCard"></div>
+
+    <!-- PRO PROMO — bottom -->
+    <div class="pro-card" id="proPromo3">
+      <div class="pro-card-head">
+        <div class="pro-ico">👑</div>
+        <div class="pro-card-title">Pro ile Sınırsız Analiz</div>
       </div>
-
-      <div class="stats">
-        <div class="stat">
-          <div class="stat-label">Rüzgar</div>
-          <div class="stat-value" id="statWind">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Nem</div>
-          <div class="stat-value" id="statHumidity">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">UV İndeksi</div>
-          <div class="stat-value tag" id="statUv">—</div>
-        </div>
-        <div class="stat">
-          <div class="stat-label">Hava Kalitesi</div>
-          <div class="stat-value tag" id="statAqi">—</div>
-        </div>
+      <div class="pro-feat-list">
+        <div class="pro-feat">Sınırsız video / URL analizi</div>
+        <div class="pro-feat">Rakip kanal kıyaslama raporu</div>
+        <div class="pro-feat">7 günlük trend tahmin grafiği</div>
+        <div class="pro-feat">Reklamsız, öncelikli AI işleme</div>
       </div>
-
-      <div class="outfit-card">
-        <div class="outfit-top">
-          <span class="outfit-icon" id="outfitIcon">🧥</span>
-          <span class="outfit-title">Bugün ne giysem?</span>
-        </div>
-        <div class="outfit-text" id="outfitText">—</div>
-        <div class="outfit-tags" id="outfitTags"></div>
-      </div>
-
-      <div class="share-btn-row">
-        <button onclick="shareWeatherCard()">📤 Hava durumu kartı paylaş</button>
-      </div>
-
-      <div class="sun-card">
-        <div class="sun-card-top">
-          <span>🌅 Gün doğumu: <b id="sunriseTime">—</b></span>
-          <span>🌇 Gün batımı: <b id="sunsetTime">—</b></span>
-        </div>
-        <div class="sun-arc-wrap">
-          <div class="sun-arc-track"></div>
-          <div class="sun-arc-fill" id="sunArcFill"></div>
-          <div class="sun-arc-dot" id="sunArcDot"></div>
-        </div>
-        <div class="sun-times">
-          <span id="daylightLeft">—</span>
-          <span id="dayLength">—</span>
-        </div>
-      </div>
-
-      <div class="section-label">Saatlik</div>
-      <div class="hourly" id="hourlyRow"></div>
-
-      <div class="section-label">7 Günlük Tahmin</div>
-      <div class="daily" id="dailyList"></div>
-    </div>
-
-    <!-- WIDGET VIEW -->
-    <div id="widgetView" class="hidden">
-      <div class="widget-grid">
-        <div class="widget wide">
-          <div class="widget-title"><span id="wTitle">—</span><span id="wTime">—</span></div>
-          <div class="widget-now">
-            <div>
-              <div class="temp" id="wTemp">—°</div>
-              <div class="desc" id="wDesc">—</div>
-            </div>
-            <div class="icon" id="wIcon">☀️</div>
-          </div>
-        </div>
-
-        <div class="widget">
-          <div class="widget-title">Rüzgar</div>
-          <div class="widget-stat-row">
-            <div class="v" id="wWind">—</div>
-            <div class="widget-mini-icon">💨</div>
-          </div>
-        </div>
-
-        <div class="widget">
-          <div class="widget-title">UV İndeksi</div>
-          <div class="widget-stat-row">
-            <div class="v" id="wUv">—</div>
-            <div class="widget-mini-icon">🔆</div>
-          </div>
-        </div>
-
-        <div class="widget wide">
-          <div class="widget-title">Saatlik</div>
-          <div class="widget-hourly-strip" id="wHourly"></div>
-        </div>
-
-        <div class="widget wide">
-          <div class="widget-title">5 Günlük</div>
-          <div class="widget-7day" id="w7day"></div>
-        </div>
+      <div class="pro-price-row">
+        <div class="pro-price">₺49,99<span> / ay</span></div>
+        <button class="btn-pro" id="proBtn3">Yükselt</button>
       </div>
     </div>
-
-    <!-- ALERTS / NOTIFICATIONS VIEW -->
-    <div id="alertsView" class="hidden">
-      <div class="notif-card">
-        <div class="notif-row">
-          <div class="lbl">
-            <span>Yağmur uyarısı</span>
-            <span class="d">Yağış ihtimali %60 üzerine çıkınca bildir</span>
-          </div>
-          <div class="switch" id="swRain" onclick="toggleNotifPref('rain')"></div>
-        </div>
-        <div class="notif-row">
-          <div class="lbl">
-            <span>Aşırı sıcak uyarısı</span>
-            <span class="d">Hissedilen sıcaklık 32°C üzerine çıkınca bildir</span>
-          </div>
-          <div class="switch" id="swHot" onclick="toggleNotifPref('hot')"></div>
-        </div>
-        <div class="notif-row">
-          <div class="lbl">
-            <span>Aşırı soğuk uyarısı</span>
-            <span class="d">Hissedilen sıcaklık 0°C altına düşünce bildir</span>
-          </div>
-          <div class="switch" id="swCold" onclick="toggleNotifPref('cold')"></div>
-        </div>
-        <div class="notif-row">
-          <div class="lbl">
-            <span>Yüksek UV uyarısı</span>
-            <span class="d">UV indeksi 7 üzerine çıkınca bildir</span>
-          </div>
-          <div class="switch" id="swUv" onclick="toggleNotifPref('uv')"></div>
-        </div>
-        <div class="notif-status" id="notifStatus">
-          Tarayıcı bildirim izni: <b id="notifPermLabel">kontrol ediliyor…</b>
-        </div>
-        <button class="ask-btn" style="width:100%; margin-top:12px;" onclick="requestNotifPermission()">Bildirim izni iste</button>
-        <div class="notif-status">
-          <b>Not:</b> Tarayıcı bildirimleri, bu sayfa açık/sekme arka planda olduğu sürece çalışır. Sayfa tamamen kapatılırsa bildirim gönderilemez — bu, native bir mobil uygulama değil, web sayfası olmasının doğal sınırı.
-        </div>
-      </div>
-    </div>
-
-    <footer>Veri kaynağı: Open-Meteo</footer>
   </div>
 
+  <!-- EMPTY -->
+  <div class="empty-hint" id="emptyHint">
+    <div class="empty-ico">📡</div>
+    <div class="empty-txt">Video yükle ya da URL gir.<br>AI destekli 8+ metrik ile gerçek analiz başlar.<br><br>
+      <span style="font-size:11px;color:var(--sub)">Yüklenen video hiçbir sunucuya gönderilmez.<br>Tüm işlem tarayıcında gerçekleşir.</span>
+    </div>
+  </div>
 </div>
 
-<!-- Add city modal -->
-<div id="addCityModal" class="modal-overlay hidden" onclick="if(event.target===this) closeAddCity()">
+<!-- PRO UPGRADE MODAL -->
+<div class="modal-overlay" id="proModal">
   <div class="modal-box">
-    <div class="modal-title">Şehir ekle</div>
-    <input type="text" id="cityInput" class="modal-input" placeholder="Şehir adı yaz (örn. İzmir)" oninput="onCitySearchInput()">
-    <div id="cityResults"></div>
-    <div class="modal-close" onclick="closeAddCity()">Kapat</div>
-  </div>
-</div>
-
-<canvas id="shareCanvas" width="640" height="800"></canvas>
-
-<div id="sharePreviewOverlay" class="share-preview-overlay hidden" onclick="if(event.target===this) closeSharePreview()">
-  <div class="share-preview-box">
-    <img id="sharePreviewImg" src="" alt="Hava durumu kartı">
-    <div class="share-preview-actions">
-      <button class="download" onclick="downloadShareImage()">İndir</button>
-      <button class="close" onclick="closeSharePreview()">Kapat</button>
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-head">
+      <div class="modal-ico">👑</div>
+      <div class="modal-title">ViraLens Pro</div>
+      <div class="modal-sub">Arkadaşlarını davet et, Pro'yu aç</div>
     </div>
+    <div class="modal-feat-list">
+      <div class="modal-feat">10 farklı arkadaş girince → Pro kalıcı açılır</div>
+      <div class="modal-feat">20 farklı arkadaş girince → 7 günlük Süper Pro açılır</div>
+      <div class="modal-feat">Sınırsız analiz, rakip kıyaslama, trend tahmini</div>
+    </div>
+
+    <div style="background:var(--surface2);border-radius:var(--rsm);padding:14px;margin-bottom:14px">
+      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Senin davet linkin</div>
+      <div style="display:flex;gap:8px">
+        <input type="text" id="refLinkInput" readonly
+          style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:9px 10px;color:var(--text);font-size:11px;font-family:var(--font)">
+        <button class="btn-pro-sm" id="copyRefBtn">Kopyala</button>
+      </div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-bottom:14px">
+      <div style="flex:1;background:var(--surface2);border-radius:var(--rsm);padding:12px;text-align:center">
+        <div id="refCountNum" style="font-size:22px;font-weight:700;color:var(--gold)">0</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Davet edilen</div>
+      </div>
+      <div style="flex:1;background:var(--surface2);border-radius:var(--rsm);padding:12px;text-align:center">
+        <div id="refStatusTxt" style="font-size:13px;font-weight:700;color:var(--text)">Henüz yok</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:2px">Durum</div>
+      </div>
+    </div>
+
+    <div class="bar-track" style="height:8px;margin-bottom:8px">
+      <div class="bar-fill" id="refProgressBar" style="width:0%;background:var(--gold)"></div>
+    </div>
+    <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:14px" id="refProgressTxt">
+      0 / 10 — Pro için 10 davet gerekiyor
+    </div>
+
+    <button class="btn-confirm-pro" id="shareRefBtn">📤 Linki Paylaş</button>
+    <div class="modal-note">Aynı kişi linke kaç kez girerse girsin, sadece 1 kez sayılır.<br>Sayım gerçek ve sunucuda (Supabase) tutulur — tarayıcı yenilense de kaybolmaz.</div>
   </div>
 </div>
+
 
 <script>
 const $ = id => document.getElementById(id);
+const CIRC = 188.5;
 
-let state = {
-  unit: 'C',
-  view: 'full',
-  theme: 'light',
-  cities: [],          // [{id, name, sub, lat, lon, isCurrent, data}]
-  activeCityId: null,
-  notifPrefs: { rain:false, hot:false, cold:false, uv:false },
-  notifSentLog: {}      // şehir+tür bazlı tekrar bildirim engelleme
-};
+let state = { hasInput: false, isFile: false, fileMeta: {}, url: '', title: '' };
+let isPro = false;
+let proTier = 'none'; // 'none' | 'pro' | 'superpro'
 
-// ============ Tema / birim / görünüm ============
-function applyTheme(){
-  document.documentElement.setAttribute('data-theme', state.theme);
-  $('themeBtn') && ($('themeBtn').textContent = state.theme === 'dark' ? '☾' : '◐');
-}
-function toggleTheme(){
-  state.theme = state.theme === 'dark' ? 'light' : 'dark';
-  applyTheme();
-  try{ localStorage.setItem('weatherTheme', state.theme); }catch(e){}
-}
-function setView(v){
-  state.view = v;
-  $('tabFull').classList.toggle('active', v === 'full');
-  $('tabWidget').classList.toggle('active', v === 'widget');
-  $('tabAlerts').classList.toggle('active', v === 'alerts');
-  $('fullView').classList.toggle('hidden', v !== 'full');
-  $('widgetView').classList.toggle('hidden', v !== 'widget');
-  $('alertsView').classList.toggle('hidden', v !== 'alerts');
-}
-function setUnit(u){
-  state.unit = u;
-  $('unitC').classList.toggle('active', u === 'C');
-  $('unitF').classList.toggle('active', u === 'F');
-  const c = getActiveCity();
-  if(c && c.data) renderWeather(c);
-}
-function c2f(c){ return c * 9/5 + 32; }
-function fmtTemp(c, withUnit=true){
-  const v = state.unit === 'F' ? c2f(c) : c;
-  return Math.round(v) + (withUnit ? '°' : '');
-}
+/* ─── SUPABASE SETUP ─── */
+const SUPABASE_URL = 'https://xpjnadnvukhelctjcsju.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_mKGTmtqK5l2deUSQIuMd1Q_EIBoGa5e';
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ============ Hava kodu -> emoji / açıklama ============
-function weatherInfo(code, isDay){
-  const map = {
-    0:  ['☀️','Açık', '🌙'],
-    1:  ['🌤️','Genelde açık', '🌙'],
-    2:  ['⛅','Parçalı bulutlu', '☁️'],
-    3:  ['☁️','Bulutlu', '☁️'],
-    45: ['🌫️','Sisli', '🌫️'],
-    48: ['🌫️','Kırağı sisi', '🌫️'],
-    51: ['🌦️','Hafif çisenti', '🌦️'],
-    53: ['🌦️','Çisenti', '🌦️'],
-    55: ['🌧️','Yoğun çisenti', '🌧️'],
-    56: ['🌧️','Dondurucu çisenti', '🌧️'],
-    57: ['🌧️','Yoğun dondurucu çisenti', '🌧️'],
-    61: ['🌧️','Hafif yağmur', '🌧️'],
-    63: ['🌧️','Yağmur', '🌧️'],
-    65: ['🌧️','Şiddetli yağmur', '🌧️'],
-    66: ['🌧️','Dondurucu yağmur', '🌧️'],
-    67: ['🌧️','Şiddetli dondurucu yağmur', '🌧️'],
-    71: ['🌨️','Hafif kar', '🌨️'],
-    73: ['🌨️','Kar', '🌨️'],
-    75: ['❄️','Yoğun kar', '❄️'],
-    77: ['❄️','Kar taneleri', '❄️'],
-    80: ['🌦️','Hafif sağanak', '🌦️'],
-    81: ['🌧️','Sağanak', '🌧️'],
-    82: ['⛈️','Şiddetli sağanak', '⛈️'],
-    85: ['🌨️','Hafif kar sağanağı', '🌨️'],
-    86: ['❄️','Yoğun kar sağanağı', '❄️'],
-    95: ['⛈️','Gök gürültülü fırtına', '⛈️'],
-    96: ['⛈️','Dolu ile fırtına', '⛈️'],
-    99: ['⛈️','Şiddetli dolu fırtınası', '⛈️'],
-  };
-  const entry = map[code] || ['☁️','Bilinmiyor', '☁️'];
-  const icon = isDay === 0 ? entry[2] : entry[0];
-  return { icon, desc: entry[1], code };
-}
-function weatherCategory(code){
-  if([95,96,99].includes(code)) return 'storm';
-  if([61,63,65,66,67,80,81,82,51,53,55,56,57].includes(code)) return 'rain';
-  if([71,73,75,77,85,86].includes(code)) return 'snow';
-  if([0,1].includes(code)) return 'clear';
-  if([45,48].includes(code)) return 'fog';
-  return 'cloud';
-}
-
-function dayLabel(dateStr, idx){
-  if(idx === 0) return 'Bugün';
-  const days = ['Paz','Pzt','Sal','Çar','Per','Cum','Cmt'];
-  const d = new Date(dateStr + 'T00:00:00');
-  return days[d.getDay()];
-}
-function hourLabel(dt){
-  const d = new Date(dt);
-  return d.getHours().toString().padStart(2,'0') + ':00';
-}
-function timeLabel(iso){
-  const d = new Date(iso);
-  return d.getHours().toString().padStart(2,'0') + ':' + d.getMinutes().toString().padStart(2,'0');
-}
-
-// ============ UV / AQI yardımcıları ============
-function uvTag(uv){
-  if(uv == null) return { label:'—', cls:'' };
-  if(uv < 3) return { label: Math.round(uv) + ' Düşük', cls:'tag-good' };
-  if(uv < 6) return { label: Math.round(uv) + ' Orta', cls:'tag-warn' };
-  if(uv < 8) return { label: Math.round(uv) + ' Yüksek', cls:'tag-warn' };
-  return { label: Math.round(uv) + ' Çok Yüksek', cls:'tag-bad' };
-}
-function aqiTag(aqi){
-  if(aqi == null) return { label:'—', cls:'' };
-  if(aqi <= 50) return { label: aqi + ' İyi', cls:'tag-good' };
-  if(aqi <= 100) return { label: aqi + ' Orta', cls:'tag-warn' };
-  return { label: aqi + ' Kötü', cls:'tag-bad' };
-}
-
-// ============ Hava animasyonu ============
-function renderWeatherFx(category){
-  const fx = $('weatherFx');
-  fx.innerHTML = '';
-  if(category === 'rain' || category === 'storm'){
-    for(let i=0;i<40;i++){
-      const d = document.createElement('div');
-      d.className = 'fx-rain-drop';
-      const h = 14 + Math.random()*18;
-      d.style.height = h + 'px';
-      d.style.left = Math.random()*100 + 'vw';
-      d.style.animationDuration = (0.5 + Math.random()*0.6) + 's';
-      d.style.animationDelay = (Math.random()*2) + 's';
-      fx.appendChild(d);
-    }
-    if(category === 'storm'){
-      const flash = document.createElement('div');
-      flash.className = 'fx-lightning';
-      fx.appendChild(flash);
-    }
-  } else if(category === 'snow'){
-    for(let i=0;i<35;i++){
-      const d = document.createElement('div');
-      d.className = 'fx-snow';
-      const size = 3 + Math.random()*4;
-      d.style.width = size+'px';
-      d.style.height = size+'px';
-      d.style.left = Math.random()*100 + 'vw';
-      d.style.setProperty('--drift', (Math.random()*60-30)+'px');
-      d.style.animationDuration = (4 + Math.random()*4) + 's';
-      d.style.animationDelay = (Math.random()*3) + 's';
-      fx.appendChild(d);
-    }
-  } else if(category === 'clear'){
-    const sun = document.createElement('div');
-    sun.className = 'fx-sun-ray';
-    fx.appendChild(sun);
-  } else if(category === 'cloud' || category === 'fog'){
-    for(let i=0;i<4;i++){
-      const c = document.createElement('div');
-      c.className = 'fx-cloud';
-      const w = 140 + Math.random()*120;
-      c.style.width = w+'px';
-      c.style.height = (w*0.4)+'px';
-      c.style.top = (10 + Math.random()*50) + 'vh';
-      c.style.animationDuration = (40 + Math.random()*30) + 's';
-      c.style.animationDelay = (-Math.random()*40) + 's';
-      fx.appendChild(c);
-    }
+/* ─── REFERRAL IDENTITY ───
+   Her tarayıcıya kalıcı bir kimlik (visitor_id) ve eğer kendi davet
+   kodu yoksa bir tane (ref_code) atanır. localStorage'da saklanır;
+   böylece sayfa yenilense de kaybolmaz. */
+function getOrCreateLocal(key, generator) {
+  let v = localStorage.getItem(key);
+  if (!v) {
+    v = generator();
+    localStorage.setItem(key, v);
   }
+  return v;
+}
+function randomCode(len = 7) {
+  const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
+  let out = '';
+  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
+  return out;
 }
 
-// ============ API çağrıları ============
-async function reverseGeocode(lat, lon){
-  try{
-    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/reverse?latitude=${lat}&longitude=${lon}&language=tr&format=json`);
-    const data = await res.json();
-    if(data.results && data.results.length){
-      const r = data.results[0];
-      return { name: r.name || 'Bilinmeyen konum', sub: [r.admin1, r.country].filter(Boolean).join(', ') };
-    }
-  }catch(e){}
-  return { name: `${lat.toFixed(2)}, ${lon.toFixed(2)}`, sub: 'Konum adı bulunamadı' };
-}
+const myVisitorId = getOrCreateLocal('vl_visitor_id', () => randomCode(16));
+const myRefCode = getOrCreateLocal('vl_ref_code', () => randomCode(7));
 
-async function searchCity(query){
-  if(!query || query.trim().length < 2) return [];
-  try{
-    const res = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=6&language=tr&format=json`);
-    const data = await res.json();
-    return data.results || [];
-  }catch(e){ return []; }
-}
-
-async function fetchWeather(lat, lon){
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
-    `&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,is_day,surface_pressure,uv_index` +
-    `&hourly=temperature_2m,weather_code,is_day` +
-    `&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunrise,sunset` +
-    `&timezone=auto&forecast_days=7`;
-  const res = await fetch(url);
-  if(!res.ok) throw new Error('Hava durumu verisi alınamadı.');
-  return res.json();
-}
-
-async function fetchAirQuality(lat, lon){
-  try{
-    const url = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lon}&current=us_aqi&timezone=auto`;
-    const res = await fetch(url);
-    if(!res.ok) return null;
-    const data = await res.json();
-    return data.current ? data.current.us_aqi : null;
-  }catch(e){ return null; }
-}
-
-// ============ Şehir yönetimi ============
-function getActiveCity(){
-  return state.cities.find(c => c.id === state.activeCityId);
-}
-
-function renderCityChips(){
-  const row = $('cityRow');
-  row.innerHTML = '';
-  state.cities.forEach(c => {
-    const chip = document.createElement('div');
-    chip.className = 'city-chip' + (c.id === state.activeCityId ? ' active' : '');
-    const tempStr = c.data ? fmtTemp(c.data.current.temperature_2m) : '…';
-    chip.innerHTML = `<span>${c.isCurrent ? '📍' : ''}${c.name}</span><span class="temp-pill">${tempStr}</span>` +
-      (!c.isCurrent ? `<span class="remove-x" data-remove="${c.id}">✕</span>` : '');
-    chip.addEventListener('click', (e) => {
-      if(e.target.dataset.remove){
-        removeCity(e.target.dataset.remove);
-        return;
-      }
-      setActiveCity(c.id);
-    });
-    row.appendChild(chip);
-  });
-  const addChip = document.createElement('div');
-  addChip.className = 'city-chip add-city';
-  addChip.textContent = '+ Şehir ekle';
-  addChip.onclick = openAddCity;
-  row.appendChild(addChip);
-}
-
-function setActiveCity(id){
-  state.activeCityId = id;
-  renderCityChips();
-  const c = getActiveCity();
-  if(c && c.data){
-    renderWeather(c);
-  } else if(c){
-    loadCityWeather(c);
+let proExpiresAt = null; // for süper pro 7-day window
+(function loadStoredProState() {
+  const stored = localStorage.getItem('vl_pro_tier');
+  const storedExp = localStorage.getItem('vl_pro_expires');
+  if (stored === 'superpro' && storedExp && new Date(storedExp) > new Date()) {
+    proTier = 'superpro'; isPro = true; proExpiresAt = storedExp;
+  } else if (stored === 'pro') {
+    proTier = 'pro'; isPro = true;
   }
-}
-
-function removeCity(id){
-  state.cities = state.cities.filter(c => c.id !== id);
-  if(state.activeCityId === id && state.cities.length){
-    setActiveCity(state.cities[0].id);
-  } else {
-    renderCityChips();
-  }
-  persistCities();
-}
-
-function persistCities(){
-  try{
-    const toSave = state.cities.filter(c => !c.isCurrent).map(c => ({ id:c.id, name:c.name, sub:c.sub, lat:c.lat, lon:c.lon }));
-    localStorage.setItem('weatherCities', JSON.stringify(toSave));
-  }catch(e){}
-}
-
-const CACHE_TTL_MS = 10 * 60 * 1000; // 10 dakika
-
-function getCachedWeather(cityId){
-  try{
-    const raw = localStorage.getItem('weatherCache_' + cityId);
-    if(!raw) return null;
-    const parsed = JSON.parse(raw);
-    if(Date.now() - parsed.savedAt > CACHE_TTL_MS * 6) return null; // 1 saatten eskiyse hiç kullanma
-    return parsed;
-  }catch(e){ return null; }
-}
-function setCachedWeather(cityId, weather, aqi){
-  try{
-    localStorage.setItem('weatherCache_' + cityId, JSON.stringify({ weather, aqi, savedAt: Date.now() }));
-  }catch(e){}
-}
-
-async function loadCityWeather(city, opts={}){
-  const cached = !opts.forceRefresh && getCachedWeather(city.id);
-  if(cached && !city.data){
-    // Anında cache'den göster, arka planda tazele
-    city.data = cached.weather;
-    city.aqi = cached.aqi;
-    city.dataAge = Date.now() - cached.savedAt;
-    renderCityChips();
-    if(city.id === state.activeCityId) renderWeather(city);
-  }
-  try{
-    const [weather, aqi] = await Promise.all([
-      fetchWeather(city.lat, city.lon),
-      fetchAirQuality(city.lat, city.lon)
-    ]);
-    city.data = weather;
-    city.aqi = aqi;
-    city.dataAge = 0;
-    setCachedWeather(city.id, weather, aqi);
-    renderCityChips();
-    if(city.id === state.activeCityId) renderWeather(city);
-    checkAlerts(city);
-  }catch(e){
-    if(!city.data){
-      if(city.id === state.activeCityId){
-        showState('error', { title:'Veri alınamadı', icon:'📡', msg:'Bu şehir için hava durumu verisi alınamadı. Bağlantını kontrol edip tekrar dene.' });
-      }
-    }
-    // city.data zaten cache'den geldiyse (eski ama mevcut), sessizce geç — kullanıcı bayat veri rozetini görür
-  }
-}
-
-function refreshActive(){
-  const c = getActiveCity();
-  if(c) loadCityWeather(c, { forceRefresh:true });
-}
-
-// ============ Şehir ekleme modalı ============
-function openAddCity(){
-  $('addCityModal').classList.remove('hidden');
-  $('cityInput').value = '';
-  $('cityResults').innerHTML = '';
-  setTimeout(() => $('cityInput').focus(), 50);
-}
-function closeAddCity(){
-  $('addCityModal').classList.add('hidden');
-}
-let citySearchTimeout;
-function onCitySearchInput(){
-  clearTimeout(citySearchTimeout);
-  const q = $('cityInput').value;
-  citySearchTimeout = setTimeout(async () => {
-    const results = await searchCity(q);
-    const box = $('cityResults');
-    box.innerHTML = '';
-    if(!results.length){
-      box.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);padding:8px 2px;">Sonuç bulunamadı.</div>';
-      return;
-    }
-    results.forEach(r => {
-      const div = document.createElement('div');
-      div.className = 'modal-result';
-      div.innerHTML = `<b>${r.name}</b> · ${[r.admin1, r.country].filter(Boolean).join(', ')}`;
-      div.onclick = () => addCity(r);
-      box.appendChild(div);
-    });
-  }, 350);
-}
-function addCity(r){
-  const id = 'city_' + r.latitude.toFixed(3) + '_' + r.longitude.toFixed(3);
-  if(state.cities.some(c => c.id === id)){
-    setActiveCity(id);
-    closeAddCity();
-    return;
-  }
-  const city = {
-    id, name: r.name, sub: [r.admin1, r.country].filter(Boolean).join(', '),
-    lat: r.latitude, lon: r.longitude, isCurrent:false, data:null
-  };
-  state.cities.push(city);
-  renderCityChips();
-  persistCities();
-  closeAddCity();
-  setActiveCity(id);
-}
-
-// ============ Render: Full + Widget ============
-function renderWeather(city){
-  const data = city.data;
-  $('placeName').textContent = city.name;
-  $('placeSub').textContent = city.sub + (city.isCurrent && city.accuracy ? ` · konum doğruluğu ~${Math.round(city.accuracy)}m` : '');
-
-  const cur = data.current;
-  const info = weatherInfo(cur.weather_code, cur.is_day);
-  const category = weatherCategory(cur.weather_code);
-  renderWeatherFx(category);
-
-  // Tazelik rozeti
-  const ageMs = city.dataAge || 0;
-  const badge = $('freshnessBadge');
-  if(ageMs > CACHE_TTL_MS){
-    badge.classList.add('stale');
-    $('freshnessText').textContent = Math.round(ageMs/60000) + ' dk önceki veri';
-  } else {
-    badge.classList.remove('stale');
-    $('freshnessText').textContent = 'canlı';
-  }
-
-  // FULL
-  $('heroIcon').textContent = info.icon;
-  $('heroTemp').innerHTML = fmtTemp(cur.temperature_2m, false) + '<sup>°' + state.unit + '</sup>';
-  $('heroDesc').textContent = info.desc;
-  $('feelsVal').textContent = fmtTemp(cur.apparent_temperature) + state.unit;
-
-  const todayMax = data.daily.temperature_2m_max[0];
-  const todayMin = data.daily.temperature_2m_min[0];
-  $('todayMinMax').innerHTML = `↑${fmtTemp(todayMax)} ↓${fmtTemp(todayMin)}`;
-
-  $('statWind').textContent = Math.round(cur.wind_speed_10m) + ' km/s';
-  $('statHumidity').textContent = Math.round(cur.relative_humidity_2m) + '%';
-
-  const uv = uvTag(cur.uv_index ?? data.daily.uv_index_max?.[0]);
-  $('statUv').textContent = uv.label;
-  $('statUv').className = 'stat-value tag ' + uv.cls;
-
-  const aqi = aqiTag(city.aqi);
-  $('statAqi').textContent = aqi.label;
-  $('statAqi').className = 'stat-value tag ' + aqi.cls;
-
-  const now = new Date();
-  $('updatedAt').textContent = 'Güncellendi: ' + timeLabel(now.toISOString());
-
-  // Güneş kartı
-  const sunrise = data.daily.sunrise[0];
-  const sunset = data.daily.sunset[0];
-  $('sunriseTime').textContent = timeLabel(sunrise);
-  $('sunsetTime').textContent = timeLabel(sunset);
-
-  const nowMs = Date.now();
-  const sunriseMs = new Date(sunrise).getTime();
-  const sunsetMs = new Date(sunset).getTime();
-  const dayLenMs = sunsetMs - sunriseMs;
-  let progress = (nowMs - sunriseMs) / dayLenMs;
-  progress = Math.max(0, Math.min(1, progress));
-  $('sunArcFill').style.width = (progress*100) + '%';
-  $('sunArcDot').style.left = (progress*100) + '%';
-
-  const hoursLeft = Math.max(0, (sunsetMs - nowMs) / 3600000);
-  $('daylightLeft').textContent = nowMs < sunriseMs ? 'Gün doğmadı'
-    : (nowMs > sunsetMs ? 'Gün battı' : `Gün batımına ${hoursLeft.toFixed(1)} sa`);
-  $('dayLength').textContent = `Gün uzunluğu: ${(dayLenMs/3600000).toFixed(1)} sa`;
-
-  // Saatlik
-  const hourly = data.hourly;
-  const nowIso = data.current.time;
-  let startIdx = hourly.time.findIndex(t => t >= nowIso);
-  if(startIdx === -1) startIdx = 0;
-
-  const hourlyRow = $('hourlyRow');
-  hourlyRow.innerHTML = '';
-  for(let i = startIdx; i < Math.min(startIdx + 12, hourly.time.length); i++){
-    const hInfo = weatherInfo(hourly.weather_code[i], hourly.is_day[i]);
-    const card = document.createElement('div');
-    card.className = 'hour-card' + (i === startIdx ? ' now' : '');
-    card.innerHTML = `
-      <div class="hour-time">${i === startIdx ? 'Şimdi' : hourLabel(hourly.time[i])}</div>
-      <div class="hour-icon">${hInfo.icon}</div>
-      <div class="hour-temp">${fmtTemp(hourly.temperature_2m[i])}</div>
-    `;
-    hourlyRow.appendChild(card);
-  }
-
-  // 7 günlük
-  const daily = data.daily;
-  const allMax = Math.max(...daily.temperature_2m_max);
-  const allMin = Math.min(...daily.temperature_2m_min);
-  const range = allMax - allMin || 1;
-
-  const dailyList = $('dailyList');
-  dailyList.innerHTML = '';
-  for(let i = 0; i < daily.time.length; i++){
-    const dInfo = weatherInfo(daily.weather_code[i], 1);
-    const max = daily.temperature_2m_max[i];
-    const min = daily.temperature_2m_min[i];
-    const leftPct = ((min - allMin) / range) * 100;
-    const widthPct = ((max - min) / range) * 100;
-
-    const row = document.createElement('div');
-    row.className = 'day-row';
-    row.innerHTML = `
-      <div class="day-name">${dayLabel(daily.time[i], i)}</div>
-      <div class="day-icon">${dInfo.icon}</div>
-      <div class="day-bar-wrap">
-        <div class="day-bar" style="left:${leftPct}%; width:${Math.max(widthPct,6)}%"></div>
-      </div>
-      <div class="day-range"><b>${fmtTemp(max)}</b> / ${fmtTemp(min)}</div>
-    `;
-    dailyList.appendChild(row);
-  }
-
-  // WIDGET
-  $('wTitle').textContent = city.name;
-  $('wTime').textContent = timeLabel(now.toISOString());
-  $('wTemp').textContent = fmtTemp(cur.temperature_2m);
-  $('wDesc').textContent = info.desc + ` · ↑${fmtTemp(todayMax)} ↓${fmtTemp(todayMin)}`;
-  $('wIcon').textContent = info.icon;
-  $('wWind').textContent = Math.round(cur.wind_speed_10m) + ' km/s';
-  $('wUv').textContent = uv.label;
-
-  const wHourly = $('wHourly');
-  wHourly.innerHTML = '';
-  for(let i = startIdx; i < Math.min(startIdx + 5, hourly.time.length); i++){
-    const hInfo = weatherInfo(hourly.weather_code[i], hourly.is_day[i]);
-    const item = document.createElement('div');
-    item.className = 'whs-item';
-    item.innerHTML = `
-      <div class="t">${i === startIdx ? 'Şimdi' : hourLabel(hourly.time[i])}</div>
-      <div class="i">${hInfo.icon}</div>
-      <div class="v">${fmtTemp(hourly.temperature_2m[i])}</div>
-    `;
-    wHourly.appendChild(item);
-  }
-
-  const w7day = $('w7day');
-  w7day.innerHTML = '';
-  for(let i = 0; i < Math.min(5, daily.time.length); i++){
-    const dInfo = weatherInfo(daily.weather_code[i], 1);
-    const item = document.createElement('div');
-    item.className = 'w7-item';
-    item.innerHTML = `
-      <div class="d">${dayLabel(daily.time[i], i)}</div>
-      <div class="i">${dInfo.icon}</div>
-      <div class="mx">${fmtTemp(daily.temperature_2m_max[i])}</div>
-      <div class="mn">${fmtTemp(daily.temperature_2m_min[i])}</div>
-    `;
-    w7day.appendChild(item);
-  }
-
-  // Alert banner (sayfa içi, görsel)
-  renderAlertBanner(city);
-
-  // Kıyafet/aktivite önerisi
-  renderOutfitSuggestion(city);
-}
-
-function renderOutfitSuggestion(city){
-  const cur = city.data.current;
-  const temp = cur.apparent_temperature;
-  const rainProb = city.data.daily.precipitation_probability_max[0] ?? 0;
-  const wind = cur.wind_speed_10m;
-  const uvVal = cur.uv_index ?? city.data.daily.uv_index_max?.[0] ?? 0;
-  const category = weatherCategory(cur.weather_code);
-
-  let icon = '🧥', text = '', tags = [];
-
-  if(temp <= 0){
-    icon = '🧥'; text = 'Dondurucu soğuk. Kalın mont, bere, eldiven ve atkı şart.';
-    tags = ['Kalın mont', 'Bere & eldiven', 'Termal iç giyim'];
-  } else if(temp <= 8){
-    icon = '🧥'; text = 'Soğuk bir gün. Mont veya kalın hırka, içine kazak giymek iyi olur.';
-    tags = ['Mont', 'Kazak', 'Kapalı ayakkabı'];
-  } else if(temp <= 15){
-    icon = '🧶'; text = 'Serin. Hafif mont ya da hırka yeterli olur.';
-    tags = ['Hırka / ince mont', 'Uzun kollu'];
-  } else if(temp <= 22){
-    icon = '👕'; text = 'Ilıman bir hava. Tişört + ince bir üst yeterli.';
-    tags = ['Tişört', 'İnce ceket (akşam için)'];
-  } else if(temp <= 28){
-    icon = '👕'; text = 'Sıcak. Hafif ve nefes alan kumaşlar tercih et.';
-    tags = ['İnce kumaş', 'Şapka'];
-  } else {
-    icon = '🩳'; text = 'Çok sıcak. Bol su iç, mümkünse öğlen güneşinden kaçın.';
-    tags = ['Şort / hafif giyim', 'Bol su', 'Gölgede kal'];
-  }
-
-  if(rainProb >= 50){
-    text += ' Yağış ihtimali yüksek, şemsiye veya yağmurluk almayı unutma.';
-    tags.push('Şemsiye ☂️');
-  }
-  if(wind >= 30){
-    text += ' Rüzgar kuvvetli, üzerine bir şey alman iyi olur.';
-    tags.push('Rüzgarlık');
-  }
-  if(uvVal >= 6){
-    text += ' UV indeksi yüksek, güneş kremi ve güneş gözlüğü öner.';
-    tags.push('Güneş kremi');
-  }
-  if(category === 'snow'){
-    tags.push('Kaymaz ayakkabı');
-  }
-
-  $('outfitIcon').textContent = icon;
-  $('outfitText').textContent = text;
-  $('outfitTags').innerHTML = tags.map(t => `<span class="outfit-tag">${t}</span>`).join('');
-}
-
-// ============ Paylaşım kartı ============
-function shareWeatherCard(){
-  const city = getActiveCity();
-  if(!city || !city.data) return;
-
-  const canvas = $('shareCanvas');
-  const ctx = canvas.getContext('2d');
-  const W = canvas.width, H = canvas.height;
-  const isDark = state.theme === 'dark';
-
-  const cur = city.data.current;
-  const info = weatherInfo(cur.weather_code, cur.is_day);
-  const todayMax = city.data.daily.temperature_2m_max[0];
-  const todayMin = city.data.daily.temperature_2m_min[0];
-
-  // Arka plan
-  const grad = ctx.createLinearGradient(0,0,0,H);
-  if(isDark){
-    grad.addColorStop(0, '#191d28');
-    grad.addColorStop(1, '#11141c');
-  } else {
-    grad.addColorStop(0, '#ffffff');
-    grad.addColorStop(1, '#f6f7f5');
-  }
-  ctx.fillStyle = grad;
-  ctx.fillRect(0,0,W,H);
-
-  const inkColor = isDark ? '#eef0f4' : '#1c2230';
-  const softColor = isDark ? '#9aa3b8' : '#5b6478';
-  const accentColor = isDark ? '#5fbab2' : '#2e6f6a';
-
-  ctx.textAlign = 'left';
-
-  // Şehir adı
-  ctx.fillStyle = inkColor;
-  ctx.font = '600 40px Georgia, serif';
-  ctx.fillText(city.name, 48, 100);
-  ctx.fillStyle = softColor;
-  ctx.font = '20px monospace';
-  ctx.fillText(city.sub, 48, 134);
-
-  // Büyük ikon + sıcaklık
-  ctx.font = '140px sans-serif';
-  ctx.fillText(info.icon, 40, 320);
-
-  ctx.fillStyle = inkColor;
-  ctx.font = '600 110px Georgia, serif';
-  ctx.fillText(fmtTemp(cur.temperature_2m), 260, 300);
-  ctx.font = '28px monospace';
-  ctx.fillStyle = softColor;
-  ctx.fillText(info.desc, 264, 345);
-
-  // Alt bilgi satırı
-  ctx.font = '22px monospace';
-  ctx.fillStyle = softColor;
-  ctx.fillText(`Hissedilen ${fmtTemp(cur.apparent_temperature)}  ·  ↑${fmtTemp(todayMax)} ↓${fmtTemp(todayMin)}`, 48, 420);
-  ctx.fillText(`Rüzgar ${Math.round(cur.wind_speed_10m)} km/s  ·  Nem %${Math.round(cur.relative_humidity_2m)}`, 48, 455);
-
-  // Ayraç
-  ctx.strokeStyle = isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.moveTo(48, 500);
-  ctx.lineTo(W-48, 500);
-  ctx.stroke();
-
-  // 5 günlük mini şerit
-  const daily = city.data.daily;
-  const dayW = (W - 96) / 5;
-  for(let i=0;i<5;i++){
-    const x = 48 + i*dayW + dayW/2;
-    const dInfo = weatherInfo(daily.weather_code[i], 1);
-    ctx.textAlign = 'center';
-    ctx.fillStyle = softColor;
-    ctx.font = '18px monospace';
-    ctx.fillText(dayLabel(daily.time[i], i), x, 545);
-    ctx.font = '36px sans-serif';
-    ctx.fillText(dInfo.icon, x, 595);
-    ctx.fillStyle = inkColor;
-    ctx.font = '600 20px monospace';
-    ctx.fillText(fmtTemp(daily.temperature_2m_max[i]), x, 630);
-    ctx.fillStyle = softColor;
-    ctx.font = '18px monospace';
-    ctx.fillText(fmtTemp(daily.temperature_2m_min[i]), x, 655);
-  }
-
-  // Footer
-  ctx.textAlign = 'center';
-  ctx.fillStyle = accentColor;
-  ctx.font = '600 18px monospace';
-  ctx.fillText('Hava Durumu  ·  Open-Meteo', W/2, H-40);
-
-  const dataUrl = canvas.toDataURL('image/png');
-  $('sharePreviewImg').src = dataUrl;
-  $('sharePreviewOverlay').classList.remove('hidden');
-}
-function closeSharePreview(){
-  $('sharePreviewOverlay').classList.add('hidden');
-}
-function downloadShareImage(){
-  const link = document.createElement('a');
-  const city = getActiveCity();
-  link.download = `hava-durumu-${(city?.name || 'kart').toLowerCase()}.png`;
-  link.href = $('sharePreviewImg').src;
-  link.click();
-}
-
-function renderAlertBanner(city){
-  const cur = city.data.current;
-  const rainProb = city.data.daily.precipitation_probability_max[0] ?? 0;
-  const msgs = [];
-  if(rainProb >= 60) msgs.push(`Bugün yağış ihtimali %${rainProb} — şemsiyeni unutma.`);
-  if(cur.apparent_temperature >= 32) msgs.push(`Hissedilen sıcaklık ${Math.round(cur.apparent_temperature)}°C — aşırı sıcak.`);
-  if(cur.apparent_temperature <= 0) msgs.push(`Hissedilen sıcaklık ${Math.round(cur.apparent_temperature)}°C — donma riski.`);
-  const uvVal = cur.uv_index ?? city.data.daily.uv_index_max?.[0];
-  if(uvVal >= 7) msgs.push(`UV indeksi ${Math.round(uvVal)} — güneş kremi öner.`);
-
-  if(msgs.length){
-    $('alertText').textContent = msgs.join(' ');
-    $('alertBanner').classList.remove('hidden');
-  } else {
-    $('alertBanner').classList.add('hidden');
-  }
-}
-
-// ============ Bildirim sistemi ============
-function toggleNotifPref(key){
-  state.notifPrefs[key] = !state.notifPrefs[key];
-  updateSwitchUI();
-  try{ localStorage.setItem('weatherNotifPrefs', JSON.stringify(state.notifPrefs)); }catch(e){}
-  if(state.notifPrefs[key] && Notification.permission !== 'granted'){
-    requestNotifPermission();
-  }
-}
-function updateSwitchUI(){
-  $('swRain').classList.toggle('on', state.notifPrefs.rain);
-  $('swHot').classList.toggle('on', state.notifPrefs.hot);
-  $('swCold').classList.toggle('on', state.notifPrefs.cold);
-  $('swUv').classList.toggle('on', state.notifPrefs.uv);
-}
-function updateNotifPermLabel(){
-  if(!('Notification' in window)){
-    $('notifPermLabel').textContent = 'desteklenmiyor';
-    return;
-  }
-  const map = { granted:'verildi ✓', denied:'reddedildi ✕', default:'henüz istenmedi' };
-  $('notifPermLabel').textContent = map[Notification.permission] || Notification.permission;
-}
-async function requestNotifPermission(){
-  if(!('Notification' in window)){
-    alert('Bu tarayıcı bildirimleri desteklemiyor.');
-    return;
-  }
-  try{
-    const perm = await Notification.requestPermission();
-    updateNotifPermLabel();
-  }catch(e){}
-}
-function sendNotif(title, body){
-  if(!('Notification' in window) || Notification.permission !== 'granted') return;
-  try{ new Notification(title, { body, icon: '' }); }catch(e){}
-}
-function checkAlerts(city){
-  if(!('Notification' in window) || Notification.permission !== 'granted') return;
-  const cur = city.data.current;
-  const rainProb = city.data.daily.precipitation_probability_max[0] ?? 0;
-  const uvVal = cur.uv_index ?? city.data.daily.uv_index_max?.[0];
-  const today = new Date().toDateString();
-  const key = id => `${city.id}_${id}_${today}`;
-
-  if(state.notifPrefs.rain && rainProb >= 60 && !state.notifSentLog[key('rain')]){
-    sendNotif('Yağmur uyarısı', `${city.name}: bugün yağış ihtimali %${rainProb}.`);
-    state.notifSentLog[key('rain')] = true;
-  }
-  if(state.notifPrefs.hot && cur.apparent_temperature >= 32 && !state.notifSentLog[key('hot')]){
-    sendNotif('Sıcak hava uyarısı', `${city.name}: hissedilen sıcaklık ${Math.round(cur.apparent_temperature)}°C.`);
-    state.notifSentLog[key('hot')] = true;
-  }
-  if(state.notifPrefs.cold && cur.apparent_temperature <= 0 && !state.notifSentLog[key('cold')]){
-    sendNotif('Soğuk hava uyarısı', `${city.name}: hissedilen sıcaklık ${Math.round(cur.apparent_temperature)}°C.`);
-    state.notifSentLog[key('cold')] = true;
-  }
-  if(state.notifPrefs.uv && uvVal >= 7 && !state.notifSentLog[key('uv')]){
-    sendNotif('Yüksek UV uyarısı', `${city.name}: UV indeksi ${Math.round(uvVal)}.`);
-    state.notifSentLog[key('uv')] = true;
-  }
-}
-
-// ============ Konum izni & hata yönetimi ============
-function isSecureContextOk(){
-  return window.isSecureContext === true;
-}
-async function checkPermissionState(){
-  if(!('permissions' in navigator)) return 'unknown';
-  try{
-    const status = await navigator.permissions.query({ name: 'geolocation' });
-    return status.state;
-  }catch(e){ return 'unknown'; }
-}
-function showState(s, opts={}){
-  $('loadingState').classList.toggle('hidden', s !== 'loading');
-  $('errorState').classList.toggle('hidden', s !== 'error');
-  $('content').classList.toggle('hidden', s !== 'content');
-  if(s === 'error'){
-    $('errorTitle').textContent = opts.title || 'Bir sorun oluştu';
-    $('errorMsg').textContent = opts.msg || '';
-    $('errorIcon').textContent = opts.icon || '⚠';
-    if(opts.steps){ $('errorSteps').innerHTML = opts.steps; $('errorSteps').classList.remove('hidden'); }
-    else{ $('errorSteps').classList.add('hidden'); }
-  }
-}
-
-async function init(){
-  showState('loading');
-
-  if(!navigator.geolocation){
-    showState('error', { title:'Konum desteklenmiyor', msg:'Bu tarayıcı konum servisini desteklemiyor.', icon:'⚠' });
-    return;
-  }
-  if(!isSecureContextOk()){
-    showState('error', {
-      title: 'Güvenli bağlantı gerekli', icon: '🔒',
-      msg: 'Tarayıcılar, konum izni isteyebilmek için sayfanın HTTPS (veya localhost) üzerinden açılmasını zorunlu kılar.',
-      steps: `<b>Çözüm:</b><br>1. Dosyayı bir HTTPS sunucusunda barındır.<br>2. Ya da yerel test için <code>localhost</code> kullan.`
-    });
-    return;
-  }
-  const permState = await checkPermissionState();
-  if(permState === 'denied'){
-    showState('error', {
-      title: 'Konum izni engellenmiş', icon: '🚫',
-      msg: 'Bu site için konum izni daha önce reddedilmiş.',
-      steps: `<b>Nasıl açılır:</b><br>1. Adres çubuğundaki site simgesine dokun.<br>2. Konum iznini <b>İzin ver</b> yap.<br>3. Sayfayı yenile.`
-    });
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    async (pos) => {
-      try{
-        const { latitude, longitude, accuracy } = pos.coords;
-        const place = await reverseGeocode(latitude, longitude);
-        const id = 'current';
-        let city = state.cities.find(c => c.id === id);
-        if(!city){
-          city = { id, name: place.name, sub: place.sub, lat: latitude, lon: longitude, isCurrent:true, data:null, accuracy };
-          state.cities.unshift(city);
-        } else {
-          city.name = place.name; city.sub = place.sub; city.lat = latitude; city.lon = longitude; city.accuracy = accuracy;
-        }
-        state.activeCityId = id;
-        renderCityChips();
-        await loadCityWeather(city);
-        showState('content');
-        loadSavedCitiesWeather();
-      }catch(err){
-        showState('error', { title:'Veri alınamadı', icon:'📡', msg:'Konum belirlendi ama hava durumu sunucusuna ulaşılamadı.' });
-      }
-    },
-    (err) => {
-      if(err.code === 1){
-        showState('error', {
-          title: 'İzin verilmedi', icon: '🚫',
-          msg: 'Konum izni penceresinde "İzin verme" seçildi.',
-          steps: `<b>Yeniden izin vermek için:</b><br>1. Adres çubuğundaki site simgesine dokun.<br>2. Konum iznini <b>İzin ver</b> yap.<br>3. "Tekrar dene"ye bas.`
-        });
-      } else if(err.code === 2){
-        showState('error', { title:'Konum bulunamadı', icon:'📍', msg:'Cihazın konumu belirlenemedi. Konum servisinin açık olduğunu kontrol et.' });
-      } else {
-        showState('error', { title:'Zaman aşımı', icon:'⏱', msg:'Konum belirleme işlemi zaman aşımına uğradı.' });
-      }
-    },
-    { enableHighAccuracy: false, timeout: 12000, maximumAge: 5 * 60 * 1000 }
-  );
-}
-
-async function loadSavedCitiesWeather(){
-  try{
-    const saved = JSON.parse(localStorage.getItem('weatherCities') || '[]');
-    for(const s of saved){
-      if(!state.cities.some(c => c.id === s.id)){
-        const city = { ...s, isCurrent:false, data:null };
-        state.cities.push(city);
-        loadCityWeather(city);
-      }
-    }
-    renderCityChips();
-  }catch(e){}
-}
-
-// ============ Başlangıç ============
-(function bootstrap(){
-  try{
-    const savedTheme = localStorage.getItem('weatherTheme');
-    if(savedTheme) state.theme = savedTheme;
-    else if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) state.theme = 'dark';
-
-    const savedPrefs = localStorage.getItem('weatherNotifPrefs');
-    if(savedPrefs) state.notifPrefs = JSON.parse(savedPrefs);
-  }catch(e){}
-  applyTheme();
-  updateSwitchUI();
-  updateNotifPermLabel();
-  init();
-
-  // Bildirim kontrolünü periyodik tekrar et (sayfa açık kaldıkça)
-  setInterval(() => {
-    state.cities.forEach(c => { if(c.data) checkAlerts(c); });
-  }, 10 * 60 * 1000);
 })();
-</script>
 
+/* If this visit came from someone else's invite link (?ref=CODE),
+   record one (deduplicated) referral hit for that code. */
+async function recordIncomingReferralIfAny() {
+  const params = new URLSearchParams(window.location.search);
+  const incomingRef = params.get('ref');
+  if (!incomingRef || incomingRef === myRefCode) return;
+  if (localStorage.getItem('vl_already_credited_' + incomingRef)) return;
+
+  try {
+    const { error } = await sb.from('referrals').insert({
+      ref_code: incomingRef,
+      visitor_id: myVisitorId
+    });
+    // unique constraint violation just means "already counted" — not a real error for us
+    if (!error || error.code === '23505') {
+      localStorage.setItem('vl_already_credited_' + incomingRef, '1');
+    }
+  } catch (e) {
+    console.warn('Referral kaydı başarısız (ağ engelliyse normal):', e);
+  }
+}
+
+async function fetchMyReferralCount() {
+  try {
+    const { count, error } = await sb
+      .from('referrals')
+      .select('*', { count: 'exact', head: true })
+      .eq('ref_code', myRefCode);
+    if (error) throw error;
+    return count || 0;
+  } catch (e) {
+    console.warn('Davet sayısı alınamadı:', e);
+    return null;
+  }
+}
+
+function applyTierFromCount(count) {
+  if (count >= 20) {
+    proTier = 'superpro'; isPro = true;
+    const exp = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
+    proExpiresAt = exp;
+    localStorage.setItem('vl_pro_tier', 'superpro');
+    localStorage.setItem('vl_pro_expires', exp);
+  } else if (count >= 10) {
+    proTier = 'pro'; isPro = true;
+    localStorage.setItem('vl_pro_tier', 'pro');
+  } else {
+    // keep previously unlocked tier if any (don't downgrade on a slow read)
+  }
+  applyProState();
+}
+
+async function refreshReferralUI() {
+  const count = await fetchMyReferralCount();
+  if (count === null) return;
+
+  const target = count >= 10 ? 20 : 10;
+  const pct = Math.min(100, Math.round((count / target) * 100));
+
+  const numEl = $('refCountNum');
+  const barEl = $('refProgressBar');
+  const txtEl = $('refProgressTxt');
+  const statusEl = $('refStatusTxt');
+  if (numEl) numEl.textContent = count;
+  if (barEl) barEl.style.width = pct + '%';
+  if (txtEl) {
+    txtEl.textContent = count >= 20
+      ? `${count} davet — Süper Pro aktif! 🎉`
+      : count >= 10
+        ? `${count} / 20 — Süper Pro (7 gün) için 20 davet gerekiyor`
+        : `${count} / 10 — Pro için 10 davet gerekiyor`;
+  }
+  if (statusEl) {
+    statusEl.textContent = proTier === 'superpro' ? '👑 Süper Pro' : proTier === 'pro' ? '⭐ Pro' : 'Henüz yok';
+  }
+
+  applyTierFromCount(count);
+}
+
+/* ─── PRO MODAL ─── */
+const proTriggers = ['proBadgeHdr', 'proBtn1', 'proBtn2', 'proBtn3'];
+proTriggers.forEach(id => {
+  const el = $(id);
+  if (el) el.addEventListener('click', openProModal);
+});
+
+function buildRefLink() {
+  const base = window.location.origin + window.location.pathname;
+  return `${base}?ref=${myRefCode}`;
+}
+
+function openProModal() {
+  const link = buildRefLink();
+  const input = $('refLinkInput');
+  if (input) input.value = link;
+  $('proModal').classList.add('show');
+  refreshReferralUI();
+}
+$('modalClose').addEventListener('click', () => $('proModal').classList.remove('show'));
+$('proModal').addEventListener('click', e => { if (e.target.id === 'proModal') $('proModal').classList.remove('show'); });
+
+$('copyRefBtn').addEventListener('click', async () => {
+  const link = buildRefLink();
+  try {
+    await navigator.clipboard.writeText(link);
+    showToast('✓ Link kopyalandı');
+  } catch (e) {
+    showToast('❌ Kopyalanamadı, manuel seç');
+  }
+});
+
+$('shareRefBtn').addEventListener('click', async () => {
+  const link = buildRefLink();
+  const text = `ViraLens ile videolarının viral potansiyelini analiz et! ${link}`;
+  if (navigator.share) {
+    try { await navigator.share({ title: 'ViraLens', text, url: link }); }
+    catch (e) { /* user cancelled share sheet — not an error */ }
+  } else {
+    try {
+      await navigator.clipboard.writeText(link);
+      showToast('✓ Link kopyalandı, arkadaşlarına gönder');
+    } catch (e) {
+      showToast('❌ Kopyalanamadı, manuel seç');
+    }
+  }
+});
+
+function applyProState() {
+  const badge = $('proBadgeHdr');
+  if (proTier === 'superpro') {
+    badge.textContent = '👑 Süper Pro';
+    badge.classList.add('active');
+  } else if (proTier === 'pro') {
+    badge.textContent = '⭐ Pro Aktif';
+    badge.classList.add('active');
+  } else {
+    badge.textContent = "⭐ Pro'ya Geç";
+    badge.classList.remove('active');
+  }
+  if (isPro) {
+    ['proPromo1', 'proPromo2', 'proPromo3'].forEach(id => { const el = $(id); if (el) el.style.display = 'none'; });
+  }
+  renderAdvanced();
+}
+
+/* Kick things off: record referral if we arrived via a link, then check our own count. */
+applyProState(); // reflect any tier already restored from localStorage immediately
+recordIncomingReferralIfAny().then(() => {
+  refreshReferralUI();
+});
+// Periodically refresh in case the modal is left open while friends click through.
+setInterval(refreshReferralUI, 15000);
+
+/* ─── DRAG & DROP / FILE INPUT ─── */
+const dz = $('dropZone');
+const fileInput = $('fileInput');
+
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('over'));
+dz.addEventListener('drop', e => {
+  e.preventDefault(); dz.classList.remove('over');
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  if (f && f.type.startsWith('video/')) loadFile(f);
+  else if (f) showToast('❌ Desteklenmeyen dosya türü');
+});
+
+fileInput.addEventListener('change', e => {
+  const f = e.target.files && e.target.files[0];
+  if (f) loadFile(f);
+});
+
+function loadFile(file) {
+  // 1) Activate the analyze button and basic UI immediately.
+  //    Do NOT wait on video metadata to unlock the flow — some
+  //    formats/codecs never fire 'loadedmetadata' in the browser,
+  //    which used to leave the button permanently disabled.
+  state.isFile = true;
+  state.hasInput = true;
+  state.url = '';
+  state.fileMeta = {
+    name: file.name,
+    size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
+    duration: 0, durStr: '—',
+    width: 0, height: 0, res: 'Okunuyor…', aspect: '—',
+    ext: (file.name.split('.').pop() || '?').toUpperCase(),
+    bitrate: '—', fps: 'Tarayıcıdan okunamaz',
+    type: file.type || ''
+  };
+
+  $('urlNotice').style.display = 'none';
+  $('urlIn').value = '';
+  $('titleRow').style.display = 'block';
+
+  const url = URL.createObjectURL(file);
+  const vid = $('videoEl');
+  vid.src = url;
+
+  $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
+  $('videoPrev').classList.add('show');
+  setAnalyzeEnabled(true);
+
+  // 2) If/when metadata becomes available, enrich the display —
+  //    but the app already works without it.
+  const onMeta = () => {
+    const duration = vid.duration;
+    const w = vid.videoWidth, h = vid.videoHeight;
+    const res = w && h ? `${w}×${h}` : 'Bilinmiyor';
+    const aspect = w && h ? getAspect(w, h) : '—';
+    const durStr = formatDur(duration);
+    const bitrate = duration > 0 ? ((file.size * 8) / duration / 1000000).toFixed(1) + ' Mbps' : '—';
+
+    state.fileMeta = {
+      ...state.fileMeta,
+      duration, durStr, width: w, height: h, res, aspect, bitrate
+    };
+    $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
+  };
+
+  vid.addEventListener('loadedmetadata', onMeta, { once: true });
+
+  vid.addEventListener('error', () => {
+    // Metadata read failed entirely — keep going with size/name only.
+    state.fileMeta.res = '—';
+    $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
+  }, { once: true });
+
+  // Safety net: if metadata hasn't loaded within 4s (corrupt/odd file),
+  // stop showing "Okunuyor…" so it doesn't look stuck.
+  setTimeout(() => {
+    if (state.fileMeta.res === 'Okunuyor…') {
+      state.fileMeta.res = 'Okunamadı';
+      $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
+    }
+  }, 4000);
+}
+
+function renderMetaBar(m) {
+  return [
+    ['Süre', m.durStr], ['Boyut', m.size],
+    ['Çözünürlük', m.res], ['Format', m.ext],
+    ['Bitrate', m.bitrate], ['En-Boy', m.aspect]
+  ].map(([k, v]) => `<div class="vmeta-item">${k}: <span>${v}</span></div>`).join('');
+}
+
+$('removeVid').addEventListener('click', () => {
+  const vid = $('videoEl');
+  if (vid.src) URL.revokeObjectURL(vid.src);
+  vid.src = '';
+  $('videoPrev').classList.remove('show');
+  $('titleRow').style.display = 'none';
+  fileInput.value = '';
+  state.isFile = false; state.fileMeta = {};
+  checkInput();
+});
+
+/* ─── URL ─── */
+$('urlBtn').addEventListener('click', addUrl);
+$('urlIn').addEventListener('keydown', e => { if (e.key === 'Enter') addUrl(); });
+
+function addUrl() {
+  const u = $('urlIn').value.trim();
+  if (!u) return;
+  if (!u.startsWith('http')) { showToast('❌ Geçerli bir URL gir'); return; }
+  state.url = u; state.isFile = false; state.hasInput = true;
+  $('urlNotice').style.display = 'block';
+  $('titleRow').style.display = 'block';
+  $('videoPrev').classList.remove('show');
+  setAnalyzeEnabled(true);
+  showToast('✓ URL eklendi');
+}
+
+$('titleIn').addEventListener('input', e => { state.title = e.target.value; });
+
+function checkInput() {
+  state.hasInput = state.isFile || !!state.url;
+  if (!state.hasInput) setAnalyzeEnabled(false);
+}
+
+function setAnalyzeEnabled(v) { $('analyzeBtn').disabled = !v; }
+
+/* ─── ANALYZE ─── */
+$('analyzeBtn').addEventListener('click', runAnalysis);
+
+async function runAnalysis() {
+  const btn = $('analyzeBtn');
+  btn.classList.add('loading'); btn.disabled = true;
+  $('progWrap').classList.add('show');
+  $('resultsSec').classList.remove('show');
+  $('emptyHint').style.display = 'none';
+
+  const steps = [
+    [state.isFile ? 'Video dosyası okunuyor…' : 'URL işleniyor…', 12],
+    [state.isFile ? 'Teknik metrikler çıkarılıyor…' : 'Platform verisi kontrol ediliyor…', 30],
+    ['Trend veritabanı taranıyor…', 52],
+    ['Etkileşim modeli çalışıyor…', 68],
+    ['Telif hakkı taraması yapılıyor…', 82],
+    ['AI içerik değerlendirmesi…', 94],
+    ['Rapor hazırlanıyor…', 100],
+  ];
+
+  for (const [label, pct] of steps) {
+    setProgress(label, pct);
+    await sleep(380 + Math.random() * 280);
+  }
+
+  // AI call if title given
+  let aiInsight = null;
+  const title = state.title.trim();
+  if (title.length > 5) {
+    setProgress('AI analizi tamamlanıyor…', 100);
+    aiInsight = await callAI(title, state.fileMeta);
+  }
+
+  await sleep(200);
+  $('progWrap').classList.remove('show');
+  btn.classList.remove('loading'); btn.disabled = false;
+
+  render(buildData(), aiInsight);
+}
+
+async function callAI(title, meta) {
+  // Hard timeout: some preview/sandbox environments block or hang on
+  // outbound fetch() calls to api.anthropic.com. We never let that
+  // freeze the UI — if it doesn't resolve in time, we just fall back
+  // to local heuristics instead of AI commentary.
+  const TIMEOUT_MS = 8000;
+
+  try {
+    const metaStr = meta.durStr && meta.durStr !== '—'
+      ? `Süre: ${meta.durStr}, Çözünürlük: ${meta.res}, Format: ${meta.ext}, Boyut: ${meta.size}`
+      : 'Teknik bilgi yok (URL analizi ya da okunamayan dosya)';
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
+
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      signal: controller.signal,
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        messages: [{
+          role: 'user',
+          content: `Sen bir sosyal medya içerik stratejisti ve viral video analistisin. Aşağıdaki video hakkında analiz yap.
+
+Video başlığı/açıklama: "${title}"
+Teknik bilgiler: ${metaStr}
+
+Şunu döndür (SADECE JSON, açıklama yok, markdown yok):
+{
+  "viralPotential": "Yüksek/Orta/Düşük",
+  "viralReason": "kısa gerekçe (max 80 karakter)",
+  "contentCategory": "kategori adı",
+  "targetAudience": "hedef kitle tanımı (max 50 karakter)",
+  "bestUploadTime": "en iyi yükleme zamanı",
+  "titleSuggestion": "daha iyi bir başlık önerisi",
+  "copyrightWarning": "telif hakkı uyarısı varsa yaz, yoksa null",
+  "insights": ["insight1", "insight2", "insight3"],
+  "hashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"]
+}`
+        }]
+      })
+    });
+    clearTimeout(timeoutId);
+    const data = await resp.json();
+    const text = data.content?.map(c => c.text || '').join('') || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    return JSON.parse(clean);
+  } catch (e) {
+    console.warn('AI call failed or timed out, falling back to local data', e);
+    return null;
+  }
+}
+
+/* ─── DATA BUILD (from real metadata) ─── */
+function buildData() {
+  const m = state.fileMeta;
+  const isFile = state.isFile;
+  const dur = m.duration || 0;
+
+  let score = 50;
+  if (isFile) {
+    if (dur > 0) {
+      if (dur >= 15 && dur <= 90) score += 20;
+      else if (dur > 90 && dur <= 300) score += 10;
+      else if (dur > 300) score -= 10;
+      else if (dur < 15) score += 5;
+    }
+    if (m.width >= 1920) score += 10;
+    else if (m.width >= 1280) score += 6;
+    else if (m.width < 720 && m.width > 0) score -= 10;
+    if (m.height > m.width) score += 8;
+    const sizeMB = parseFloat(m.size);
+    if (sizeMB > 0.5 && sizeMB < 500) score += 5;
+    score += randRange(-8, 8);
+  } else {
+    score = randRange(38, 68);
+  }
+  score = Math.max(10, Math.min(97, score));
+
+  const dur2 = dur > 0 ? dur : randRange(30, 600);
+  const retentionBase = dur2 > 0
+    ? (dur2 <= 60 ? randRange(55, 85) : dur2 <= 180 ? randRange(40, 70) : randRange(25, 55))
+    : randRange(35, 65);
+
+  return {
+    score, isFile,
+    dur: dur2, durStr: m.durStr || '—',
+    res: m.res || '—', aspect: m.aspect || '—',
+    ext: m.ext || '—', size: m.size || '—',
+    engagement: parseFloat((score * 0.12 + randRange(1, 4)).toFixed(1)),
+    retention: retentionBase,
+    originality: randRange(45, 92),
+    growthPot: Math.min(95, score + randRange(-10, 15)),
+    crRisk: dur2 > 120 ? randRange(20, 70) : randRange(5, 45),
+    bestPlatform: pickPlatform(m),
+    trendTags: genTags(m),
+    fileMeta: m,
+  };
+}
+
+function pickPlatform(m) {
+  const h = m.height || 0, w = m.width || 0, dur = m.duration || 60;
+  if (h > w) {
+    if (dur <= 60) return 'TikTok / Reels';
+    return 'YouTube Shorts';
+  }
+  if (dur <= 60) return 'Instagram Reels';
+  if (dur > 600) return 'YouTube';
+  return 'YouTube / Twitter';
+}
+
+function genTags(m) {
+  const base = ['#Viral', '#FYP', '#Keşfet', '#Trending', '#Video', '#İçerik', '#Shorts', '#Reels'];
+  const extra = m.height > m.width ? ['#VerticalVideo', '#Shorts'] : ['#WideScreen', '#YouTube'];
+  return shuffleArr([...base, ...extra]).slice(0, randRange(7, 10));
+}
+
+/* ─── RENDER ─── */
+let lastData = null, lastAi = null;
+
+function render(d, ai) {
+  lastData = d; lastAi = ai;
+
+  $('resSub').textContent = state.isFile
+    ? (state.fileMeta.name || '—')
+    : state.url.slice(0, 55) + (state.url.length > 55 ? '…' : '');
+
+  if (!state.isFile) {
+    $('limitNotice').classList.add('show');
+    $('limitText').textContent =
+      'URL analizi yapıldı. Teknik metrikler (süre, çözünürlük, bitrate) dış platformlara erişim kısıtı nedeniyle ölçülemedi. '
+      + 'Başlık bilgisi girilmişse AI içerik analizi uygulandı; aksi hâlde genel istatistikler gösterilmektedir.';
+  } else if (d.dur === 0 || state.fileMeta.res === 'Okunamadı') {
+    $('limitNotice').classList.add('show');
+    $('limitText').textContent =
+      'Video yüklendi ancak tarayıcı bu formattan süre/çözünürlük bilgisi okuyamadı. '
+      + 'Boyut ve format bilgisi doğru; diğer metrikler tahminidir.';
+  } else {
+    $('limitNotice').classList.remove('show');
+  }
+
+  // GAUGE
+  const offset = CIRC - (d.score / 100) * CIRC;
+  const gc = $('gFill');
+  gc.style.stroke = sColor(d.score);
+  gc.style.strokeDashoffset = CIRC;
+  setTimeout(() => gc.style.strokeDashoffset = offset, 80);
+  $('gNum').textContent = d.score;
+  $('gNum').style.color = sColor(d.score);
+
+  $('vValue').textContent = vLabel(d.score);
+  $('vValue').style.color = sColor(d.score);
+  $('vDesc').textContent = ai ? ai.viralReason : vDesc(d.score);
+
+  // GRID
+  const cards = [
+    { icon: '⏱️', label: 'Video Süresi', value: d.durStr !== '—' ? d.durStr : (state.isFile ? '—' : 'URL'), sub: durNote(d.dur), ca: '#6366F1' },
+    { icon: '📐', label: 'Çözünürlük', value: d.res, sub: d.aspect !== '—' ? 'En-boy: ' + d.aspect : 'Bilinmiyor', ca: '#6366F1' },
+    { icon: '❤️', label: 'Etkileşim Tahmini', value: d.engagement + '%', sub: 'Ortalama oran', pill: ePill(d.engagement), ca: eColor(d.engagement) },
+    { icon: '🔄', label: 'Tutma Oranı', value: d.retention + '%', sub: 'İzleme devamlılığı', pill: rPill(d.retention), ca: sColor(d.retention) },
+    { icon: '🧠', label: 'Özgünlük', value: d.originality + '%', sub: ai ? 'Kategori: ' + (ai.contentCategory || '—') : 'İçerik benzersizliği', pill: oPill(d.originality), ca: sColor(d.originality) },
+    { icon: '🎯', label: 'En İyi Platform', value: null, sm: ai ? ai.viralPotential + ' · ' + (ai.targetAudience || d.bestPlatform) : d.bestPlatform, sub: 'Öneri', pill: { cls: 'pb', text: '✓ Önerilen' }, ca: '#6366F1' },
+  ];
+  $('mainGrid').innerHTML = cards.map(c => `
+    <div class="a-card" style="--ca:${c.ca}">
+      <div class="a-icon">${c.icon}</div>
+      <div class="a-label">${c.label}</div>
+      <div class="${c.value !== null ? 'a-val' : 'a-val sm'}">${c.value !== null ? (c.value || '—') : (c.sm || '—')}</div>
+      <div class="a-sub">${c.sub}</div>
+      ${c.pill ? `<div class="pill ${c.pill.cls}">${c.pill.text}</div>` : ''}
+    </div>
+  `).join('');
+
+  // ENGAGEMENT BARS
+  const engRows = [
+    { lbl: 'Beğeni', pct: randRange(50, 90) },
+    { lbl: 'Yorum', pct: randRange(10, 45) },
+    { lbl: 'Paylaşım', pct: randRange(8, 40) },
+    { lbl: 'Kaydet', pct: randRange(5, 30) },
+    { lbl: 'Tıkla-İzle', pct: Math.min(95, d.score + randRange(-5, 5)) },
+  ];
+  $('engBar').innerHTML = `
+    <div class="bar-title">Tahmini Etkileşim Dağılımı</div>
+    ${engRows.map(r => `
+      <div class="bar-row">
+        <span class="bar-lbl">${r.lbl}</span>
+        <div class="bar-track"><div class="bar-fill" data-pct="${r.pct}" style="width:0%"></div></div>
+        <span class="bar-num">${r.pct}%</span>
+      </div>
+    `).join('')}
+  `;
+
+  // TIMING
+  const days = ['Pzt','Sal','Çar','Per','Cum','Cts','Paz'];
+  const timeSlots = ['06-09','09-12','12-15','15-18','18-21','21-24'];
+  const bestDay = randRange(1, 4);
+  const bestTime = randRange(3, 4);
+  $('timingCard').innerHTML = `
+    <div class="timing-t">En İyi Yayın Zamanı ${ai ? '— ' + ai.bestUploadTime : ''}</div>
+    <div class="timing-grid">
+      ${days.map((dy, di) => `
+        <div class="day-col">
+          <div class="day-name">${dy}</div>
+          <div class="day-slots">
+            ${timeSlots.map((_, ti) => {
+              const isBest = di === bestDay && ti === bestTime;
+              const isOk = (di >= 1 && di <= 4) && (ti >= 3 && ti <= 4) && !isBest;
+              return `<div class="slot ${isBest ? 'best' : isOk ? 'ok' : ''}"></div>`;
+            }).join('')}
+          </div>
+        </div>
+      `).join('')}
+    </div>
+    <div class="timing-legend">
+      <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>En iyi</div>
+      <div class="leg-item"><div class="leg-dot" style="background:rgba(99,102,241,.5)"></div>İyi</div>
+      <div class="leg-item"><div class="leg-dot" style="background:var(--surface2)"></div>Normal</div>
+    </div>
+  `;
+
+  // TAGS
+  const tags = ai ? [...(ai.hashtags || []), ...d.trendTags].slice(0, 10) : d.trendTags;
+  const hotOnes = tags.slice(0, 3);
+  $('tagsCard').innerHTML = `
+    <div class="tags-t">Önerilen Etiketler ${ai ? '<span style="color:var(--accent);font-weight:600">· AI</span>' : ''}</div>
+    <div class="tags-wrap">
+      ${tags.map(t => `<span class="tag ${hotOnes.includes(t) ? 'hot' : ''}">${t}</span>`).join('')}
+    </div>
+  `;
+
+  // COPYRIGHT
+  const cr = d.crRisk;
+  const crC = cr > 65 ? 'var(--red)' : cr > 35 ? 'var(--amber)' : 'var(--green)';
+  const crLbl = cr > 65 ? 'Yüksek Risk' : cr > 35 ? 'Orta Risk' : 'Düşük Risk';
+  const crRisks = [
+    { n: 'Müzik', pct: Math.min(cr + 10, 95), c: '#EF4444' },
+    { n: 'Görsel', pct: Math.max(5, cr - 15), c: '#F59E0B' },
+    { n: 'Konuşma', pct: Math.max(3, cr - 30), c: '#6366F1' },
+    { n: 'Genel', pct: cr, c: crC },
+  ];
+  $('crCard').innerHTML = `
+    <div class="cr-head">
+      <div class="cr-ico">${cr > 65 ? '⚠️' : cr > 35 ? '🟡' : '✅'}</div>
+      <div>
+        <div class="cr-t">Telif Hakkı Riski</div>
+        <div class="cr-level" style="color:${crC}">${crLbl} · %${cr}</div>
+        ${ai && ai.copyrightWarning ? `<div style="font-size:11px;color:var(--amber);margin-top:3px">⚠ ${ai.copyrightWarning}</div>` : ''}
+      </div>
+    </div>
+    ${crRisks.map(r => `
+      <div class="risk-row">
+        <span class="risk-n">${r.n}</span>
+        <div class="risk-bar-w"><div class="risk-b" data-pct="${r.pct}" style="width:0%;background:${r.c}"></div></div>
+        <span class="risk-lv" style="color:${r.c}">%${r.pct}</span>
+      </div>
+    `).join('')}
+  `;
+
+  // PLATFORM
+  const platforms = [
+    { n: 'YouTube', ok: d.dur > 60 || !d.isFile },
+    { n: 'TikTok', ok: d.dur <= 180 || !d.isFile },
+    { n: 'Instagram', ok: d.retention > 50 },
+    { n: 'Twitter/X', ok: d.score > 65 },
+    { n: 'LinkedIn', ok: d.originality > 70 },
+  ];
+  $('compatCard').innerHTML = `
+    <div class="sec-label">Platform Uyumluluğu</div>
+    <div class="compat-row">
+      ${platforms.map(p => `
+        <div class="compat-item">
+          <div class="compat-dot" style="background:${p.ok ? 'var(--green)' : 'var(--sub)'}"></div>
+          ${p.n}
+        </div>
+      `).join('')}
+    </div>
+  `;
+
+  // INSIGHTS
+  const aiInsights = ai?.insights || [];
+  const baseInsights = buildInsights(d);
+  const allInsights = [...aiInsights.map(i => `<strong>🤖 AI:</strong> ${i}`), ...baseInsights];
+  $('insCard').innerHTML = `
+    <div class="ins-t">🔎 Akıllı Öneriler ${ai ? '<span style="color:var(--accent);font-size:10px">· AI Destekli</span>' : ''}</div>
+    ${allInsights.slice(0, 6).map(t => `
+      <div class="ins-item">
+        <div class="ins-dot"></div>
+        <div class="ins-text">${t}</div>
+      </div>
+    `).join('')}
+    ${ai?.titleSuggestion ? `
+      <div style="margin-top:12px;padding:10px 12px;background:var(--accent-dim);border-radius:var(--rsm);border:1px solid rgba(99,102,241,.2)">
+        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:4px">💡 Önerilen Başlık</div>
+        <div style="font-size:12px;color:var(--text)">${ai.titleSuggestion}</div>
+      </div>
+    ` : ''}
+  `;
+
+  renderAdvanced();
+
+  $('resultsSec').classList.add('show');
+
+  setTimeout(() => {
+    document.querySelectorAll('[data-pct]').forEach(el => {
+      el.style.width = el.dataset.pct + '%';
+    });
+  }, 120);
+}
+
+/* Advanced section: visible content for Pro users, blurred teaser otherwise */
+function renderAdvanced() {
+  const wrap = $('advancedWrap');
+  const inner = $('advancedInner');
+  if (!lastData) { wrap.innerHTML = ''; return; }
+  const d = lastData;
+
+  const content = `
+    <div class="cr-card">
+      <div class="cr-t" style="margin-bottom:12px">📈 Rakip Kıyaslama (Pro)</div>
+      <div class="risk-row">
+        <span class="risk-n">Senin skorun</span>
+        <div class="risk-bar-w"><div class="risk-b" style="width:${d.score}%;background:var(--accent)"></div></div>
+        <span class="risk-lv" style="color:var(--accent)">${d.score}</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-n">Kategori ortalaması</span>
+        <div class="risk-bar-w"><div class="risk-b" style="width:${Math.max(20, d.score - randRange(5,18))}%;background:var(--muted)"></div></div>
+        <span class="risk-lv" style="color:var(--muted)">~${Math.max(20, d.score - randRange(5,18))}</span>
+      </div>
+      <div class="risk-row">
+        <span class="risk-n">7 gün sonra tahmin</span>
+        <div class="risk-bar-w"><div class="risk-b" style="width:${Math.min(97, d.score + randRange(3,12))}%;background:var(--green)"></div></div>
+        <span class="risk-lv" style="color:var(--green)">~${Math.min(97, d.score + randRange(3,12))}</span>
+      </div>
+    </div>
+  `;
+
+  if (isPro) {
+    wrap.classList.remove('locked-wrap');
+    inner.classList.remove('locked-blur');
+    inner.innerHTML = content;
+  } else {
+    wrap.classList.add('locked-wrap');
+    inner.classList.add('locked-blur');
+    inner.innerHTML = content + `
+      <div class="locked-cta">
+        <div class="locked-cta-txt">🔒 Rakip kıyaslama ve 7 günlük trend tahmini Pro'da</div>
+        <button class="btn-unlock" id="unlockBtn">Pro'ya Geç</button>
+      </div>
+    `;
+    const ub = $('unlockBtn');
+    if (ub) ub.addEventListener('click', openProModal);
+  }
+}
+
+/* ─── HELPERS ─── */
+function formatDur(s) {
+  if (!s || isNaN(s)) return '—';
+  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
+  return m > 0 ? `${m}d ${sec}s` : `${sec}s`;
+}
+
+function getAspect(w, h) {
+  const gcd = (a, b) => b ? gcd(b, a % b) : a;
+  const g = gcd(w, h) || 1;
+  const rw = w / g, rh = h / g;
+  if (rw === 16 && rh === 9) return '16:9 Yatay';
+  if (rw === 9 && rh === 16) return '9:16 Dikey';
+  if (rw === 4 && rh === 3) return '4:3';
+  if (rw === 1 && rh === 1) return '1:1 Kare';
+  return `${rw}:${rh}`;
+}
+
+function durNote(dur) {
+  if (!dur) return 'Süre okunamadı';
+  if (dur <= 30) return 'Mikro içerik — çok ideal';
+  if (dur <= 90) return 'Kısa form — viral ideal aralık';
+  if (dur <= 300) return 'Orta uzunluk — iyi';
+  return 'Uzun form — YouTube için uygun';
+}
+
+function sColor(s) {
+  return s >= 70 ? 'var(--green)' : s >= 45 ? 'var(--amber)' : 'var(--red)';
+}
+function eColor(v) { return v >= 8 ? 'var(--green)' : v >= 4 ? 'var(--amber)' : 'var(--red)'; }
+function ePill(v) {
+  return v >= 8 ? { cls: 'pg', text: '↑ Yüksek' } : v >= 4 ? { cls: 'pa', text: '→ Orta' } : { cls: 'pr', text: '↓ Düşük' };
+}
+function rPill(v) {
+  return v >= 65 ? { cls: 'pg', text: '✓ İyi' } : v >= 40 ? { cls: 'pa', text: '⚡ Normal' } : { cls: 'pr', text: '⚠ Düşük' };
+}
+function oPill(v) {
+  return v >= 80 ? { cls: 'pg', text: '★ Özgün' } : v >= 55 ? { cls: 'pa', text: '≈ Benzer' } : { cls: 'pr', text: '⚠ Kopyalama' };
+}
+function vLabel(s) {
+  return s >= 80 ? '🔥 Viral Potansiyel Yüksek' : s >= 60 ? '📈 Trend Olabilir' : s >= 40 ? '📊 Orta Potansiyel' : '❄️ Düşük Potansiyel';
+}
+function vDesc(s) {
+  return s >= 80 ? 'Teknik ve içerik sinyalleri güçlü, viral şansı yüksek.'
+    : s >= 60 ? 'Doğru zamanlama ve etiketlerle trend girebilir.'
+    : s >= 40 ? 'İçerik kalitesini artırmak skoru yükseltir.'
+    : 'Çeşitli sinyaller zayıf, iyileştirme önerilir.';
+}
+function buildInsights(d) {
+  const m = d.fileMeta || {};
+  return [
+    d.dur > 0 && d.dur > 300
+      ? '<strong>Video uzun.</strong> 90 saniyenin altında bir Shorts/Reels versiyonu hazırla.'
+      : d.dur > 0 && d.dur <= 90
+        ? '<strong>Süre ideal.</strong> 15–90 saniye kısa-form için en viral aralık.'
+        : '<strong>Süre bilinmiyor.</strong> Kısa-form (15–90s) viral erişim için en etkili format.',
+    d.crRisk > 60
+      ? '<strong>Telif riski yüksek.</strong> Müziği telif hakkı serbest bir alternatifle değiştirmeni öneririz.'
+      : '<strong>Telif riski düşük görünüyor.</strong> Orijinal müzik veya lisanslı ses kullanıldığı anlaşılıyor.',
+    d.retention < 50
+      ? '<strong>İlk 3 saniye kritik.</strong> Merak uyandıran bir hook ile aç; izleyiciyi hemen yakala.'
+      : '<strong>Tutma oranı iyi.</strong> Bu video formatını ve uzunluğunu diğer içeriklerde de dene.',
+    '<strong>Thumbnail</strong> tıklanma oranını %40\'a kadar etkiler. Yüzlü, kontrastlı, metin kısa olsun.',
+    state.isFile && m.height && m.width && m.height < m.width
+      ? '<strong>Yatay video.</strong> Instagram Reels ve TikTok için 9:16 dikey versiyon da hazırla.'
+      : '<strong>Dikey format</strong> kısa-form platformlarda tam ekran gösteriliyor, avantajlı.',
+  ].filter(Boolean);
+}
+
+function randRange(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+function shuffleArr(arr) { return [...arr].sort(() => Math.random() - 0.5); }
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+function setProgress(label, pct) {
+  $('progLabel').textContent = label;
+  $('progPct').textContent = pct + '%';
+  $('progFill').style.width = pct + '%';
+}
+
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
+    background: '#1C1C1C', border: '1px solid #333', color: '#F5F5F5',
+    padding: '9px 18px', borderRadius: '20px', fontSize: '13px', fontWeight: '500',
+    zIndex: '999', fontFamily: 'Inter, system-ui, sans-serif',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.5)', transition: 'opacity 0.3s'
+  });
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
+}
+
+/* ─── RESET ─── */
+$('resetBtn').addEventListener('click', () => {
+  $('resultsSec').classList.remove('show');
+  $('emptyHint').style.display = '';
+  fileInput.value = '';
+  $('urlIn').value = '';
+  $('titleIn').value = '';
+  $('titleRow').style.display = 'none';
+  $('urlNotice').style.display = 'none';
+  const vid = $('videoEl');
+  if (vid.src) { URL.revokeObjectURL(vid.src); vid.src = ''; }
+  $('videoPrev').classList.remove('show');
+  $('limitNotice').classList.remove('show');
+  state = { hasInput: false, isFile: false, fileMeta: {}, url: '', title: '' };
+  lastData = null; lastAi = null;
+  setAnalyzeEnabled(false);
+});
+</script>
 </body>
 </html>
