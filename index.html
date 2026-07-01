@@ -200,6 +200,19 @@
         .info-pill .value { font-size: 0.85rem; font-weight: 700; color: #f8fafc; text-align: center; }
         .info-pill.deceased .value { color: #fca5a5; }
 
+        /* Kariyer Başarı Rozetleri */
+        .stat-badge {
+            display: flex; flex-direction: column; align-items: center;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid #334155;
+            border-radius: 0.9rem;
+            padding: 0.55rem 1rem;
+            min-width: 84px;
+        }
+        .stat-badge .icon { font-size: 1.3rem; line-height: 1; margin-bottom: 0.15rem; }
+        .stat-badge .num { font-size: 1.05rem; font-weight: 800; color: #fbbf24; line-height: 1.1; }
+        .stat-badge .lbl { font-size: 0.55rem; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; text-align: center; margin-top: 0.1rem; }
+
         /* Toast */
         .toast {
             position: fixed;
@@ -375,7 +388,7 @@
                     </div>
 
                     <!-- Bilgi Rozetleri -->
-                    <div class="flex gap-2 mb-6 flex-wrap justify-center">
+                    <div class="flex gap-2 mb-4 flex-wrap justify-center">
                         <div class="info-pill">
                             <span class="label" id="pill-place-label">Doğum Yeri</span>
                             <span class="value" id="pill-place-value"></span>
@@ -387,6 +400,40 @@
                         <div class="info-pill" id="pill-age-container">
                             <span class="label" id="pill-age-label">Yaş</span>
                             <span class="value" id="pill-age-value"></span>
+                        </div>
+                    </div>
+
+                    <!-- Mevki / Kulüpler -->
+                    <div class="flex gap-2 mb-6 flex-wrap justify-center">
+                        <div class="info-pill">
+                            <span class="label" id="pill-position-label">Mevki</span>
+                            <span class="value" id="pill-position-value"></span>
+                        </div>
+                        <div class="info-pill" style="min-width:180px; flex:2;">
+                            <span class="label" id="pill-clubs-label">Kulüpler</span>
+                            <span class="value" id="pill-clubs-value" style="font-size:0.75rem; line-height:1.3;"></span>
+                        </div>
+                    </div>
+
+                    <!-- Kariyer Başarı Rozetleri -->
+                    <div class="mb-7">
+                        <h4 id="stats-title" class="text-center text-yellow-400/70 text-[0.65rem] font-bold uppercase tracking-widest mb-2">Kariyer Başarıları</h4>
+                        <div class="flex gap-2.5 justify-center flex-wrap">
+                            <div class="stat-badge">
+                                <span class="icon">🏆</span>
+                                <span class="num" id="stat-bdo-value">0</span>
+                                <span class="lbl" id="stat-bdo-label">Ballon d'Or</span>
+                            </div>
+                            <div class="stat-badge">
+                                <span class="icon">🌍</span>
+                                <span class="num" id="stat-wc-value">0</span>
+                                <span class="lbl" id="stat-wc-label">Dünya Kupası</span>
+                            </div>
+                            <div class="stat-badge">
+                                <span class="icon">⭐</span>
+                                <span class="num" id="stat-cl-value">0</span>
+                                <span class="lbl" id="stat-cl-label">Şampiyonlar Ligi</span>
+                            </div>
                         </div>
                     </div>
 
@@ -432,17 +479,28 @@
     <script>
         // --- ÇEVİRİLER ---
         const uiTranslations = {
-            tr: { searchPlaceholder: "Futbolcu ara...", watchYoutube: "YouTube'da İzle", back: "Geri Dön", noResult: "Futbolcu bulunamadı.", tagline: "Efsanelerin Gerçek Hikayeleri", allTab: "Tümü", favTab: "⭐ Favorilerim", noFavResult: "Henüz favori eklemediniz. Kartlardaki ⭐ ikonuna dokun!", favorite: "Favorile", favorited: "Favorilerde", listen: "Dinle", stop: "Durdur", share: "Paylaş", favAdded: "Favorilere eklendi!", favRemoved: "Favorilerden çıkarıldı.", ttsUnsupported: "Tarayıcınız sesli okumayı desteklemiyor.", ttsError: "Sesli okuma başlatılamadı, tekrar dene.", placeLabel: "Doğum Yeri", dateLabel: "Doğum Tarihi", deathLabel: "Vefat Tarihi", ageLabel: "Yaş", deathAgeLabel: "Vefat Yaşı", shareModalTitle: "Nereye Paylaşmak İstersin?", shareSystem: "Diğer Uygulamalar", shareCopy: "Bağlantıyı Kopyala", shareCancel: "Vazgeç", copied: "Panoya kopyalandı!", sharedOk: "Paylaşıldı!" },
-            en: { searchPlaceholder: "Search player...", watchYoutube: "Watch on YouTube", back: "Go Back", noResult: "No players found.", tagline: "True Stories of Legends", allTab: "All", favTab: "⭐ My Favorites", noFavResult: "No favorites yet. Tap the ⭐ icon on a card!", favorite: "Favorite", favorited: "Favorited", listen: "Listen", stop: "Stop", share: "Share", favAdded: "Added to favorites!", favRemoved: "Removed from favorites.", ttsUnsupported: "Your browser doesn't support text-to-speech.", ttsError: "Couldn't start speech, try again.", placeLabel: "Birthplace", dateLabel: "Date of Birth", deathLabel: "Date of Death", ageLabel: "Age", deathAgeLabel: "Age at Death", shareModalTitle: "Where do you want to share?", shareSystem: "More Apps", shareCopy: "Copy Link", shareCancel: "Cancel", copied: "Copied to clipboard!", sharedOk: "Shared!" },
-            es: { searchPlaceholder: "Buscar jugador...", watchYoutube: "Ver en YouTube", back: "Regresar", noResult: "No se encontraron jugadores.", tagline: "Historias Reales de Leyendas", allTab: "Todos", favTab: "⭐ Mis Favoritos", noFavResult: "Aún no hay favoritos. ¡Toca el ícono ⭐ en una tarjeta!", favorite: "Favorito", favorited: "Favorito", listen: "Escuchar", stop: "Detener", share: "Compartir", favAdded: "¡Añadido a favoritos!", favRemoved: "Eliminado de favoritos.", ttsUnsupported: "Tu navegador no soporta lectura en voz alta.", ttsError: "No se pudo iniciar la voz, intenta de nuevo.", placeLabel: "Lugar de Nacimiento", dateLabel: "Fecha de Nacimiento", deathLabel: "Fecha de Fallecimiento", ageLabel: "Edad", deathAgeLabel: "Edad al Fallecer", shareModalTitle: "¿Dónde quieres compartir?", shareSystem: "Más Aplicaciones", shareCopy: "Copiar Enlace", shareCancel: "Cancelar", copied: "¡Copiado al portapapeles!", sharedOk: "¡Compartido!" }
+            tr: { searchPlaceholder: "Futbolcu ara...", watchYoutube: "YouTube'da İzle", back: "Geri Dön", noResult: "Futbolcu bulunamadı.", tagline: "Efsanelerin Gerçek Hikayeleri", allTab: "Tümü", favTab: "⭐ Favorilerim", noFavResult: "Henüz favori eklemediniz. Kartlardaki ⭐ ikonuna dokun!", favorite: "Favorile", favorited: "Favorilerde", listen: "Dinle", stop: "Durdur", share: "Paylaş", favAdded: "Favorilere eklendi!", favRemoved: "Favorilerden çıkarıldı.", ttsUnsupported: "Tarayıcınız sesli okumayı desteklemiyor.", ttsError: "Sesli okuma başlatılamadı, tekrar dene.", placeLabel: "Doğum Yeri", dateLabel: "Doğum Tarihi", deathLabel: "Vefat Tarihi", ageLabel: "Yaş", deathAgeLabel: "Vefat Yaşı", shareModalTitle: "Nereye Paylaşmak İstersin?", shareSystem: "Diğer Uygulamalar", shareCopy: "Bağlantıyı Kopyala", shareCancel: "Vazgeç", copied: "Panoya kopyalandı!", sharedOk: "Paylaşıldı!", positionLabel: "Mevki", clubsLabel: "Kulüpler", statsTitle: "Kariyer Başarıları", bdoLabel: "Ballon d'Or", wcLabel: "Dünya Kupası", clLabel: "Şampiyonlar Ligi" },
+            en: { searchPlaceholder: "Search player...", watchYoutube: "Watch on YouTube", back: "Go Back", noResult: "No players found.", tagline: "True Stories of Legends", allTab: "All", favTab: "⭐ My Favorites", noFavResult: "No favorites yet. Tap the ⭐ icon on a card!", favorite: "Favorite", favorited: "Favorited", listen: "Listen", stop: "Stop", share: "Share", favAdded: "Added to favorites!", favRemoved: "Removed from favorites.", ttsUnsupported: "Your browser doesn't support text-to-speech.", ttsError: "Couldn't start speech, try again.", placeLabel: "Birthplace", dateLabel: "Date of Birth", deathLabel: "Date of Death", ageLabel: "Age", deathAgeLabel: "Age at Death", shareModalTitle: "Where do you want to share?", shareSystem: "More Apps", shareCopy: "Copy Link", shareCancel: "Cancel", copied: "Copied to clipboard!", sharedOk: "Shared!", positionLabel: "Position", clubsLabel: "Clubs", statsTitle: "Career Achievements", bdoLabel: "Ballon d'Or", wcLabel: "World Cups", clLabel: "Champions League" },
+            es: { searchPlaceholder: "Buscar jugador...", watchYoutube: "Ver en YouTube", back: "Regresar", noResult: "No se encontraron jugadores.", tagline: "Historias Reales de Leyendas", allTab: "Todos", favTab: "⭐ Mis Favoritos", noFavResult: "Aún no hay favoritos. ¡Toca el ícono ⭐ en una tarjeta!", favorite: "Favorito", favorited: "Favorito", listen: "Escuchar", stop: "Detener", share: "Compartir", favAdded: "¡Añadido a favoritos!", favRemoved: "Eliminado de favoritos.", ttsUnsupported: "Tu navegador no soporta lectura en voz alta.", ttsError: "No se pudo iniciar la voz, intenta de nuevo.", placeLabel: "Lugar de Nacimiento", dateLabel: "Fecha de Nacimiento", deathLabel: "Fecha de Fallecimiento", ageLabel: "Edad", deathAgeLabel: "Edad al Fallecer", shareModalTitle: "¿Dónde quieres compartir?", shareSystem: "Más Aplicaciones", shareCopy: "Copiar Enlace", shareCancel: "Cancelar", copied: "¡Copiado al portapapeles!", sharedOk: "¡Compartido!", positionLabel: "Posición", clubsLabel: "Clubes", statsTitle: "Logros de Carrera", bdoLabel: "Balón de Oro", wcLabel: "Mundiales", clLabel: "Champions League" }
         };
         const speechLangMap = { tr: 'tr-TR', en: 'en-US', es: 'es-ES' };
         const dateLocaleMap = { tr: 'tr-TR', en: 'en-US', es: 'es-ES' };
+
+        // --- MEVKİ ÇEVİRİLERİ ---
+        const positionsMap = {
+            FW: { tr: "Forvet", en: "Forward", es: "Delantero" },
+            MF: { tr: "Orta Saha", en: "Midfielder", es: "Centrocampista" },
+            AM: { tr: "Ofansif Orta Saha", en: "Attacking Midfielder", es: "Mediapunta" },
+            DF: { tr: "Defans (Libero)", en: "Defender (Sweeper)", es: "Defensa (Líbero)" },
+            GK: { tr: "Kaleci", en: "Goalkeeper", es: "Portero" },
+            WG: { tr: "Kanat", en: "Winger", es: "Extremo" }
+        };
 
         // --- VERİTABANI (25 Efsane) ---
         const playersData = [
             { id: 1, name: "Lionel Messi", flag: "🇦🇷", wikiTitle: "Lionel_Messi", birthDate: "1987-06-24",
               birthPlace: { tr: "Rosario, Arjantin", en: "Rosario, Argentina", es: "Rosario, Argentina" },
+              pos: "FW", clubs: ["Barcelona", "Paris Saint-Germain", "Inter Miami"], stats: { bdo: 8, wc: 1, cl: 4 },
               story: {
                 tr: "24 Haziran 1987'de Arjantin'in Rosario kentinde, işçi sınıfından bir ailenin çocuğu olarak dünyaya geldi. Küçük yaşta büyüme hormonu eksikliği teşhisi kondu ve Arjantin'deki hiçbir kulüp aylık 900 dolarlık tedavi masrafını karşılayamadı. 13 yaşında ailesiyle birlikte Barcelona'ya taşındı; kulüp tedaviyi üstlenirken o da bir peçeteye atılan imzayla tarihe geçen anlaşmayı imzaladı. La Masia'da yetişti, 2004'te profesyonel forma giydi ve kısa sürede dünyanın en iyisi oldu. Rekor 8 Ballon d'Or, 4 Şampiyonlar Ligi ve nihayet 2022'de Arjantin'e 36 yıl sonra Dünya Kupası'nı getirerek kariyerini taçlandırdı. Bugün Inter Miami formasıyla Amerika'da futbolu büyütmeye devam ediyor.",
                 en: "Born on 24 June 1987 in Rosario, Argentina, to a working-class family. Diagnosed young with a growth hormone deficiency, no Argentine club could cover the $900 monthly treatment. At 13 he moved to Barcelona with his family; the club paid for his treatment while he signed a now-legendary contract scrawled on a napkin. Raised at La Masia, he debuted in 2004 and quickly became the best in the world. A record 8 Ballon d'Ors, 4 Champions Leagues, and finally the 2022 World Cup, ending Argentina's 36-year wait, crowned his career. He now continues growing the game in America with Inter Miami.",
@@ -450,6 +508,7 @@
               }},
             { id: 2, name: "Cristiano Ronaldo", flag: "🇵🇹", wikiTitle: "Cristiano_Ronaldo", birthDate: "1985-02-05",
               birthPlace: { tr: "Funchal, Madeira, Portekiz", en: "Funchal, Madeira, Portugal", es: "Funchal, Madeira, Portugal" },
+              pos: "FW", clubs: ["Sporting CP", "Manchester United", "Real Madrid", "Juventus", "Al-Nassr"], stats: { bdo: 5, wc: 0, cl: 5 },
               story: {
                 tr: "5 Şubat 1985'te Portekiz'in Madeira adasındaki Funchal'da, çok yoksul bir ailenin dördüncü çocuğu olarak doğdu. Babası bir bahçıvandı; çocukluğu maddi zorluklarla geçti. 12 yaşında ailesinden ayrılıp Lizbon'a, Sporting Lizbon'un yatılı akademisine gitti. 15 yaşında kalp ritim bozukluğu teşhisiyle kariyeri bitme noktasına geldi, riskli bir ameliyatla kurtuldu. 2003'te Manchester United onu keşfetti, ardından Real Madrid'de tarihin en golcü oyuncusu unvanını aldı (900'ün üzerinde resmi gol). Juventus ve Al-Nassr'da rekor kırmaya devam etti, 5 kez Ballon d'Or kazandı. Disiplini ve çalışma azmiyle futbolun fiziksel sınırlarını yeniden tanımladı.",
                 en: "Born on 5 February 1985 in Funchal, Madeira, Portugal, the fourth child of a very poor family. His father was a gardener, and his childhood was marked by hardship. At 12 he left home for Sporting Lisbon's boarding academy in the capital. At 15 a heart arrhythmia nearly ended his career, but risky surgery saved him. Manchester United discovered him in 2003, and at Real Madrid he became football's all-time top scorer with over 900 official goals. He kept breaking records at Juventus and Al-Nassr, winning 5 Ballon d'Ors. With relentless discipline, he redefined the physical limits of the sport.",
@@ -457,6 +516,7 @@
               }},
             { id: 3, name: "Pelé", flag: "🇧🇷", wikiTitle: "Pelé", birthDate: "1940-10-23", deathDate: "2022-12-29",
               birthPlace: { tr: "Três Corações, Brezilya", en: "Três Corações, Brazil", es: "Três Corações, Brasil" },
+              pos: "FW", clubs: ["Santos", "New York Cosmos"], stats: { bdo: 0, wc: 3, cl: 0 },
               story: {
                 tr: "Gerçek adı Edson Arantes do Nascimento olan Pelé, 23 Ekim 1940'ta Brezilya'nın Três Corações kasabasında doğdu. Yoksul bir ailede büyüdü, çorapların içine gazete kağıdı doldurarak yaptığı toplarla sokaklarda futbol öğrendi. Ayakkabı boyacılığı yaparak aileye katkı sağladı. 15 yaşında Santos'a katıldı, 16 yaşında milli takıma çağrıldı. 1958'de henüz 17 yaşındayken İsveç'te Dünya Kupası'nı kazanarak dünyayı şoka uğrattı; 1962 ve 1970'te iki kupa daha ekleyerek tarihte 3 Dünya Kupası kazanan tek futbolcu oldu. 1363 resmi golle 'Futbolun Kralı' unvanını aldı. 29 Aralık 2022'de 82 yaşında hayatını kaybetti; futbol tarihinin en büyük mirasını bıraktı.",
                 en: "Born Edson Arantes do Nascimento on 23 October 1940 in Três Corações, Brazil, he grew up poor and learned football in the streets with balls made of stuffed socks and newspaper. He shined shoes to help support his family. He joined Santos at 15 and was called to the national team at 16. In 1958, at just 17, he shocked the world by winning the World Cup in Sweden; he added two more in 1962 and 1970, becoming the only player in history to win 3 World Cups. With 1,363 official goals, he earned the title 'The King of Football'. He passed away on 29 December 2022 at 82, leaving the greatest legacy in the sport's history.",
@@ -464,6 +524,7 @@
               }},
             { id: 4, name: "Diego Maradona", flag: "🇦🇷", wikiTitle: "Diego_Maradona", birthDate: "1960-10-30", deathDate: "2020-11-25",
               birthPlace: { tr: "Lanús, Buenos Aires, Arjantin", en: "Lanús, Buenos Aires, Argentina", es: "Lanús, Buenos Aires, Argentina" },
+              pos: "AM", clubs: ["Boca Juniors", "Barcelona", "Napoli", "Sevilla"], stats: { bdo: 0, wc: 1, cl: 0 },
               story: {
                 tr: "30 Ekim 1960'ta Buenos Aires'in yoksul Villa Fiorito gecekondu mahallesinde doğdu. Sekiz kardeşin arasında büyüdü, sokak futbolunda topla kurduğu ilişki fizik kurallarına aykırı gibiydi. 10 yaşında Los Cebollitas takımında dikkat çekti, 16 yaşında Arjantin liginde profesyonel oldu. Barcelona ve Napoli'de efsaneleşti; özellikle güçlü bir kulübü olmayan Napoli'yi iki kez İtalya şampiyonu yaptı. 1986 Dünya Kupası çeyrek finalinde İngiltere'ye attığı 'Tanrının Eli' ve aynı maçtaki 'Yüzyılın Golü' ile bir ulusun kahramanı oldu ve kupayı Arjantin'e getirdi. Sahadaki dehası kadar sahra dışındaki mücadeleleriyle de tanınan Maradona, 25 Kasım 2020'de 60 yaşında kalp krizi sonucu hayatını kaybetti.",
                 en: "Born on 30 October 1960 in the impoverished Villa Fiorito slum of Buenos Aires, he grew up among eight siblings, and his relationship with a ball on the street seemed to defy the laws of physics. He caught attention at age 10 with Los Cebollitas and turned professional in the Argentine league at 16. He became a legend at Barcelona and Napoli, taking a club with no history of success to two Italian titles. In the 1986 World Cup quarter-final against England, his 'Hand of God' and the 'Goal of the Century' in the same match made him a national hero and delivered the trophy to Argentina. Known as much for his off-field struggles as his genius on it, Maradona died of a heart attack on 25 November 2020 at age 60.",
@@ -471,6 +532,7 @@
               }},
             { id: 5, name: "Zinedine Zidane", flag: "🇫🇷", wikiTitle: "Zinedine_Zidane", birthDate: "1972-06-23",
               birthPlace: { tr: "Marsilya, Fransa", en: "Marseille, France", es: "Marsella, Francia" },
+              pos: "AM", clubs: ["Cannes", "Bordeaux", "Juventus", "Real Madrid"], stats: { bdo: 1, wc: 1, cl: 1 },
               story: {
                 tr: "23 Haziran 1972'de Fransa'nın Marsilya kentinde, Cezayir'den göç etmiş bir ailenin en küçük çocuğu olarak dünyaya geldi. Marsilya'nın zorlu La Castellane banliyösünde büyüdü, sokak futbolunda tekniğini geliştirdi. Cannes ve Bordeaux'da olgunlaştı, Juventus'ta yıldızlaştı. 1998 Dünya Kupası finalinde Brezilya'ya attığı iki kafa gol ile Fransa'ya ilk Dünya Kupası'nı kazandırdı ve ulusal kahraman oldu. 2001'de dönemin rekor transfer bedeliyle Real Madrid'e gitti; 2002 Şampiyonlar Ligi finalinde attığı efsanevi sol ayak voleyi futbol tarihinin en güzel gollerinden sayılır. 2006 Dünya Kupası finalindeki kafa vuruşu olayına rağmen, zarafeti ve vizyonuyla nesillere ilham verdi; bugün antrenörlük kariyerinde de başarılı bir figür.",
                 en: "Born on 23 June 1972 in Marseille, France, the youngest child of a family that had immigrated from Algeria. He grew up in Marseille's tough La Castellane housing estate, honing his technique on the streets. He matured at Cannes and Bordeaux before becoming a star at Juventus. His two headed goals against Brazil in the 1998 World Cup final gave France its first title and made him a national hero. In 2001 he moved to Real Madrid for a then-record fee; his legendary left-foot volley in the 2002 Champions League final is considered one of the finest goals in football history. Despite the infamous headbutt in the 2006 World Cup final, his elegance and vision inspired generations, and today he remains a successful figure in coaching.",
@@ -478,6 +540,7 @@
               }},
             { id: 6, name: "Ronaldinho", flag: "🇧🇷", wikiTitle: "Ronaldinho", birthDate: "1980-03-21",
               birthPlace: { tr: "Porto Alegre, Brezilya", en: "Porto Alegre, Brazil", es: "Porto Alegre, Brasil" },
+              pos: "AM", clubs: ["Grêmio", "Paris Saint-Germain", "Barcelona", "AC Milan"], stats: { bdo: 1, wc: 1, cl: 1 },
               story: {
                 tr: "21 Mart 1980'de Brezilya'nın Porto Alegre kentinde doğdu. Abisi Roberto'nun futbol kariyeri sakatlık yüzünden erken sona erince, ailenin tüm umudu küçük Ronaldinho'ya kaldı. 13 yaşında bir maçta rakibine 23 gol attığı efsaneleşti. Grêmio'da başladığı kariyerini PSG ve özellikle Barcelona'da taçlandırdı; 2005'te Ballon d'Or kazandı ve Santiago Bernabéu'da bile Real Madrid taraftarlarının ayakta alkışladığı nadir rakiplerden biri oldu. Joga Bonito (Güzel Oyun) felsefesinin canlı sembolüydü; sokak futbolunun neşesini ve hokkabazlığını en üst düzey rekabetçi futbola taşıyan oyuncu olarak hatırlanıyor. 2002 Dünya Kupası'nda Brezilya ile şampiyon oldu.",
                 en: "Born on 21 March 1980 in Porto Alegre, Brazil. When his older brother Roberto's football career ended early due to injury, the family's hopes fell on young Ronaldinho. He became legendary at 13 for scoring 23 goals in a single match. Starting at Grêmio, his career reached its peak at PSG and especially Barcelona, where he won the 2005 Ballon d'Or and famously received a standing ovation from Real Madrid fans at the Bernabéu. He was the living embodiment of 'Joga Bonito', remembered as the player who brought the joy and trickery of street football to the highest level of competitive play. He was a World Cup champion with Brazil in 2002.",
@@ -485,6 +548,7 @@
               }},
             { id: 7, name: "Johan Cruyff", flag: "🇳🇱", wikiTitle: "Johan_Cruyff", birthDate: "1947-04-25", deathDate: "2016-03-24",
               birthPlace: { tr: "Amsterdam, Hollanda", en: "Amsterdam, Netherlands", es: "Ámsterdam, Países Bajos" },
+              pos: "FW", clubs: ["Ajax", "Barcelona", "Los Angeles Aztecs", "Feyenoord"], stats: { bdo: 3, wc: 0, cl: 3 },
               story: {
                 tr: "25 Nisan 1947'de Amsterdam'da, Ajax stadyumuna sadece birkaç yüz metre uzaklıkta doğdu; babası kulübün yakınında bir bakkal işletiyordu. 12 yaşında babasını kaybetti ve Ajax'ın gençlik akademisinde büyüdü. Rinus Michels ile geliştirdiği 'Total Football' (Total Futbol) anlayışıyla Ajax'ı ve Hollanda Milli Takımı'nı 1970'lerde dünyanın en etkileyici takımlarına dönüştürdü; 3 kez Ballon d'Or kazandı. 1973'te Barcelona'ya transfer oldu ve kulübü diktatörlük döneminin ardından yeniden ayağa kaldırdı. Oyuncu kariyerinin ardından teknik direktörlükte de devrim yarattı, 'Cruyff turn' hareketini futbol sözlüğüne kazandırdı ve modern Barcelona'nın (tiki-taka) felsefesinin mimarı oldu. 24 Mart 2016'da akciğer kanseri nedeniyle 68 yaşında hayatını kaybetti.",
                 en: "Born on 25 April 1947 in Amsterdam, just a few hundred meters from the Ajax stadium, where his father ran a grocery shop nearby. He lost his father at 12 and grew up in Ajax's youth academy. With the 'Total Football' philosophy he developed alongside Rinus Michels, he transformed Ajax and the Dutch national team into the most captivating sides of the 1970s, winning 3 Ballon d'Ors. He moved to Barcelona in 1973 and revived the club after years under dictatorship. After his playing career, he revolutionized coaching too, gifting football the 'Cruyff turn' and architecting the tiki-taka philosophy that defines modern Barcelona. He died of lung cancer on 24 March 2016 at age 68.",
@@ -492,6 +556,7 @@
               }},
             { id: 8, name: "Paolo Maldini", flag: "🇮🇹", wikiTitle: "Paolo_Maldini", birthDate: "1968-06-26",
               birthPlace: { tr: "Milano, İtalya", en: "Milan, Italy", es: "Milán, Italia" },
+              pos: "DF", clubs: ["AC Milan"], stats: { bdo: 0, wc: 0, cl: 5 },
               story: {
                 tr: "26 Haziran 1968'de İtalya'nın Milano kentinde, kendisi de AC Milan efsanesi olan Cesare Maldini'nin oğlu olarak doğdu. Kulübün akademisinde yetişti, 16 yaşında ilk takıma çıktı ve tam 25 yıl boyunca yalnızca Milan formasıyla oynadı — transfer olmadan tek kulüpte geçirdiği kariyer futbol tarihinde eşsizdir. 5 Şampiyonlar Ligi, 7 Serie A şampiyonluğu kazandı ve savunma oyununun en zarif temsilcisi olarak anıldı. 'Eğer kayarak müdahale etmek zorunda kalırsan, zaten bir hata yapmışsındır' sözüyle taktik zekasını özetledi. 41 yaşına kadar üst düzeyde oynadı; oğlu Daniel Maldini de bugün profesyonel futbolcu olarak aynı geleneği sürdürüyor.",
                 en: "Born on 26 June 1968 in Milan, Italy, the son of Cesare Maldini, himself an AC Milan legend. He rose through the club's academy, debuted for the first team at 16, and played exclusively for Milan for a full 25 years — a one-club career unmatched in football history. He won 5 Champions Leagues and 7 Serie A titles, remembered as the most elegant defender the game has produced. He summed up his tactical intelligence with the quote: 'If you have to slide in for a tackle, you've already made a mistake.' He played at the top level until age 41; his son Daniel Maldini now carries the family tradition forward as a professional footballer.",
@@ -499,6 +564,7 @@
               }},
             { id: 9, name: "Andrés Iniesta", flag: "🇪🇸", wikiTitle: "Andrés_Iniesta", birthDate: "1984-05-11",
               birthPlace: { tr: "Fuentealbilla, İspanya", en: "Fuentealbilla, Spain", es: "Fuentealbilla, España" },
+              pos: "MF", clubs: ["Barcelona", "Vissel Kobe", "Emirates Club"], stats: { bdo: 0, wc: 1, cl: 4 },
               story: {
                 tr: "11 Mayıs 1984'te İspanya'nın küçük Fuentealbilla kasabasında doğdu. 12 yaşında ailesinden ayrılıp Barcelona'nın La Masia yatılı akademisine katıldığında çok utangaç ve ev hasreti çeken bir çocuktu; ilk geceler ağlayarak uyuduğu bilinir. Barcelona'nın altın çağının kalbi oldu, Xavi ile kurduğu ortaklık tiki-taka futbolunun temeliydi. 2010 Dünya Kupası finalinde, uzatma dakikalarında attığı golle İspanya'ya tarihinin ilk ve tek Dünya Kupası'nı kazandırdı; o gol Fuentealbilla'da bir heykelle ölümsüzleştirildi. Barcelona'da 4 Şampiyonlar Ligi kazandıktan sonra kariyerinin son yıllarını Japonya'nın Vissel Kobe kulübünde sürdürdü, 2023'te profesyonel futbola veda etti.",
                 en: "Born on 11 May 1984 in the small town of Fuentealbilla, Spain. When he left home at 12 to join Barcelona's La Masia boarding academy, he was a deeply shy, homesick boy known to cry himself to sleep in his first nights there. He became the heart of Barcelona's golden era, with his partnership alongside Xavi forming the foundation of tiki-taka football. His extra-time goal in the 2010 World Cup final gave Spain its first and only World Cup, a goal immortalized with a statue in Fuentealbilla. After winning 4 Champions Leagues with Barcelona, he spent the final years of his career at Vissel Kobe in Japan, retiring from professional football in 2023.",
@@ -506,6 +572,7 @@
               }},
             { id: 10, name: "Xavi Hernández", flag: "🇪🇸", wikiTitle: "Xavi", birthDate: "1980-01-25",
               birthPlace: { tr: "Terrassa, İspanya", en: "Terrassa, Spain", es: "Terrassa, España" },
+              pos: "MF", clubs: ["Barcelona", "Al-Sadd"], stats: { bdo: 0, wc: 1, cl: 4 },
               story: {
                 tr: "25 Ocak 1980'de İspanya'nın Terrassa kentinde doğdu. 11 yaşında La Masia'ya katıldı ve orada geliştirdiği pas oyunuyla sahanın geometrisini herkesten iyi gören bir 'Kuklacı' oldu. Barcelona'da 17 yıl boyunca 767 resmi maça çıktı, 8 La Liga ve 4 Şampiyonlar Ligi şampiyonluğu kazandı. Tiki-taka sisteminin kalbiydi; topu kaybetmesi neredeyse imkansız kabul edilirdi. İspanya Milli Takımı ile 2008 ve 2012 Avrupa Şampiyonalarını, 2010 Dünya Kupası'nı kazanarak İspanya futbol tarihinin en başarılı neslinin lideri oldu. Kariyerinin sonunda Katar'da oynadı, ardından teknik direktör olarak Barcelona'ya döndü ve kulübü 2023'te yeniden La Liga şampiyonu yaptı.",
                 en: "Born on 25 January 1980 in Terrassa, Spain. He joined La Masia at 11 and developed a passing game there that let him read the geometry of the pitch better than anyone, earning him the nickname 'the Puppet Master'. He played 767 official matches for Barcelona over 17 years, winning 8 La Liga titles and 4 Champions Leagues. He was the heart of the tiki-taka system, considered almost impossible to dispossess. With the Spanish national team he won the 2008 and 2012 European Championships and the 2010 World Cup, leading the most successful generation in Spanish football history. He finished his playing career in Qatar, then returned to Barcelona as manager, guiding the club back to a La Liga title in 2023.",
@@ -513,6 +580,7 @@
               }},
             { id: 11, name: "Thierry Henry", flag: "🇫🇷", wikiTitle: "Thierry_Henry", birthDate: "1977-08-17",
               birthPlace: { tr: "Les Ulis, Fransa", en: "Les Ulis, France", es: "Les Ulis, Francia" },
+              pos: "FW", clubs: ["Monaco", "Juventus", "Arsenal", "Barcelona", "New York Red Bulls"], stats: { bdo: 0, wc: 1, cl: 1 },
               story: {
                 tr: "17 Ağustos 1977'de Paris yakınlarındaki Les Ulis'te doğdu. Kariyerine Monaco'da başladı, 1998 Dünya Kupası'nı Fransa ile kazandı. Juventus'ta kanat oyuncusu olarak başarısız bir dönem geçirdikten sonra Arsene Wenger tarafından Arsenal'e getirildi ve orada forvete dönüştürülerek tarihin en golcü oyuncularından biri haline geldi. 2003-04 sezonunda Arsenal'in tek maç kaybetmeden şampiyon olduğu 'Invincibles' (Yenilmezler) kadrosunun yıldızıydı. İnanılmaz hızı, zarafeti ve topu köşeye plase etme becerisiyle Premier Lig tarihinin en beğenilen forvetlerinden oldu; kulüpte 228 golle rekor kırdı. Kariyerinin sonunda Barcelona ve New York Red Bulls'ta oynadı; bugün televizyon yorumculuğu ve teknik direktörlük yapıyor.",
                 en: "Born on 17 August 1977 in Les Ulis, near Paris. He began his career at Monaco and won the 1998 World Cup with France. After a difficult spell as a struggling winger at Juventus, he was brought to Arsenal by Arsène Wenger and transformed into a striker, becoming one of the greatest goalscorers in history. He was the star of Arsenal's 'Invincibles' side that won the 2003-04 title without losing a single match. With incredible pace, elegance, and a signature finish curled into the far corner, he became one of the most beloved strikers in Premier League history, setting the club's all-time scoring record with 228 goals. He finished his career at Barcelona and New York Red Bulls, and today works as a TV pundit and manager.",
@@ -520,6 +588,7 @@
               }},
             { id: 12, name: "Ronaldo Nazário", flag: "🇧🇷", wikiTitle: "Ronaldo_(Brazilian_footballer)", birthDate: "1976-09-22",
               birthPlace: { tr: "Rio de Janeiro, Brezilya", en: "Rio de Janeiro, Brazil", es: "Río de Janeiro, Brasil" },
+              pos: "FW", clubs: ["Cruzeiro", "PSV Eindhoven", "Barcelona", "Inter Milan", "Real Madrid", "AC Milan", "Corinthians"], stats: { bdo: 2, wc: 2, cl: 0 },
               story: {
                 tr: "22 Eylül 1976'da Rio de Janeiro'nun yoksul Bento Ribeiro mahallesinde doğdu. 'O Fenômeno' (Fenomen) lakabıyla anılan Ronaldo, henüz 17 yaşındayken Cruzeiro'da patlama yaptı, ardından PSV Eindhoven ve Barcelona'da inanılmaz gol ortalamaları tuttu. 1998 Dünya Kupası finalinde geçirdiği gizemli kriz hâlâ tartışılır. Real Madrid'e transfer olduktan sonra iki kez ağır diz kapağı yaralanması geçirdi ve kariyerinin bitmesi bekleniyordu; ancak inanılmaz bir azimle 2002 Dünya Kupası'na döndü, 8 golle gol kralı oldu ve Brezilya'yı şampiyon yaptı. Bu geri dönüş futbol tarihinin en büyük mucizelerinden sayılır. Kariyerinin sonunda Milan ve Corinthians'ta oynadı; bugün Real Valladolid kulübünün sahibi.",
                 en: "Born on 22 September 1976 in the poor Bento Ribeiro neighborhood of Rio de Janeiro. Known as 'O Fenômeno' (The Phenomenon), he burst onto the scene at Cruzeiro at just 17, then posted extraordinary scoring ratios at PSV Eindhoven and Barcelona. The mysterious seizure he suffered before the 1998 World Cup final is still debated today. After moving to Real Madrid, he suffered two devastating knee injuries that were expected to end his career; yet with remarkable determination he returned for the 2002 World Cup, finished as top scorer with 8 goals, and led Brazil to the title. That comeback is considered one of the greatest miracles in football history. He finished his career at Milan and Corinthians; today he is the owner of Real Valladolid.",
@@ -527,6 +596,7 @@
               }},
             { id: 13, name: "Franz Beckenbauer", flag: "🇩🇪", wikiTitle: "Franz_Beckenbauer", birthDate: "1945-09-11", deathDate: "2024-01-07",
               birthPlace: { tr: "Münih, Almanya", en: "Munich, Germany", es: "Múnich, Alemania" },
+              pos: "DF", clubs: ["Bayern Munich", "New York Cosmos"], stats: { bdo: 2, wc: 1, cl: 3 },
               story: {
                 tr: "11 Eylül 1945'te İkinci Dünya Savaşı'nın hemen ardından Münih'te doğdu. Bayern Münih'in efsanevi altyapısında yetişti ve libero pozisyonunu icat eden isim olarak futbol taktiklerini kökten değiştirdi; savunmadan topla ileri çıkıp hücumu başlatan ilk modern stoper oldu. 'Der Kaiser' (İmparator) lakabıyla anılan Beckenbauer, Bayern Münih ile 3 kez Şampiyon Kulüpler Kupası kazandı ve 1974'te Batı Almanya'yı kaptan olarak Dünya Kupası şampiyonu yaptı. 1990'da bu kez teknik direktör olarak Batı Almanya'yı yeniden şampiyon yaparak, hem oyuncu hem teknik direktör olarak Dünya Kupası kazanan nadir isimlerden biri oldu. 2006 Dünya Kupası'nın Almanya'da düzenlenmesinde kilit rol oynadı. 7 Ocak 2024'te 78 yaşında hayatını kaybetti.",
                 en: "Born on 11 September 1945 in Munich, shortly after the end of World War II. Raised in Bayern Munich's storied youth system, he fundamentally changed football tactics by inventing the sweeper (libero) role, becoming the first modern defender to carry the ball forward from the back to launch attacks. Nicknamed 'Der Kaiser' (The Emperor), he won 3 European Cups with Bayern Munich and captained West Germany to the 1974 World Cup title. In 1990 he led West Germany to another World Cup title, this time as manager, becoming one of the rare figures to win the World Cup as both player and coach. He played a key role in bringing the 2006 World Cup to Germany. He died on 7 January 2024 at age 78.",
@@ -534,6 +604,7 @@
               }},
             { id: 14, name: "Roberto Baggio", flag: "🇮🇹", wikiTitle: "Roberto_Baggio", birthDate: "1967-02-18",
               birthPlace: { tr: "Caldogno, İtalya", en: "Caldogno, Italy", es: "Caldogno, Italia" },
+              pos: "AM", clubs: ["Fiorentina", "Juventus", "AC Milan", "Bologna", "Inter Milan", "Brescia"], stats: { bdo: 1, wc: 0, cl: 0 },
               story: {
                 tr: "18 Şubat 1967'de İtalya'nın Caldogno kasabasında doğdu. Kariyeri boyunca dizinden 6 kez ağır ameliyat geçirmesine rağmen olağanüstü tekniği ve şık oyunuyla İtalya'yı büyüledi. Fiorentina'dan Juventus'a transferi, taraftarları isyan ettirecek kadar tartışmalıydı. 1993'te Ballon d'Or ve dünyanın yılın futbolcusu ödüllerini kazandı. 'İlahi Atkuyruklu' lakabıyla anılan Baggio, 1994 Dünya Kupası finalinde İtalya'yı neredeyse tek başına finale taşıdı ancak penaltı atışlarında kaçırdığı vuruş kariyerinin en büyük dramı oldu; buna rağmen sportmenliği ve zarafetiyle hafızalarda kaldı. Budist inancı ve doğa sporlarına olan tutkusuyla da tanınan Baggio, futbolun en sevilen sanatçılarından biri olarak anılıyor.",
                 en: "Born on 18 February 1967 in Caldogno, Italy. Despite enduring six major knee surgeries throughout his career, his extraordinary technique and stylish play mesmerized Italy. His transfer from Fiorentina to Juventus was so controversial it sparked riots among fans. He won the Ballon d'Or and World Player of the Year award in 1993. Nicknamed 'the Divine Ponytail', Baggio almost single-handedly carried Italy to the 1994 World Cup final, but the penalty he missed in the shootout became the greatest heartbreak of his career; despite that, his sportsmanship and grace kept him beloved. Known also for his Buddhist faith and passion for nature and conservation, Baggio is remembered as one of football's most cherished artists.",
@@ -541,6 +612,7 @@
               }},
             { id: 15, name: "Gianluigi Buffon", flag: "🇮🇹", wikiTitle: "Gianluigi_Buffon", birthDate: "1978-01-28",
               birthPlace: { tr: "Carrara, İtalya", en: "Carrara, Italy", es: "Carrara, Italia" },
+              pos: "GK", clubs: ["Parma", "Juventus", "Paris Saint-Germain"], stats: { bdo: 0, wc: 1, cl: 0 },
               story: {
                 tr: "28 Ocak 1978'de İtalya'nın mermer şehri Carrara'da, sporcu bir aileden geldi; annesi disk atma şampiyonu, babası ağır sıklet halterciydi. Parma'da henüz 17 yaşındayken Serie A'ya çıktı ve dönemin rekor transfer bedeliyle Juventus'a katıldı. Kulüpte 17 sezon geçirdi, 2006 Dünya Kupası'nda İtalya'nın şampiyonluğunun en büyük mimarlarından biriydi ve turnuvada sadece 2 gol yedi. Refleksleri, liderliği ve uzun ömürlülüğüyle tanınan Buffon, 45 yaşına kadar üst düzey futbol oynayarak kaleciliğin en tutkulu sembollerinden biri oldu. Kariyerinin son yıllarında Paris Saint-Germain'de de forma giydi, 2023'te Parma'ya dönerek kariyerine memleket kulübünde veda etti.",
                 en: "Born on 28 January 1978 in Carrara, Italy's marble city, into a family of athletes; his mother was a discus champion and his father a heavyweight weightlifter. He debuted in Serie A at just 17 with Parma and joined Juventus for a then-record transfer fee for a goalkeeper. He spent 17 seasons at the club, was a key architect of Italy's 2006 World Cup triumph, conceding just 2 goals in the entire tournament. Renowned for his reflexes, leadership, and longevity, Buffon played top-level football until age 45, becoming one of the most passionate symbols of goalkeeping. He also played for Paris Saint-Germain late in his career, returning to Parma in 2023 to close his career at the club where it all began.",
@@ -548,6 +620,7 @@
               }},
             { id: 16, name: "Iker Casillas", flag: "🇪🇸", wikiTitle: "Iker_Casillas", birthDate: "1981-05-20",
               birthPlace: { tr: "Móstoles, İspanya", en: "Móstoles, Spain", es: "Móstoles, España" },
+              pos: "GK", clubs: ["Real Madrid", "Porto"], stats: { bdo: 0, wc: 1, cl: 3 },
               story: {
                 tr: "20 Mayıs 1981'de Madrid yakınlarındaki Móstoles'te doğdu. Real Madrid'in altyapısına 9 yaşında katıldı, henüz 19 yaşındayken 2000 Şampiyonlar Ligi finalinde forma giyerek kulübün en genç kalecilerinden biri olarak kupayı kaldırdı. Kulüpte 25 yıl geçirdi, 3 Şampiyonlar Ligi kazandı ve rekor sayıda maça çıktı. İspanya Milli Takımı'nın kaptanı olarak 2008 ve 2012 Avrupa şampiyonluklarına, 2010'da ise ülkesinin ilk Dünya Kupası'na öncülük etti; finalde Arjen Robben'in kritik pozisyonda attığı şutu ayağıyla çıkararak İspanya'nın kaderini değiştirdiği an futbol tarihine geçti. Refleksleri ve sahadaki liderliğiyle 'San Iker' (Aziz Iker) lakabını aldı. Kariyerinin son yıllarını Porto'da geçirdi, geçirdiği kalp krizi sonrası 2020'de futbola veda etti.",
                 en: "Born on 20 May 1981 in Móstoles, near Madrid. He joined Real Madrid's academy at age 9 and, at just 19, lifted the 2000 Champions League as one of the club's youngest-ever keepers to feature in a final. He spent 25 years at the club, winning 3 Champions Leagues and setting appearance records. As captain of the Spanish national team, he led the country to European titles in 2008 and 2012 and to its first-ever World Cup in 2010; his toe-save on Arjen Robben's clear chance in the final is remembered as the moment that changed Spain's destiny. His reflexes and leadership on the pitch earned him the nickname 'San Iker' (Saint Iker). He spent his final playing years at Porto, retiring from football in 2020 after suffering a heart attack.",
@@ -555,6 +628,7 @@
               }},
             { id: 17, name: "Lev Yashin", flag: "🇷🇺", wikiTitle: "Lev_Yashin", birthDate: "1929-10-22", deathDate: "1990-03-20",
               birthPlace: { tr: "Moskova, SSCB", en: "Moscow, USSR", es: "Moscú, URSS" },
+              pos: "GK", clubs: ["Dynamo Moscow"], stats: { bdo: 1, wc: 0, cl: 0 },
               story: {
                 tr: "22 Ekim 1929'da Moskova'da işçi bir ailenin çocuğu olarak doğdu. İkinci Dünya Savaşı sırasında henüz 12 yaşında fabrikada çalışmak zorunda kaldı. Dinamo Moskova'da kaleci olarak yetişti ve futbol tarihinde Ballon d'Or kazanan ilk ve tek kaleci oldu (1963). Kaleci olarak simsiyah forması, çığlık atarak savunmasını yönlendirmesi ve ceza sahası dışına çıkarak oyuna katılan vizyoner tarzıyla 'Siyah Örümcek' lakabını aldı; kariyeri boyunca tahmini 150 penaltı kurtardı. Sovyetler Birliği ile 1960 Avrupa Şampiyonası'nı kazandı. Modern kaleciliğin babası kabul edilir; FIFA bugün turnuvaların en iyi kalecisine onun anısına 'Yashin Ödülü'nü veriyor. 20 Mart 1990'da 60 yaşında hayatını kaybetti.",
                 en: "Born on 22 October 1929 in Moscow to a working-class family. During World War II he was forced to work in a factory at just 12 years old. He rose as a goalkeeper at Dynamo Moscow and became the first and only goalkeeper in football history to win the Ballon d'Or, in 1963. Known for his all-black kit, his commanding shouts directing his defense, and his visionary style of leaving the box to sweep up danger, he earned the nickname 'The Black Spider', saving an estimated 150 penalties over his career. He won the 1960 European Championship with the Soviet Union. Considered the father of modern goalkeeping, FIFA today awards the 'Yashin Trophy' to the best goalkeeper of each World Cup in his honor. He died on 20 March 1990 at age 60.",
@@ -562,6 +636,7 @@
               }},
             { id: 18, name: "George Best", flag: "🏴", wikiTitle: "George_Best", birthDate: "1946-05-22", deathDate: "2005-11-25",
               birthPlace: { tr: "Belfast, Kuzey İrlanda", en: "Belfast, Northern Ireland", es: "Belfast, Irlanda del Norte" },
+              pos: "WG", clubs: ["Manchester United", "Fulham", "Los Angeles Aztecs"], stats: { bdo: 1, wc: 0, cl: 1 },
               story: {
                 tr: "22 Mayıs 1946'da Kuzey İrlanda'nın Belfast kentinde doğdu. 15 yaşında Manchester United'a katılmak için İngiltere'ye gitti, ancak ilk günlerde memleket hasretiyle geri döndü; kısa süre sonra tekrar denemek için geri geldi. İnanılmaz çalımları, hızı ve iki ayağını da ustaca kullanabilmesiyle futbolun ilk 'rock yıldızı' oldu; sahadaki yeteneği kadar sahra dışındaki eğlenceli yaşam tarzıyla da manşetlere çıktı. 1968'de Manchester United'ın ilk Şampiyon Kulüpler Kupası'nı kazanmasında kilit rol oynadı ve aynı yıl Ballon d'Or kazandı. 'Pelé iyi, Maradona daha iyi, George en iyisi' sözü futbol folkloruna yerleşti. Alkol bağımlılığıyla uzun süre mücadele etti ve 25 Kasım 2005'te 59 yaşında karaciğer yetmezliği nedeniyle hayatını kaybetti.",
                 en: "Born on 22 May 1946 in Belfast, Northern Ireland. He moved to England at 15 to join Manchester United, but was so homesick in his first days that he returned home before coming back to try again shortly after. With incredible dribbling, blistering pace, and equal skill on both feet, he became football's first true rock star, making as many headlines for his colorful lifestyle off the pitch as for his talent on it. He played a key role in Manchester United's first European Cup triumph in 1968 and won the Ballon d'Or that same year. The saying 'Pelé good, Maradona better, George Best' became part of football folklore. He struggled with alcoholism for years and died of liver failure on 25 November 2005 at age 59.",
@@ -569,6 +644,7 @@
               }},
             { id: 19, name: "Ferenc Puskás", flag: "🇭🇺", wikiTitle: "Ferenc_Puskás", birthDate: "1927-04-02", deathDate: "2006-11-17",
               birthPlace: { tr: "Budapeşte, Macaristan", en: "Budapest, Hungary", es: "Budapest, Hungría" },
+              pos: "FW", clubs: ["Honvéd", "Real Madrid"], stats: { bdo: 0, wc: 0, cl: 3 },
               story: {
                 tr: "2 Nisan 1927'de Budapeşte'de doğdu. Macaristan'ın 1950'lerdeki efsanevi 'Muhteşem Macarlar' (Aranycsapat) takımının lideriydi; bu kadro İngiltere'yi kendi evinde 6-3 yenerek futbol tarihinde çığır açtı. Sol ayağındaki inanılmaz vuruş gücü ve isabetiyle tanınan Puskás, Honvéd ve Macaristan Milli Takımı ile neredeyse yenilmezdi. 1956'da Macar İhtilali sırasında ülkesini terk etti ve İspanya'ya sığındı. 31 yaşında ve fazla kilolu olmasına rağmen Real Madrid tarafından imzalandı; Alfredo Di Stéfano ile kurduğu ortaklık futbol tarihinin en üretken ikililerinden biri oldu, 4 kez İspanya gol kralı oldu. FIFA bugün yılın en güzel golüne onun adına 'Puskás Ödülü'nü veriyor. 17 Kasım 2006'da 79 yaşında Alzheimer komplikasyonları nedeniyle hayatını kaybetti.",
                 en: "Born on 2 April 1927 in Budapest. He was the leader of Hungary's legendary 'Mighty Magyars' (Aranycsapat) side of the 1950s, a team that stunned football history by beating England 6-3 on English soil. Known for the incredible power and accuracy of his left foot, Puskás was nearly unbeatable with Honvéd and the Hungarian national team. He fled his country during the 1956 Hungarian Revolution and sought refuge in Spain. Despite being 31 and overweight, he was signed by Real Madrid, and his partnership with Alfredo Di Stéfano became one of the most prolific duos in football history, winning the Spanish top scorer title 4 times. FIFA today awards the 'Puskás Award' for the best goal of the year in his honor. He died on 17 November 2006 at age 79 from complications of Alzheimer's disease.",
@@ -576,6 +652,7 @@
               }},
             { id: 20, name: "Alfredo Di Stéfano", flag: "🇦🇷", wikiTitle: "Alfredo_Di_Stéfano", birthDate: "1926-07-04", deathDate: "2014-07-07",
               birthPlace: { tr: "Buenos Aires, Arjantin", en: "Buenos Aires, Argentina", es: "Buenos Aires, Argentina" },
+              pos: "FW", clubs: ["River Plate", "Millonarios", "Real Madrid", "Espanyol"], stats: { bdo: 2, wc: 0, cl: 5 },
               story: {
                 tr: "4 Temmuz 1926'da Buenos Aires'te İtalyan göçmenlerin torunu olarak doğdu. Kariyerine River Plate'te başladı, ardından Kolombiya liginde forma giydi. 1953'te Real Madrid'e transfer olduğunda hem kulüp hem de futbol tarihini değiştirdi; kulübü Avrupa'nın en büyük gücüne dönüştürerek ilk 5 Şampiyon Kulüpler Kupası'nın tamamını kazandı. Sahanın her bölgesinde -savunmada, orta sahada, forvette- mükemmel performans sergileyebilen, futbol tarihindeki en komple oyuncu olarak kabul edilir. Arjantin, Kolombiya ve İspanya milli takımlarında oynayan nadir isimlerden biridir. 2 kez Ballon d'Or kazandı. Real Madrid'i bugünkü küresel dev haline getiren isim olarak anılır. 7 Temmuz 2014'te, 88. doğum gününden sadece 3 gün sonra, 88 yaşında hayatını kaybetti.",
                 en: "Born on 4 July 1926 in Buenos Aires, the grandson of Italian immigrants. He began his career at River Plate, then played in the Colombian league. When he transferred to Real Madrid in 1953, he changed both the club and the sport's history, turning Madrid into Europe's greatest power by winning all of the first 5 European Cups. Capable of excelling in every area of the pitch — defense, midfield, and attack — he is considered the most complete player in football history. He is one of the rare players to have represented Argentina, Colombia, and Spain at national level. He won the Ballon d'Or twice. He is remembered as the man who built Real Madrid into the global giant it is today. He died on 7 July 2014, just 3 days after his 88th birthday.",
@@ -583,6 +660,7 @@
               }},
             { id: 21, name: "Garrincha", flag: "🇧🇷", wikiTitle: "Garrincha", birthDate: "1933-10-28", deathDate: "1983-01-20",
               birthPlace: { tr: "Pau Grande, Brezilya", en: "Pau Grande, Brazil", es: "Pau Grande, Brasil" },
+              pos: "WG", clubs: ["Botafogo", "Corinthians", "Flamengo"], stats: { bdo: 0, wc: 2, cl: 0 },
               story: {
                 tr: "28 Ekim 1933'te Brezilya'nın küçük Pau Grande köyünde doğdu. Çarpık bacaklarla dünyaya geldi; sağ bacağı sol bacağından altı santim daha kısaydı ve doktorlar hiçbir zaman yürüyemeyeceğini söyledi. Yoksul bir çocukluk geçirdi ve resmi bir futbol eğitimi almadı. Buna rağmen dribbling (top sürme) yeteneğiyle futbol tarihinin gelmiş geçmiş en özel oyuncularından biri oldu; rakiplerini adeta oyuncak gibi geçerdi. 1958 ve 1962 Dünya Kupalarını Pelé ile birlikte Brezilya'ya kazandırdı; özellikle 1962'de Pelé sakatlanınca takımı neredeyse tek başına şampiyon yaptı ve turnuvanın en iyi oyuncusu seçildi. Sahra dışındaki mücadeleleri ve alkol bağımlılığı nedeniyle kariyeri erken söndü; 20 Ocak 1983'te 49 yaşında sirozdan hayatını kaybetti.",
                 en: "Born on 28 October 1933 in the small village of Pau Grande, Brazil. He was born with distorted legs, his right leg six centimeters shorter than his left, and doctors said he would never walk. He had an impoverished childhood and never received formal football training. Despite this, his dribbling ability made him one of the most extraordinary players in the game's history, able to leave defenders looking like they were standing still. He helped Brazil win the 1958 and 1962 World Cups alongside Pelé, and in 1962 in particular, when Pelé was injured, he practically carried the team to the title alone and was named the tournament's best player. Struggles off the pitch and alcoholism cut his career short; he died of cirrhosis on 20 January 1983 at age 49.",
@@ -590,6 +668,7 @@
               }},
             { id: 22, name: "Michel Platini", flag: "🇫🇷", wikiTitle: "Michel_Platini", birthDate: "1955-06-21",
               birthPlace: { tr: "Joeuf, Fransa", en: "Joeuf, France", es: "Joeuf, Francia" },
+              pos: "MF", clubs: ["Nancy", "Saint-Étienne", "Juventus"], stats: { bdo: 3, wc: 0, cl: 1 },
               story: {
                 tr: "21 Haziran 1955'te Fransa'nın Joeuf kasabasında, İtalyan göçmen bir ailenin çocuğu olarak doğdu. Nancy ve Saint-Étienne'de yetiştikten sonra 1982'de Juventus'a transfer oldu ve 1980'lerin tartışmasız kralı oldu; 1983, 1984 ve 1985'te üst üste 3 kez Ballon d'Or kazanan ilk oyuncu unvanını aldı. Bir orta saha oyuncusu olmasına rağmen inanılmaz bir gol içgüdüsüne sahipti; 1984 Avrupa Şampiyonası'nda sadece 5 maçta 9 gol atarak hâlâ kırılamamış bir turnuva rekoru kurdu ve Fransa'yı şampiyon yaptı. Serbest vuruşlardaki ustalığıyla tanınırdı. Oyunculuğu bıraktıktan sonra Fransa Milli Takımı teknik direktörlüğü, UEFA başkanlığı gibi görevler üstlendi; başkanlık döneminde yaşanan tartışmalar futbol yönetimindeki kariyerini gölgeledi.",
                 en: "Born on 21 June 1955 in Joeuf, France, to a family of Italian immigrants. After coming through the ranks at Nancy and Saint-Étienne, he transferred to Juventus in 1982 and became the undisputed king of the 1980s, becoming the first player to win 3 consecutive Ballon d'Ors, in 1983, 1984, and 1985. Despite playing as a midfielder, he had an extraordinary scoring instinct, netting 9 goals in just 5 matches at Euro 1984, a tournament record that still stands, as he led France to the title. He was renowned for his mastery of free kicks. After retiring, he managed the French national team and later served as UEFA president, though controversies during his presidency later overshadowed his administrative career.",
@@ -597,6 +676,7 @@
               }},
             { id: 23, name: "Dennis Bergkamp", flag: "🇳🇱", wikiTitle: "Dennis_Bergkamp", birthDate: "1969-05-10",
               birthPlace: { tr: "Amsterdam, Hollanda", en: "Amsterdam, Netherlands", es: "Ámsterdam, Países Bajos" },
+              pos: "FW", clubs: ["Ajax", "Inter Milan", "Arsenal"], stats: { bdo: 0, wc: 0, cl: 0 },
               story: {
                 tr: "10 Mayıs 1969'da Amsterdam'da doğdu; adı, doğduğu gün Ajax'ın Avrupa'da oynadığı maçtaki oyuncu Dennis Neville'e ithafen konuldu. Ajax'ta yetişti, Inter'de zorlu bir dönem geçirdikten sonra 1995'te Arsenal'e transfer oldu ve kulüp tarihinin en sevilen oyuncularından biri haline geldi. Uçak korkusu nedeniyle kariyerinin büyük bölümünde deplasman maçlarına kara yoluyla gitti; bu yüzden 'Uçamayan Hollandalı' lakabını aldı. Buz pateni yapar gibi zarif hareket kabiliyeti ve topu kontrol etme yeteneğiyle tanınırdı. 1998 Dünya Kupası çeyrek finalinde Arjantin'e attığı göğüs kontrolü ve çevirmeyle bitirdiği gol, futbol tarihinin en estetik gollerinden sayılır. Arsenal'in 'Invincibles' kadrosunun kilit ismiydi. Emekliliğinin ardından Ajax'ta teknik direktör yardımcılığı yaptı.",
                 en: "Born on 10 May 1969 in Amsterdam; he was named after Denis Neville, an Ajax player who featured in a European match on the day of his birth. He came through the Ajax academy, endured a difficult spell at Inter, and transferred to Arsenal in 1995, becoming one of the most beloved players in the club's history. Due to a fear of flying, he traveled to most away matches over land for the majority of his career, earning him the nickname 'The Non-Flying Dutchman'. He was known for his elegant, almost skater-like ball control. His chest-controlled, spinning finish against Argentina in the 1998 World Cup quarter-final is considered one of the most beautiful goals in football history. He was a key figure in Arsenal's 'Invincibles' squad. After retiring, he became assistant coach at Ajax.",
@@ -604,6 +684,7 @@
               }},
             { id: 24, name: "Luka Modrić", flag: "🇭🇷", wikiTitle: "Luka_Modrić", birthDate: "1985-09-09",
               birthPlace: { tr: "Zadar, Hırvatistan", en: "Zadar, Croatia", es: "Zadar, Croacia" },
+              pos: "MF", clubs: ["Dinamo Zagreb", "Tottenham Hotspur", "Real Madrid"], stats: { bdo: 1, wc: 0, cl: 5 },
               story: {
                 tr: "9 Eylül 1985'te Hırvatistan'ın Zadar kentinde doğdu. 6 yaşındayken Hırvatistan Bağımsızlık Savaşı sırasında büyükbabası öldürüldü ve ailesi mülteci olarak bir otelde yaşamak zorunda kaldı; çocukluğu savaşın gölgesinde geçti. Cılız fiziği nedeniyle birçok altyapı takımından reddedildi, ancak pes etmedi. Dinamo Zagreb ve Tottenham'da yeteneğini kanıtladıktan sonra 2012'de Real Madrid'e transfer oldu. Zekası, vizyonu ve tükenmek bilmeyen enerjisiyle kulübün orta saha beyni oldu, 5 Şampiyonlar Ligi kazandı. 2018 Dünya Kupası'nda küçük Hırvatistan'ı finale taşıyarak turnuvanın en iyi oyuncusu seçildi ve aynı yıl Messi-Ronaldo hegemonyasını 10 yıl sonra kırarak Ballon d'Or kazandı. 40'lı yaşlarına yaklaşırken hâlâ üst düzey futbol oynamaya devam ediyor.",
                 en: "Born on 9 September 1985 in Zadar, Croatia. At age 6, during the Croatian War of Independence, his grandfather was killed and his family was forced to live as refugees in a hotel; his childhood unfolded in the shadow of war. Rejected by many youth teams for his frail physique, he never gave up. After proving himself at Dinamo Zagreb and Tottenham, he transferred to Real Madrid in 2012. With his intelligence, vision, and boundless energy, he became the brain of the club's midfield, winning 5 Champions Leagues. He led tiny Croatia to the 2018 World Cup final and was named the tournament's best player, and that same year broke the decade-long Messi-Ronaldo hegemony to win the Ballon d'Or. Now approaching his 40s, he continues to play top-level football.",
@@ -611,6 +692,7 @@
               }},
             { id: 25, name: "Kaká", flag: "🇧🇷", wikiTitle: "Kaká", birthDate: "1982-04-22",
               birthPlace: { tr: "Gama, Brasília, Brezilya", en: "Gama, Brasília, Brazil", es: "Gama, Brasilia, Brasil" },
+              pos: "AM", clubs: ["São Paulo", "AC Milan", "Real Madrid", "Orlando City"], stats: { bdo: 1, wc: 1, cl: 1 },
               story: {
                 tr: "Gerçek adı Ricardo Izecson dos Santos Leite olan Kaká, 22 Nisan 1982'de Brezilya'nın başkenti Brasília'ya bağlı Gama kentinde, orta sınıf bir mühendis ailesinde doğdu. 18 yaşında bir havuz kazasında omurgasını kırdı ve doktorlar bir daha yürüyemeyeceğini söyledi, ancak mucizevi bir iyileşme süreciyle futbola geri döndü; bu deneyim onun derin Hristiyan inancının temeli oldu, gol attıktan sonra gökyüzünü işaret etmesi bu yüzdendir. São Paulo'da başladığı kariyerini AC Milan'da zirveye taşıdı; zarif duruşu, hızı ve yaratıcılığıyla 2007 Şampiyonlar Ligi'ni kazandı ve aynı yıl Ballon d'Or ile FIFA Yılın Futbolcusu ödüllerini aldı — bu dönem futbolun Messi-Ronaldo düellosundan önceki son büyük 'tek yıldız' zaferlerinden biri sayılır. 2009'da dönemin rekor bedeliyle Real Madrid'e transfer oldu. 2002 Dünya Kupası'nda Brezilya ile şampiyon oldu. Kariyerinin sonunda Orlando City'de oynadı, sahadaki centilmenliği ve olgun kişiliğiyle futbolun en saygın figürlerinden biri olarak anılıyor.",
                 en: "Born Ricardo Izecson dos Santos Leite on 22 April 1982 in Gama, near Brazil's capital Brasília, to a middle-class engineering family. At 18 he broke his spine in a swimming pool accident and doctors said he might never walk again, but a remarkable recovery brought him back to football; that experience deepened his Christian faith, which is why he points to the sky after scoring goals. After starting his career at São Paulo, he reached his peak at AC Milan, where his elegant style, pace, and creativity won the 2007 Champions League, and that same year he claimed both the Ballon d'Or and FIFA World Player of the Year — a period considered one of the last great 'single superstar' triumphs before the Messi-Ronaldo duopoly began. In 2009 he moved to Real Madrid for a then-record fee. He was a World Cup champion with Brazil in 2002. He finished his career at Orlando City, remembered as one of football's most respected and gracious figures on and off the pitch.",
@@ -716,6 +798,12 @@
             document.getElementById('share-opt-system').innerText = ui.shareSystem;
             document.getElementById('share-opt-copy').innerText = ui.shareCopy;
             document.getElementById('share-opt-cancel').innerText = ui.shareCancel;
+            document.getElementById('pill-position-label').innerText = ui.positionLabel;
+            document.getElementById('pill-clubs-label').innerText = ui.clubsLabel;
+            document.getElementById('stats-title').innerText = ui.statsTitle;
+            document.getElementById('stat-bdo-label').innerText = ui.bdoLabel;
+            document.getElementById('stat-wc-label').innerText = ui.wcLabel;
+            document.getElementById('stat-cl-label').innerText = ui.clLabel;
             updateDetailFavButton();
             updateDetailSpeakButton();
         }
@@ -725,7 +813,7 @@
             renderGrid();
         }
 
-        // --- FOTOĞRAF YÜKLEME (Wikipedia'dan gerçek fotoğraf) ---
+        // --- FOTOĞRAF YÜKLEME (Wikipedia'dan gerçek fotoğraf, yedekli) ---
         async function loadPlayerPhoto(wikiTitle, imgEl, fallbackEl) {
             if (photoCache.hasOwnProperty(wikiTitle)) {
                 const cached = photoCache[wikiTitle];
@@ -735,20 +823,39 @@
                 }
                 return;
             }
+
+            let src = null;
+
+            // 1. deneme: REST summary endpoint
             try {
                 const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`);
-                if (!res.ok) throw new Error('no data');
-                const data = await res.json();
-                const rawSrc = data.thumbnail && data.thumbnail.source ? data.thumbnail.source : null;
-                const src = rawSrc ? rawSrc.replace(/\/\d+px-/, '/400px-') : null;
-                photoCache[wikiTitle] = src;
-                if (src && imgEl) {
-                    imgEl.src = src;
-                    imgEl.onload = () => { imgEl.classList.add('loaded'); if (fallbackEl) fallbackEl.style.display = 'none'; };
-                    imgEl.onerror = () => { imgEl.classList.remove('loaded'); if (fallbackEl) fallbackEl.style.display = ''; };
+                if (res.ok) {
+                    const data = await res.json();
+                    const rawSrc = data.thumbnail && data.thumbnail.source ? data.thumbnail.source : null;
+                    src = rawSrc ? rawSrc.replace(/\/\d+px-/, '/400px-') : null;
                 }
-            } catch (e) {
-                photoCache[wikiTitle] = null;
+            } catch (e) {}
+
+            // 2. deneme: action API pageimages (ilkinde foto bulunamazsa)
+            if (!src) {
+                try {
+                    const res2 = await fetch(`https://en.wikipedia.org/w/api.php?action=query&titles=${encodeURIComponent(wikiTitle)}&prop=pageimages&format=json&pithumbsize=400&origin=*`);
+                    if (res2.ok) {
+                        const data2 = await res2.json();
+                        const pages = data2.query && data2.query.pages;
+                        if (pages) {
+                            const page = Object.values(pages)[0];
+                            if (page && page.thumbnail && page.thumbnail.source) src = page.thumbnail.source;
+                        }
+                    }
+                } catch (e) {}
+            }
+
+            photoCache[wikiTitle] = src;
+            if (src && imgEl) {
+                imgEl.src = src;
+                imgEl.onload = () => { imgEl.classList.add('loaded'); if (fallbackEl) fallbackEl.style.display = 'none'; };
+                imgEl.onerror = () => { imgEl.classList.remove('loaded'); if (fallbackEl) fallbackEl.style.display = ''; };
             }
         }
 
@@ -858,6 +965,16 @@
                 document.getElementById('pill-age-label').innerText = ui.ageLabel;
                 document.getElementById('pill-age-value').innerText = calculateAge(p.birthDate, null);
             }
+
+            // Mevki / Kulüpler
+            const posInfo = positionsMap[p.pos];
+            document.getElementById('pill-position-value').innerText = posInfo ? posInfo[currentLang] : '-';
+            document.getElementById('pill-clubs-value').innerText = (p.clubs || []).join(' • ');
+
+            // Kariyer başarı rozetleri
+            document.getElementById('stat-bdo-value').innerText = p.stats ? p.stats.bdo : 0;
+            document.getElementById('stat-wc-value').innerText = p.stats ? p.stats.wc : 0;
+            document.getElementById('stat-cl-value').innerText = p.stats ? p.stats.cl : 0;
 
             const query = encodeURIComponent(`${p.name} documentary story biography`);
             document.getElementById('detail-youtube').href = `https://www.youtube.com/results?search_query=${query}`;
@@ -1038,4 +1155,4 @@
         }
     </script>
 </body>
-</html>
+    </html>
