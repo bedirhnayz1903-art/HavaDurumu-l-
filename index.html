@@ -1,1449 +1,1041 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>ViraLens — Video Analiz</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #0A0A0A; --surface: #141414; --surface2: #1C1C1C; --border: #262626;
-  --text: #F5F5F5; --muted: #888; --sub: #444; --accent: #6366F1;
-  --accent-dim: rgba(99,102,241,0.1); --green: #22C55E; --amber: #F59E0B; --red: #EF4444;
-  --gold: #F0B429; --gold-dim: rgba(240,180,41,0.1);
-  --r: 14px; --rsm: 8px; --font: 'Inter', system-ui, sans-serif;
-}
-html { background: var(--bg); color: var(--text); font-family: var(--font); }
-body { min-height: 100vh; padding-bottom: 80px; }
-.container { max-width: 640px; margin: 0 auto; padding: 0 16px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FutStory - Efsanelerin Hikayeleri</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f8fafc;
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .font-serif { font-family: 'Cinzel', serif; }
 
-/* HEADER */
-.header {
-  padding: 16px 20px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: space-between;
-  position: sticky; top: 0; background: rgba(10,10,10,0.94);
-  backdrop-filter: blur(16px); z-index: 100;
-}
-.logo { display: flex; align-items: center; gap: 9px; }
-.logo-mark {
-  width: 32px; height: 32px; background: var(--accent); border-radius: 9px;
-  display: flex; align-items: center; justify-content: center;
-}
-.logo-mark svg { width: 17px; height: 17px; }
-.logo-name { font-size: 17px; font-weight: 700; letter-spacing: -0.4px; }
-.logo-name b { color: var(--accent); font-weight: 700; }
-.hdr-right { display: flex; align-items: center; gap: 8px; }
-.ai-badge { font-size: 10px; background: var(--accent-dim); color: var(--accent);
-  border: 1px solid rgba(99,102,241,0.25); padding: 3px 8px; border-radius: 20px;
-  font-weight: 600; letter-spacing: 0.4px; }
-.pro-badge-hdr { font-size: 10px; background: var(--gold-dim); color: var(--gold);
-  border: 1px solid rgba(240,180,41,0.3); padding: 3px 8px; border-radius: 20px;
-  font-weight: 700; cursor: pointer; }
-.pro-badge-hdr.active { background: var(--gold); color: #1a1300; }
+        .fut-logo {
+            position: relative;
+            width: 120px;
+            height: 140px;
+            background: linear-gradient(135deg, #065f46 0%, #022c22 100%);
+            border-radius: 50% 50% 50% 50% / 15% 15% 85% 85%;
+            border: 4px solid #fbbf24;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.4), inset 0 0 20px rgba(0,0,0,0.8);
+            overflow: hidden;
+        }
+        .fut-logo::after {
+            content: '';
+            position: absolute;
+            top: -50%; left: -50%;
+            width: 200%; height: 200%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+            transform: rotate(45deg);
+            animation: shine 3s infinite;
+        }
+        .fut-logo-inner {
+            font-family: 'Cinzel', serif;
+            font-size: 3rem;
+            font-weight: 900;
+            color: #fbbf24;
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            line-height: 1;
+            z-index: 10;
+        }
+        .fut-logo-small { width: 40px; height: 50px; border-width: 2px; }
+        .fut-logo-small .fut-logo-inner { font-size: 1.2rem; }
+        @keyframes shine {
+            0% { transform: translateX(-150%) rotate(45deg); }
+            100% { transform: translateX(150%) rotate(45deg); }
+        }
+        .splash-screen {
+            position: fixed; inset: 0;
+            background-color: #0f172a;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            z-index: 9999;
+            transition: opacity 0.8s ease-in-out;
+        }
+        .splash-hidden { opacity: 0; pointer-events: none; }
 
-/* SECTION LABEL */
-.sec-label { font-size: 10px; letter-spacing: 1.4px; text-transform: uppercase;
-  color: var(--muted); font-weight: 600; margin-bottom: 12px; }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .glass-card:hover {
+            border-color: rgba(251, 191, 36, 0.6);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4), 0 0 15px rgba(251, 191, 36, 0.1);
+        }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #fbbf24; }
 
-/* UPLOAD */
-.upload-sec { padding: 24px 0 16px; }
-.drop-zone {
-  border: 1.5px dashed var(--border); border-radius: var(--r); padding: 32px 20px;
-  text-align: center; cursor: pointer; background: var(--surface); position: relative;
-  transition: border-color 0.18s, background 0.18s;
-}
-.drop-zone:hover, .drop-zone.over { border-color: var(--accent); background: var(--accent-dim); }
-.drop-zone input[type=file] {
-  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
-  z-index: 2;
-}
-.drop-ico { font-size: 32px; margin-bottom: 8px; pointer-events: none; }
-.drop-t { font-size: 14px; font-weight: 600; margin-bottom: 5px; pointer-events: none; }
-.drop-s { font-size: 12px; color: var(--muted); pointer-events: none; }
-.drop-s em { color: var(--accent); font-style: normal; }
+        /* --- FOTOĞRAF --- */
+        .player-photo-wrap {
+            width: 68px; height: 68px;
+            border-radius: 9999px;
+            overflow: hidden;
+            border: 2px solid rgba(251, 191, 36, 0.5);
+            background: linear-gradient(135deg, #1e293b, #0f172a);
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 0.6rem;
+            position: relative;
+            flex-shrink: 0;
+        }
+        .player-photo-wrap img {
+            width: 100%; height: 100%; object-fit: cover; object-position: top;
+            display: none;
+        }
+        .player-photo-wrap img.loaded { display: block; }
+        .player-photo-wrap .flag-fallback {
+            font-size: 1.9rem;
+            filter: drop-shadow(0 2px 3px rgba(0,0,0,0.5));
+        }
+        .player-photo-wrap.big { width: 128px; height: 128px; border-width: 3px; }
+        .player-photo-wrap.big .flag-fallback { font-size: 3.2rem; }
+        .flag-badge-mini {
+            position: absolute;
+            bottom: -2px; right: -2px;
+            font-size: 0.9rem;
+            background: #0f172a;
+            border-radius: 9999px;
+            width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            border: 1px solid rgba(251, 191, 36, 0.5);
+        }
+        .player-photo-wrap.big .flag-badge-mini { width: 30px; height: 30px; font-size: 1.3rem; }
 
-/* VIDEO PREVIEW */
-.video-preview-wrap {
-  display: none; border-radius: var(--r); overflow: hidden;
-  background: #000; margin-top: 14px; position: relative;
-}
-.video-preview-wrap.show { display: block; }
-.video-preview-wrap video {
-  width: 100%; max-height: 260px; display: block; object-fit: contain; background: #000;
-}
-.video-overlay {
-  position: absolute; top: 8px; right: 8px; display: flex; gap: 6px;
-}
-.vid-btn {
-  background: rgba(0,0,0,0.7); color: #fff; border: none; border-radius: 6px;
-  padding: 5px 10px; font-size: 11px; font-weight: 600; cursor: pointer;
-  backdrop-filter: blur(4px); font-family: var(--font);
-}
-.vid-btn:hover { background: rgba(239,68,68,0.8); }
-.video-meta-bar {
-  background: var(--surface2); padding: 10px 14px;
-  display: flex; gap: 14px; flex-wrap: wrap;
-}
-.vmeta-item { font-size: 11px; color: var(--muted); }
-.vmeta-item span { color: var(--text); font-weight: 500; }
+        /* Favori Yıldızı (Kart üzerinde) */
+        .fav-btn-card {
+            position: absolute; top: 6px; right: 6px;
+            width: 30px; height: 30px;
+            display: flex; align-items: center; justify-content: center;
+            border-radius: 9999px;
+            background: rgba(15, 23, 42, 0.6);
+            z-index: 20;
+            transition: transform 0.2s ease;
+        }
+        .fav-btn-card:active { transform: scale(0.85); }
+        .fav-btn-card svg { width: 16px; height: 16px; transition: all 0.2s ease; }
 
-/* DIVIDER */
-.divider { display: flex; align-items: center; gap: 10px; margin: 14px 0; }
-.divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-.divider em { font-size: 11px; color: var(--sub); font-style: normal; font-weight: 500; }
+        /* Filtre Sekmeleri */
+        .filter-chip {
+            padding: 0.4rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+        .filter-chip.active { background: #fbbf24; color: #0f172a; border-color: #fbbf24; }
 
-/* URL ROW */
-.url-row { display: flex; gap: 8px; }
-.url-in {
-  flex: 1; background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--rsm); padding: 11px 13px; color: var(--text); font-family: var(--font);
-  font-size: 13px; outline: none; transition: border-color 0.18s;
-}
-.url-in::placeholder { color: var(--sub); }
-.url-in:focus { border-color: var(--accent); }
-.btn-add {
-  background: var(--accent); color: #fff; border: none; border-radius: var(--rsm);
-  padding: 11px 16px; font-family: var(--font); font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: opacity 0.18s; white-space: nowrap;
-}
-.btn-add:hover { opacity: 0.85; }
+        /* Rastgele Keşfet FAB */
+        .fab-random {
+            position: absolute; bottom: 20px; right: 20px;
+            width: 56px; height: 56px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #059669, #047857);
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 6px 20px rgba(5, 150, 105, 0.5);
+            z-index: 30;
+            border: 2px solid rgba(251, 191, 36, 0.4);
+            transition: transform 0.2s ease;
+        }
+        .fab-random:active { transform: scale(0.9) rotate(15deg); }
 
-/* TITLE INPUT */
-.title-row { margin-top: 10px; }
-.title-in {
-  width: 100%; background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--rsm); padding: 11px 13px; color: var(--text); font-family: var(--font);
-  font-size: 13px; outline: none; transition: border-color 0.18s;
-}
-.title-in::placeholder { color: var(--sub); }
-.title-in:focus { border-color: var(--accent); }
+        /* Detay Ekranı Aksiyon Butonları */
+        .action-btn {
+            display: flex; align-items: center; justify-content: center; gap: 0.4rem;
+            padding: 0.6rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            border: 1px solid #334155;
+            background: rgba(15, 23, 42, 0.5);
+            color: #cbd5e1;
+            transition: all 0.2s ease;
+        }
+        .action-btn:active { transform: scale(0.94); }
+        .action-btn.fav-active { color: #fbbf24; border-color: #fbbf24; background: rgba(251, 191, 36, 0.1); }
+        .action-btn.speak-active {
+            color: #34d399; border-color: #34d399; background: rgba(52, 211, 153, 0.1);
+            animation: pulse-speak 1.4s infinite;
+        }
+        .action-btn:disabled { opacity: 0.4; }
+        @keyframes pulse-speak {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.4); }
+            50% { box-shadow: 0 0 0 6px rgba(52, 211, 153, 0); }
+        }
 
-/* ANALYZE BTN */
-.analyze-wrap { margin: 16px 0; }
-.btn-analyze {
-  width: 100%; background: var(--accent); color: #fff; border: none; border-radius: var(--r);
-  padding: 15px; font-family: var(--font); font-size: 15px; font-weight: 700;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 9px;
-  transition: opacity 0.18s; letter-spacing: -0.2px;
-}
-.btn-analyze:hover { opacity: 0.88; }
-.btn-analyze:disabled { opacity: 0.3; cursor: not-allowed; }
-.spin { width: 17px; height: 17px; border: 2.5px solid rgba(255,255,255,0.3);
-  border-top-color: #fff; border-radius: 50%; animation: spin 0.65s linear infinite; display: none; }
-.btn-analyze.loading .spin { display: block; }
-.btn-analyze.loading .btxt { opacity: 0.55; }
-@keyframes spin { to { transform: rotate(360deg); } }
+        /* Bilgi Rozetleri (doğum yeri/tarihi/yaş) */
+        .info-pill {
+            display: flex; flex-direction: column;
+            align-items: center;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid #334155;
+            border-radius: 1rem;
+            padding: 0.6rem 0.8rem;
+            min-width: 90px;
+            flex: 1;
+        }
+        .info-pill .label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.05em; color: #94a3b8; margin-bottom: 0.15rem; }
+        .info-pill .value { font-size: 0.85rem; font-weight: 700; color: #f8fafc; text-align: center; }
+        .info-pill.deceased .value { color: #fca5a5; }
 
-/* PROGRESS */
-.prog-wrap { display: none; margin-top: 12px; }
-.prog-wrap.show { display: block; }
-.prog-head { display: flex; justify-content: space-between; font-size: 11px;
-  color: var(--muted); margin-bottom: 7px; }
-.prog-track { height: 2px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
-.prog-fill { height: 100%; background: var(--accent); border-radius: 2px;
-  transition: width 0.45s ease; width: 0%; }
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px; left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #1e293b; border: 1px solid #fbbf24; color: #f8fafc;
+            padding: 0.7rem 1.3rem; border-radius: 9999px;
+            font-size: 0.85rem; font-weight: 600;
+            z-index: 9998;
+            opacity: 0; pointer-events: none;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            white-space: nowrap;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* NOTICE */
-.notice {
-  display: none; background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 14px;
-}
-.notice.show { display: block; }
-.notice.warn { border-color: rgba(245,158,11,0.3); background: rgba(245,158,11,0.05); }
-.notice.info { border-color: rgba(99,102,241,0.25); background: var(--accent-dim); }
-.notice-head { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 6px; }
-.notice-body { font-size: 12px; color: var(--muted); line-height: 1.6; }
-.notice-body a { color: var(--accent); text-decoration: none; }
-
-/* PRO CARD (replaces all ads) */
-.pro-card {
-  border: 1.5px solid rgba(240,180,41,0.35); border-radius: var(--r);
-  padding: 16px 18px; margin-bottom: 14px;
-  background: linear-gradient(135deg, rgba(240,180,41,0.1), rgba(240,180,41,0.03));
-  position: relative; overflow: hidden; cursor: pointer; transition: border-color 0.18s;
-}
-.pro-card:hover { border-color: rgba(240,180,41,0.6); }
-.pro-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
-.pro-ico { font-size: 20px; }
-.pro-card-title { font-size: 14px; font-weight: 700; color: var(--gold); }
-.pro-card-desc { font-size: 12px; color: var(--muted); line-height: 1.55; margin-bottom: 12px; }
-.pro-feat-list { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; }
-.pro-feat { font-size: 12px; color: var(--text); display: flex; align-items: center; gap: 7px; }
-.pro-feat::before { content: '✓'; color: var(--gold); font-weight: 700; }
-.pro-price-row { display: flex; align-items: center; justify-content: space-between; }
-.pro-price { font-size: 18px; font-weight: 700; }
-.pro-price span { font-size: 11px; color: var(--muted); font-weight: 500; }
-.btn-pro { background: var(--gold); color: #1a1300; border: none; border-radius: var(--rsm);
-  padding: 10px 18px; font-family: var(--font); font-size: 13px; font-weight: 700;
-  cursor: pointer; transition: opacity 0.18s; }
-.btn-pro:hover { opacity: 0.88; }
-.pro-card.compact { padding: 13px 16px; display: flex; align-items: center; gap: 12px; }
-.pro-card.compact .pro-card-head { margin-bottom: 0; flex: 1; }
-.pro-card.compact .pro-card-title { font-size: 13px; }
-.pro-mini-sub { font-size: 11px; color: var(--muted); margin-top: 2px; }
-.btn-pro-sm { background: var(--gold); color: #1a1300; border: none; border-radius: var(--rsm);
-  padding: 8px 14px; font-family: var(--font); font-size: 12px; font-weight: 700;
-  cursor: pointer; white-space: nowrap; }
-
-/* LOCKED FEATURE OVERLAY */
-.locked-wrap { position: relative; }
-.locked-wrap .locked-blur { filter: blur(5px); opacity: 0.5; pointer-events: none; user-select: none; }
-.locked-cta {
-  position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 8px; text-align: center; padding: 12px;
-  background: rgba(10,10,10,0.35); border-radius: var(--r); z-index: 5;
-}
-.locked-cta-txt { font-size: 12px; color: var(--text); font-weight: 600; max-width: 220px; }
-.btn-unlock { background: var(--gold); color: #1a1300; border: none; border-radius: 20px;
-  padding: 7px 16px; font-family: var(--font); font-size: 11px; font-weight: 700; cursor: pointer; }
-
-/* RESULTS */
-.results-sec { display: none; padding-top: 6px; }
-.results-sec.show { display: block; }
-.res-head { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 18px; }
-.res-title { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
-.res-sub { font-size: 12px; color: var(--muted); margin-top: 3px; max-width: 300px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.btn-reset { background: var(--surface2); border: 1px solid var(--border); color: var(--muted);
-  border-radius: var(--rsm); padding: 7px 12px; font-family: var(--font); font-size: 11px;
-  font-weight: 500; cursor: pointer; transition: color 0.18s; flex-shrink: 0; }
-.btn-reset:hover { color: var(--text); }
-
-/* VERDICT */
-.verdict-card {
-  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r);
-  padding: 18px; margin-bottom: 12px; display: flex; align-items: center; gap: 16px;
-}
-.gauge-wrap { position: relative; flex-shrink: 0; }
-.gauge-svg { width: 76px; height: 76px; transform: rotate(-90deg); }
-.g-track { fill: none; stroke: var(--surface2); stroke-width: 6; }
-.g-fill { fill: none; stroke-width: 6; stroke-linecap: round;
-  transition: stroke-dashoffset 1.3s cubic-bezier(.4,0,.2,1); }
-.gauge-center { position: absolute; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; }
-.g-num { font-size: 19px; font-weight: 700; letter-spacing: -0.5px; }
-.g-unit { font-size: 9px; color: var(--muted); }
-.verdict-info { flex: 1; }
-.v-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase;
-  letter-spacing: 1px; margin-bottom: 3px; }
-.v-value { font-size: 20px; font-weight: 700; letter-spacing: -0.4px; margin-bottom: 5px; }
-.v-desc { font-size: 12px; color: var(--muted); line-height: 1.55; }
-
-/* GRID */
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px; }
-@media (max-width: 360px) { .grid2 { grid-template-columns: 1fr; } }
-.a-card {
-  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r);
-  padding: 14px; position: relative; overflow: hidden;
-}
-.a-card::after {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: var(--ca, var(--accent)); opacity: 0.5;
-}
-.a-icon { font-size: 18px; margin-bottom: 8px; }
-.a-label { font-size: 10px; color: var(--muted); font-weight: 600; text-transform: uppercase;
-  letter-spacing: 0.8px; margin-bottom: 3px; }
-.a-val { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-.a-val.sm { font-size: 15px; font-weight: 600; }
-.a-sub { font-size: 11px; color: var(--muted); margin-top: 3px; }
-.pill { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 20px;
-  font-size: 10px; font-weight: 600; margin-top: 5px; }
-.pg { background: rgba(34,197,94,.12); color: var(--green); }
-.pa { background: rgba(245,158,11,.12); color: var(--amber); }
-.pr { background: rgba(239,68,68,.12); color: var(--red); }
-.pb { background: var(--accent-dim); color: var(--accent); }
-
-/* BAR */
-.bar-card { background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
-.bar-title { font-size: 12px; font-weight: 600; margin-bottom: 12px; }
-.bar-row { display: flex; align-items: center; gap: 9px; margin-bottom: 9px; }
-.bar-lbl { font-size: 11px; color: var(--muted); width: 70px; flex-shrink: 0; }
-.bar-track { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-.bar-fill { height: 100%; border-radius: 3px; transition: width 1.1s ease; background: var(--accent); }
-.bar-num { font-size: 11px; color: var(--muted); width: 32px; text-align: right; }
-
-/* TAGS */
-.tags-card { background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
-.tags-t { font-size: 12px; font-weight: 600; margin-bottom: 10px; }
-.tags-wrap { display: flex; flex-wrap: wrap; gap: 6px; }
-.tag { padding: 4px 10px; border-radius: 20px; font-size: 11px; font-weight: 500;
-  border: 1px solid var(--border); color: var(--muted); background: var(--surface2); }
-.tag.hot { border-color: rgba(99,102,241,.35); color: var(--accent); background: var(--accent-dim); }
-
-/* COPYRIGHT */
-.cr-card { background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
-.cr-head { display: flex; align-items: center; gap: 9px; margin-bottom: 14px; }
-.cr-ico { font-size: 20px; }
-.cr-t { font-size: 13px; font-weight: 600; }
-.cr-level { font-size: 11px; font-weight: 600; margin-top: 2px; }
-.risk-row { display: flex; align-items: center; justify-content: space-between;
-  padding: 9px 0; border-bottom: 1px solid var(--border); }
-.risk-row:last-child { border-bottom: none; padding-bottom: 0; }
-.risk-n { font-size: 12px; color: var(--muted); }
-.risk-bar-w { flex: 1; height: 4px; background: var(--surface2); border-radius: 2px; margin: 0 10px; overflow: hidden; }
-.risk-b { height: 100%; border-radius: 2px; transition: width 1.1s ease; }
-.risk-lv { font-size: 11px; font-weight: 600; width: 55px; text-align: right; }
-
-/* PLATFORM */
-.compat-card { background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
-.compat-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
-.compat-item { display: flex; align-items: center; gap: 5px; padding: 7px 11px;
-  border-radius: var(--rsm); border: 1px solid var(--border); font-size: 12px;
-  font-weight: 500; background: var(--surface2); }
-.compat-dot { width: 6px; height: 6px; border-radius: 50%; }
-
-/* INSIGHTS */
-.ins-card { background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
-.ins-t { font-size: 12px; font-weight: 600; margin-bottom: 12px; }
-.ins-item { display: flex; gap: 9px; margin-bottom: 11px; }
-.ins-item:last-child { margin-bottom: 0; }
-.ins-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent);
-  flex-shrink: 0; margin-top: 7px; }
-.ins-text { font-size: 12px; color: var(--muted); line-height: 1.6; }
-.ins-text strong { color: var(--text); font-weight: 600; }
-
-/* TIMING CARD */
-.timing-card { background: var(--surface); border: 1.5px solid var(--border);
-  border-radius: var(--r); padding: 16px 18px; margin-bottom: 12px; }
-.timing-t { font-size: 12px; font-weight: 600; margin-bottom: 12px; }
-.timing-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-.day-col { display: flex; flex-direction: column; align-items: center; gap: 4px; }
-.day-name { font-size: 9px; color: var(--muted); font-weight: 500; }
-.day-slots { display: flex; flex-direction: column; gap: 3px; width: 100%; }
-.slot { height: 18px; border-radius: 3px; background: var(--surface2); }
-.slot.ok { background: rgba(99,102,241,.5); }
-.slot.best { background: var(--accent); }
-.timing-legend { display: flex; gap: 12px; margin-top: 10px; }
-.leg-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); }
-.leg-dot { width: 10px; height: 10px; border-radius: 2px; }
-
-/* EMPTY */
-.empty-hint { text-align: center; padding: 48px 20px; }
-.empty-ico { font-size: 38px; margin-bottom: 10px; opacity: 0.35; }
-.empty-txt { font-size: 13px; color: var(--muted); line-height: 1.65; }
-
-/* MODAL */
-.modal-overlay {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
-  z-index: 1000; align-items: center; justify-content: center; padding: 20px;
-  backdrop-filter: blur(3px);
-}
-.modal-overlay.show { display: flex; }
-.modal-box {
-  background: var(--surface); border: 1.5px solid var(--border); border-radius: var(--r);
-  max-width: 380px; width: 100%; padding: 24px 22px; position: relative;
-  max-height: 85vh; overflow-y: auto;
-}
-.modal-close { position: absolute; top: 14px; right: 14px; background: var(--surface2);
-  border: none; color: var(--muted); width: 26px; height: 26px; border-radius: 50%;
-  cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; }
-.modal-head { text-align: center; margin-bottom: 18px; }
-.modal-ico { font-size: 30px; margin-bottom: 8px; }
-.modal-title { font-size: 18px; font-weight: 700; color: var(--gold); margin-bottom: 4px; }
-.modal-sub { font-size: 12px; color: var(--muted); }
-.plan-opt {
-  border: 1.5px solid var(--border); border-radius: var(--rsm); padding: 13px 14px;
-  margin-bottom: 9px; cursor: pointer; transition: border-color 0.18s;
-  display: flex; align-items: center; justify-content: space-between;
-}
-.plan-opt.sel { border-color: var(--gold); background: var(--gold-dim); }
-.plan-opt-l { font-size: 13px; font-weight: 600; }
-.plan-opt-sub { font-size: 10px; color: var(--muted); margin-top: 2px; }
-.plan-opt-r { font-size: 14px; font-weight: 700; text-align: right; }
-.plan-badge { background: var(--gold); color: #1a1300; font-size: 9px; font-weight: 700;
-  padding: 1px 6px; border-radius: 10px; margin-left: 6px; }
-.btn-confirm-pro { width: 100%; background: var(--gold); color: #1a1300; border: none;
-  border-radius: var(--rsm); padding: 13px; font-family: var(--font); font-size: 14px;
-  font-weight: 700; cursor: pointer; margin-top: 12px; }
-.modal-note { font-size: 10px; color: var(--sub); text-align: center; margin-top: 10px; line-height: 1.5; }
-.modal-feat-list { margin: 14px 0; display: flex; flex-direction: column; gap: 8px; }
-.modal-feat { font-size: 12.5px; color: var(--text); display: flex; align-items: flex-start; gap: 8px; }
-.modal-feat::before { content: '✓'; color: var(--gold); font-weight: 700; flex-shrink: 0; }
-
-::-webkit-scrollbar { width: 3px; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-</style>
+        /* Paylaş Modalı */
+        .share-modal-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 9990;
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .share-modal-overlay.show { opacity: 1; pointer-events: auto; }
+        .share-modal {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-top: 2px solid #fbbf24;
+            border-radius: 1.5rem 1.5rem 0 0;
+            width: 100%; max-width: 480px;
+            padding: 1.5rem 1.25rem 2rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+        .share-modal-overlay.show .share-modal { transform: translateY(0); }
+        .share-option {
+            display: flex; align-items: center; gap: 0.9rem;
+            padding: 0.85rem 0.5rem;
+            border-radius: 0.9rem;
+            transition: background 0.15s ease;
+            font-weight: 600;
+        }
+        .share-option:active { background: rgba(255,255,255,0.06); }
+        .share-icon {
+            width: 42px; height: 42px; border-radius: 9999px;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+    </style>
 </head>
-<body>
+<body class="selection:bg-yellow-500 selection:text-slate-900">
 
-<header class="header">
-  <div class="logo">
-    <div class="logo-mark">
-      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round">
-        <circle cx="11" cy="11" r="7"/><path d="m16.5 16.5 4 4M9 8l5 3-5 3V8z"/>
-      </svg>
-    </div>
-    <span class="logo-name">Vira<b>Lens</b></span>
-  </div>
-  <div class="hdr-right">
-    <span class="ai-badge">AI Destekli</span>
-    <span class="pro-badge-hdr" id="proBadgeHdr">⭐ Pro'ya Geç</span>
-  </div>
-</header>
-
-<div class="container">
-
-  <!-- UPLOAD -->
-  <div class="upload-sec">
-    <div class="sec-label">Video Yükle</div>
-
-    <div class="drop-zone" id="dropZone">
-      <input type="file" id="fileInput" accept="video/*">
-      <div class="drop-ico">🎬</div>
-      <div class="drop-t">Videoyu buraya sürükle bırak</div>
-      <div class="drop-s">veya <em>dosyaya göz at</em> — MP4, MOV, AVI, MKV, WEBM</div>
-    </div>
-
-    <!-- VIDEO PREVIEW -->
-    <div class="video-preview-wrap" id="videoPrev">
-      <video id="videoEl" controls playsinline muted></video>
-      <div class="video-overlay">
-        <button class="vid-btn" id="removeVid">✕ Kaldır</button>
-      </div>
-      <div class="video-meta-bar" id="videoMetaBar"></div>
-    </div>
-
-    <!-- TITLE INPUT -->
-    <div class="title-row" id="titleRow" style="display:none">
-      <input type="text" class="title-in" id="titleIn"
-        placeholder="Video başlığı / açıklama (AI analizi için — opsiyonel)">
-    </div>
-
-    <div class="divider"><em>veya URL ile</em></div>
-
-    <div class="url-row">
-      <input type="text" class="url-in" id="urlIn" placeholder="YouTube, TikTok, Instagram linki…">
-      <button class="btn-add" id="urlBtn">Ekle</button>
-    </div>
-
-    <!-- URL notice -->
-    <div class="notice info" id="urlNotice" style="display:none;margin-top:10px;">
-      <div class="notice-head">ℹ️ URL Analizi Hakkında</div>
-      <div class="notice-body">
-        Tarayıcı güvenliği nedeniyle dış platformlardan video verisi çekilemiyor.
-        <strong>Başlık ve açıklama girersen</strong> AI içerik analizi yapabilir;
-        teknik metrikler (süre, çözünürlük, boyut) görüntülenemez.
-      </div>
-    </div>
-  </div>
-
-  <!-- ANALYZE -->
-  <div class="analyze-wrap">
-    <button class="btn-analyze" id="analyzeBtn" disabled>
-      <div class="spin"></div>
-      <span class="btxt">🔍 Analiz Et</span>
-    </button>
-    <div class="prog-wrap" id="progWrap">
-      <div class="prog-head">
-        <span id="progLabel">Hazırlanıyor…</span>
-        <span id="progPct">0%</span>
-      </div>
-      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
-    </div>
-  </div>
-
-  <!-- PRO PROMO — before results -->
-  <div class="pro-card" id="proPromo1">
-    <div class="pro-card-head">
-      <div class="pro-ico">⭐</div>
-      <div class="pro-card-title">ViraLens Pro'ya Geç</div>
-    </div>
-    <div class="pro-card-desc">Sınırsız analiz, derinlemesine AI raporu, rakip kıyaslama ve reklamsız deneyim.</div>
-    <div class="pro-price-row">
-      <div class="pro-price">₺49,99<span> / ay</span></div>
-      <button class="btn-pro" id="proBtn1">Yükselt</button>
-    </div>
-  </div>
-
-  <!-- RESULTS -->
-  <div class="results-sec" id="resultsSec">
-    <div class="res-head">
-      <div>
-        <div class="res-title">Analiz Sonucu</div>
-        <div class="res-sub" id="resSub">—</div>
-      </div>
-      <button class="btn-reset" id="resetBtn">Temizle</button>
-    </div>
-
-    <!-- Limitations notice when no file -->
-    <div class="notice warn" id="limitNotice">
-      <div class="notice-head">⚠️ Sınırlı Analiz</div>
-      <div class="notice-body" id="limitText">—</div>
-    </div>
-
-    <!-- VERDICT -->
-    <div class="verdict-card">
-      <div class="gauge-wrap">
-        <svg class="gauge-svg" viewBox="0 0 76 76">
-          <circle class="g-track" cx="38" cy="38" r="30"/>
-          <circle class="g-fill" id="gFill" cx="38" cy="38" r="30"
-            stroke-dasharray="188.5" stroke-dashoffset="188.5"/>
-        </svg>
-        <div class="gauge-center">
-          <div class="g-num" id="gNum">—</div>
-          <div class="g-unit">/ 100</div>
+    <!-- AÇILIŞ EKRANI -->
+    <div id="splash-screen" class="splash-screen">
+        <div class="fut-logo mb-6">
+            <div class="fut-logo-inner"><span>F</span><span style="font-size: 1.5rem; margin-top: -5px;">S</span></div>
         </div>
-      </div>
-      <div class="verdict-info">
-        <div class="v-label">Viral Skoru</div>
-        <div class="v-value" id="vValue">—</div>
-        <div class="v-desc" id="vDesc">—</div>
-      </div>
+        <h1 class="font-serif text-3xl font-bold text-yellow-400 tracking-wider">FutStory</h1>
+        <p id="splash-tagline" class="text-slate-400 mt-2 tracking-widest text-sm uppercase">Efsanelerin Gerçek Hikayeleri</p>
     </div>
 
-    <!-- GRID -->
-    <div class="grid2" id="mainGrid"></div>
+    <div id="toast" class="toast"></div>
 
-    <!-- PRO PROMO — mid results, compact -->
-    <div class="pro-card compact" id="proPromo2">
-      <div class="pro-card-head">
-        <div class="pro-ico">🚀</div>
-        <div>
-          <div class="pro-card-title">Daha derin AI raporu ister misin?</div>
-          <div class="pro-mini-sub">Pro ile rakip kıyaslama ve trend tahmini açılır</div>
+    <!-- PAYLAŞ MODALI -->
+    <div id="share-modal-overlay" class="share-modal-overlay" onclick="closeShareModal(event)">
+        <div class="share-modal" onclick="event.stopPropagation()">
+            <div class="w-10 h-1 bg-slate-600 rounded-full mx-auto mb-4"></div>
+            <h3 id="share-modal-title" class="font-serif text-lg text-yellow-400 font-bold mb-4 text-center">Nereye Paylaşmak İstersin?</h3>
+            <div class="flex flex-col gap-1">
+                <button onclick="doSystemShare()" class="share-option">
+                    <div class="share-icon" style="background:#334155;">
+                        <svg class="w-5 h-5 text-slate-100" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342a3 3 0 100 4.316m0-4.316a3 3 0 100 4.316m9.632-4.316a3 3 0 100-4.316m0 4.316a3 3 0 100 4.316m0 0l-9.632-4.316m9.632-9.316L8.684 8.658"/></svg>
+                    </div>
+                    <span id="share-opt-system">Diğer Uygulamalar</span>
+                </button>
+                <button onclick="doShareTo('whatsapp')" class="share-option">
+                    <div class="share-icon" style="background:#25D366;">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.39 1.26 4.81L2 22l5.42-1.42c1.36.74 2.92 1.17 4.58 1.17h.01c5.46 0 9.91-4.45 9.91-9.91C21.92 6.45 17.5 2 12.04 2zm5.79 14.02c-.24.68-1.4 1.31-1.94 1.39-.5.08-1.12.11-1.81-.11-.42-.13-.95-.31-1.63-.6-2.87-1.24-4.74-4.13-4.88-4.32-.14-.19-1.16-1.54-1.16-2.94 0-1.4.73-2.09 1-2.38.24-.27.53-.34.71-.34.18 0 .36 0 .51.01.16.01.38-.06.6.46.24.57.81 1.98.88 2.12.07.14.12.31.02.5-.1.19-.15.31-.29.48-.15.17-.31.38-.44.51-.15.15-.3.31-.13.6.17.29.75 1.24 1.62 2.01 1.11.99 2.05 1.3 2.34 1.44.29.15.46.13.63-.05.17-.19.72-.84.91-1.13.19-.29.38-.24.63-.14.26.1 1.65.78 1.94.92.29.14.48.21.55.33.07.12.07.68-.17 1.35z"/></svg>
+                    </div>
+                    <span>WhatsApp</span>
+                </button>
+                <button onclick="doShareTo('telegram')" class="share-option">
+                    <div class="share-icon" style="background:#2AABEE;">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M21.94 4.36c.26-1.1-.83-1.98-1.86-1.57L2.4 9.9c-1.1.44-1.09 2 .02 2.42l4.4 1.67 2.28 6.96c.28.85 1.36 1.06 1.98.4l2.62-2.79 4.55 3.4c.86.64 2.1.18 2.34-.87l3.35-15.73zM7.9 13.05l9.7-6.05c.28-.17.55.19.31.4l-7.9 7.2-.35 3.28-1.44-4.83z"/></svg>
+                    </div>
+                    <span>Telegram</span>
+                </button>
+                <button onclick="doShareTo('twitter')" class="share-option">
+                    <div class="share-icon" style="background:#000000;">
+                        <svg class="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+                    </div>
+                    <span>X (Twitter)</span>
+                </button>
+                <button onclick="doShareTo('copy')" class="share-option">
+                    <div class="share-icon" style="background:#334155;">
+                        <svg class="w-5 h-5 text-slate-100" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                    </div>
+                    <span id="share-opt-copy">Bağlantıyı Kopyala</span>
+                </button>
+                <button onclick="closeShareModal()" class="share-option justify-center text-slate-400 mt-1">
+                    <span id="share-opt-cancel">Vazgeç</span>
+                </button>
+            </div>
         </div>
-      </div>
-      <button class="btn-pro-sm" id="proBtn2">Pro'ya Geç</button>
     </div>
 
-    <!-- ENGAGEMENT BAR -->
-    <div class="bar-card" id="engBar"></div>
+    <!-- ANA UYGULAMA -->
+    <div class="max-w-4xl mx-auto flex flex-col h-screen relative">
+        
+        <header class="flex-none pt-6 pb-4 px-4 flex justify-between items-center z-10 relative">
+            <div class="flex items-center space-x-3 cursor-pointer" onclick="goBack()">
+                <div class="fut-logo fut-logo-small"><div class="fut-logo-inner">F</div></div>
+                <h1 class="font-serif text-2xl font-bold text-yellow-400 tracking-widest">FutStory</h1>
+            </div>
+            <div class="flex bg-slate-800 rounded-full p-1 border border-slate-700 shadow-inner" id="lang-selector">
+                <button onclick="setLang('tr')" id="btn-tr" class="lang-btn uppercase text-xs font-bold px-3 py-1.5 rounded-full transition-colors bg-yellow-500 text-slate-900 shadow-md">TR</button>
+                <button onclick="setLang('en')" id="btn-en" class="lang-btn uppercase text-xs font-bold px-3 py-1.5 rounded-full transition-colors text-slate-400 hover:text-white">EN</button>
+                <button onclick="setLang('es')" id="btn-es" class="lang-btn uppercase text-xs font-bold px-3 py-1.5 rounded-full transition-colors text-slate-400 hover:text-white">ES</button>
+            </div>
+        </header>
 
-    <!-- TIMING -->
-    <div class="timing-card" id="timingCard"></div>
+        <main class="flex-1 flex flex-col overflow-hidden relative">
+            
+            <!-- LİSTE EKRANI -->
+            <div id="home-view" class="flex-1 flex flex-col px-4 pb-8 overflow-hidden relative">
+                <div class="mb-3 relative group flex-none">
+                    <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg class="w-5 h-5 text-slate-400 group-focus-within:text-yellow-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
+                    <input type="text" id="search-input" placeholder="Futbolcu ara..." oninput="handleSearch(this.value)"
+                        class="w-full bg-slate-800 border-2 border-slate-700 text-slate-100 rounded-2xl py-3 pl-12 pr-4 focus:outline-none focus:border-yellow-500 transition-colors shadow-lg">
+                </div>
 
-    <!-- TAGS -->
-    <div class="tags-card" id="tagsCard"></div>
+                <div class="flex gap-2 mb-4 flex-none">
+                    <button onclick="setFilter('all')" id="chip-all" class="filter-chip active">Tümü</button>
+                    <button onclick="setFilter('favorites')" id="chip-favorites" class="filter-chip">⭐ Favorilerim</button>
+                </div>
 
-    <!-- COPYRIGHT -->
-    <div class="cr-card" id="crCard"></div>
+                <div id="grid-container" class="flex-1 overflow-y-auto pb-6"></div>
 
-    <!-- PLATFORM -->
-    <div class="compat-card" id="compatCard"></div>
+                <button onclick="randomPlayer()" class="fab-random" title="Rastgele Efsane">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                </button>
+            </div>
 
-    <!-- ADVANCED / PRO-LOCKED SECTION -->
-    <div class="locked-wrap" id="advancedWrap">
-      <div id="advancedInner"></div>
+            <!-- DETAY EKRANI -->
+            <div id="detail-view" class="hidden flex-1 overflow-y-auto px-4 pb-12 pt-4">
+                <button onclick="goBack()" class="flex items-center text-slate-400 hover:text-yellow-400 transition-colors mb-6 font-semibold">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                    </svg>
+                    <span id="back-text">Geri Dön</span>
+                </button>
+
+                <div class="bg-slate-800 rounded-3xl p-6 md:p-10 border border-slate-700 shadow-2xl relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-yellow-500 opacity-5 rounded-full blur-3xl transform translate-x-1/2 -translate-y-1/2 pointer-events-none"></div>
+
+                    <div class="flex flex-col items-center text-center mb-5">
+                        <div id="detail-photo-wrap" class="player-photo-wrap big mb-4">
+                            <img id="detail-photo-img" src="" alt="">
+                            <span id="detail-photo-fallback" class="flag-fallback"></span>
+                            <span id="detail-flag-badge" class="flag-badge-mini"></span>
+                        </div>
+                        <h2 id="detail-name" class="font-serif text-3xl md:text-5xl font-bold text-yellow-400 mb-2"></h2>
+                        <div class="w-16 h-1 bg-emerald-600 rounded-full mt-2"></div>
+                    </div>
+
+                    <!-- Bilgi Rozetleri -->
+                    <div class="flex gap-2 mb-6 flex-wrap justify-center">
+                        <div class="info-pill">
+                            <span class="label" id="pill-place-label">Doğum Yeri</span>
+                            <span class="value" id="pill-place-value"></span>
+                        </div>
+                        <div class="info-pill" id="pill-date-container">
+                            <span class="label" id="pill-date-label">Doğum Tarihi</span>
+                            <span class="value" id="pill-date-value"></span>
+                        </div>
+                        <div class="info-pill" id="pill-age-container">
+                            <span class="label" id="pill-age-label">Yaş</span>
+                            <span class="value" id="pill-age-value"></span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center gap-2 mb-8 flex-wrap relative z-10">
+                        <button id="detail-fav-btn" onclick="toggleFavorite(selectedPlayer.id)" class="action-btn">
+                            <svg id="detail-fav-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                            <span id="detail-fav-text">Favorile</span>
+                        </button>
+                        <button id="detail-speak-btn" onclick="toggleSpeak()" class="action-btn">
+                            <svg id="detail-speak-icon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                            </svg>
+                            <span id="detail-speak-text">Dinle</span>
+                        </button>
+                        <button onclick="openShareModal()" class="action-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342a3 3 0 100 4.316m0-4.316a3 3 0 100 4.316m9.632-4.316a3 3 0 100-4.316m0 4.316a3 3 0 100 4.316m0 0l-9.632-4.316m9.632-9.316L8.684 8.658" />
+                            </svg>
+                            <span id="detail-share-text">Paylaş</span>
+                        </button>
+                    </div>
+
+                    <div class="prose prose-invert max-w-none">
+                        <p id="detail-story" class="text-lg md:text-xl text-slate-300 leading-relaxed font-light text-justify md:text-center italic"></p>
+                    </div>
+
+                    <div class="mt-12 flex justify-center">
+                        <a id="detail-youtube" href="#" target="_blank" rel="noopener noreferrer" class="flex items-center bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-8 rounded-full transition-transform transform hover:scale-105 shadow-[0_0_15px_rgba(220,38,38,0.5)]">
+                            <svg class="w-6 h-6 mr-3" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                            <span id="youtube-text">YouTube'da İzle</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+        </main>
     </div>
 
-    <!-- INSIGHTS -->
-    <div class="ins-card" id="insCard"></div>
-
-    <!-- PRO PROMO — bottom -->
-    <div class="pro-card" id="proPromo3">
-      <div class="pro-card-head">
-        <div class="pro-ico">👑</div>
-        <div class="pro-card-title">Pro ile Sınırsız Analiz</div>
-      </div>
-      <div class="pro-feat-list">
-        <div class="pro-feat">Sınırsız video / URL analizi</div>
-        <div class="pro-feat">Rakip kanal kıyaslama raporu</div>
-        <div class="pro-feat">7 günlük trend tahmin grafiği</div>
-        <div class="pro-feat">Reklamsız, öncelikli AI işleme</div>
-      </div>
-      <div class="pro-price-row">
-        <div class="pro-price">₺49,99<span> / ay</span></div>
-        <button class="btn-pro" id="proBtn3">Yükselt</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- EMPTY -->
-  <div class="empty-hint" id="emptyHint">
-    <div class="empty-ico">📡</div>
-    <div class="empty-txt">Video yükle ya da URL gir.<br>AI destekli 8+ metrik ile gerçek analiz başlar.<br><br>
-      <span style="font-size:11px;color:var(--sub)">Yüklenen video hiçbir sunucuya gönderilmez.<br>Tüm işlem tarayıcında gerçekleşir.</span>
-    </div>
-  </div>
-</div>
-
-<!-- PRO UPGRADE MODAL -->
-<div class="modal-overlay" id="proModal">
-  <div class="modal-box">
-    <button class="modal-close" id="modalClose">✕</button>
-    <div class="modal-head">
-      <div class="modal-ico">👑</div>
-      <div class="modal-title">ViraLens Pro</div>
-      <div class="modal-sub">Arkadaşlarını davet et, Pro'yu aç</div>
-    </div>
-    <div class="modal-feat-list">
-      <div class="modal-feat">10 farklı arkadaş girince → Pro kalıcı açılır</div>
-      <div class="modal-feat">20 farklı arkadaş girince → 7 günlük Süper Pro açılır</div>
-      <div class="modal-feat">Sınırsız analiz, rakip kıyaslama, trend tahmini</div>
-    </div>
-
-    <div style="background:var(--surface2);border-radius:var(--rsm);padding:14px;margin-bottom:14px">
-      <div style="font-size:11px;color:var(--muted);margin-bottom:8px">Senin davet linkin</div>
-      <div style="display:flex;gap:8px">
-        <input type="text" id="refLinkInput" readonly
-          style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:6px;padding:9px 10px;color:var(--text);font-size:11px;font-family:var(--font)">
-        <button class="btn-pro-sm" id="copyRefBtn">Kopyala</button>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-bottom:14px">
-      <div style="flex:1;background:var(--surface2);border-radius:var(--rsm);padding:12px;text-align:center">
-        <div id="refCountNum" style="font-size:22px;font-weight:700;color:var(--gold)">0</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">Davet edilen</div>
-      </div>
-      <div style="flex:1;background:var(--surface2);border-radius:var(--rsm);padding:12px;text-align:center">
-        <div id="refStatusTxt" style="font-size:13px;font-weight:700;color:var(--text)">Henüz yok</div>
-        <div style="font-size:10px;color:var(--muted);margin-top:2px">Durum</div>
-      </div>
-    </div>
-
-    <div class="bar-track" style="height:8px;margin-bottom:8px">
-      <div class="bar-fill" id="refProgressBar" style="width:0%;background:var(--gold)"></div>
-    </div>
-    <div style="font-size:11px;color:var(--muted);text-align:center;margin-bottom:14px" id="refProgressTxt">
-      0 / 10 — Pro için 10 davet gerekiyor
-    </div>
-
-    <button class="btn-confirm-pro" id="shareRefBtn">📤 Linki Paylaş</button>
-    <div class="modal-note">Aynı kişi linke kaç kez girerse girsin, sadece 1 kez sayılır.<br>Sayım gerçek ve sunucuda (Supabase) tutulur — tarayıcı yenilense de kaybolmaz.</div>
-  </div>
-</div>
-
-
-<script>
-const $ = id => document.getElementById(id);
-const CIRC = 188.5;
-
-let state = { hasInput: false, isFile: false, fileMeta: {}, url: '', title: '' };
-let isPro = false;
-let proTier = 'none'; // 'none' | 'pro' | 'superpro'
-
-/* ─── SUPABASE SETUP ─── */
-const SUPABASE_URL = 'https://xpjnadnvukhelctjcsju.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_mKGTmtqK5l2deUSQIuMd1Q_EIBoGa5e';
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
-/* ─── REFERRAL IDENTITY ───
-   Her tarayıcıya kalıcı bir kimlik (visitor_id) ve eğer kendi davet
-   kodu yoksa bir tane (ref_code) atanır. localStorage'da saklanır;
-   böylece sayfa yenilense de kaybolmaz. */
-function getOrCreateLocal(key, generator) {
-  let v = localStorage.getItem(key);
-  if (!v) {
-    v = generator();
-    localStorage.setItem(key, v);
-  }
-  return v;
-}
-function randomCode(len = 7) {
-  const chars = 'abcdefghijkmnpqrstuvwxyz23456789';
-  let out = '';
-  for (let i = 0; i < len; i++) out += chars[Math.floor(Math.random() * chars.length)];
-  return out;
-}
-
-const myVisitorId = getOrCreateLocal('vl_visitor_id', () => randomCode(16));
-const myRefCode = getOrCreateLocal('vl_ref_code', () => randomCode(7));
-
-let proExpiresAt = null; // for süper pro 7-day window
-(function loadStoredProState() {
-  const stored = localStorage.getItem('vl_pro_tier');
-  const storedExp = localStorage.getItem('vl_pro_expires');
-  if (stored === 'superpro' && storedExp && new Date(storedExp) > new Date()) {
-    proTier = 'superpro'; isPro = true; proExpiresAt = storedExp;
-  } else if (stored === 'pro') {
-    proTier = 'pro'; isPro = true;
-  }
-})();
-
-/* If this visit came from someone else's invite link (?ref=CODE),
-   record one (deduplicated) referral hit for that code. */
-async function recordIncomingReferralIfAny() {
-  const params = new URLSearchParams(window.location.search);
-  const incomingRef = params.get('ref');
-  if (!incomingRef || incomingRef === myRefCode) return;
-  if (localStorage.getItem('vl_already_credited_' + incomingRef)) return;
-
-  try {
-    const { error } = await sb.from('referrals').insert({
-      ref_code: incomingRef,
-      visitor_id: myVisitorId
-    });
-    // unique constraint violation just means "already counted" — not a real error for us
-    if (!error || error.code === '23505') {
-      localStorage.setItem('vl_already_credited_' + incomingRef, '1');
-    }
-  } catch (e) {
-    console.warn('Referral kaydı başarısız (ağ engelliyse normal):', e);
-  }
-}
-
-async function fetchMyReferralCount() {
-  try {
-    const { count, error } = await sb
-      .from('referrals')
-      .select('*', { count: 'exact', head: true })
-      .eq('ref_code', myRefCode);
-    if (error) throw error;
-    return count || 0;
-  } catch (e) {
-    console.warn('Davet sayısı alınamadı:', e);
-    return null;
-  }
-}
-
-function applyTierFromCount(count) {
-  if (count >= 20) {
-    proTier = 'superpro'; isPro = true;
-    const exp = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString();
-    proExpiresAt = exp;
-    localStorage.setItem('vl_pro_tier', 'superpro');
-    localStorage.setItem('vl_pro_expires', exp);
-  } else if (count >= 10) {
-    proTier = 'pro'; isPro = true;
-    localStorage.setItem('vl_pro_tier', 'pro');
-  } else {
-    // keep previously unlocked tier if any (don't downgrade on a slow read)
-  }
-  applyProState();
-}
-
-async function refreshReferralUI() {
-  const count = await fetchMyReferralCount();
-  if (count === null) return;
-
-  const target = count >= 10 ? 20 : 10;
-  const pct = Math.min(100, Math.round((count / target) * 100));
-
-  const numEl = $('refCountNum');
-  const barEl = $('refProgressBar');
-  const txtEl = $('refProgressTxt');
-  const statusEl = $('refStatusTxt');
-  if (numEl) numEl.textContent = count;
-  if (barEl) barEl.style.width = pct + '%';
-  if (txtEl) {
-    txtEl.textContent = count >= 20
-      ? `${count} davet — Süper Pro aktif! 🎉`
-      : count >= 10
-        ? `${count} / 20 — Süper Pro (7 gün) için 20 davet gerekiyor`
-        : `${count} / 10 — Pro için 10 davet gerekiyor`;
-  }
-  if (statusEl) {
-    statusEl.textContent = proTier === 'superpro' ? '👑 Süper Pro' : proTier === 'pro' ? '⭐ Pro' : 'Henüz yok';
-  }
-
-  applyTierFromCount(count);
-}
-
-/* ─── PRO MODAL ─── */
-const proTriggers = ['proBadgeHdr', 'proBtn1', 'proBtn2', 'proBtn3'];
-proTriggers.forEach(id => {
-  const el = $(id);
-  if (el) el.addEventListener('click', openProModal);
-});
-
-function buildRefLink() {
-  const base = window.location.origin + window.location.pathname;
-  return `${base}?ref=${myRefCode}`;
-}
-
-function openProModal() {
-  const link = buildRefLink();
-  const input = $('refLinkInput');
-  if (input) input.value = link;
-  $('proModal').classList.add('show');
-  refreshReferralUI();
-}
-$('modalClose').addEventListener('click', () => $('proModal').classList.remove('show'));
-$('proModal').addEventListener('click', e => { if (e.target.id === 'proModal') $('proModal').classList.remove('show'); });
-
-$('copyRefBtn').addEventListener('click', async () => {
-  const link = buildRefLink();
-  try {
-    await navigator.clipboard.writeText(link);
-    showToast('✓ Link kopyalandı');
-  } catch (e) {
-    showToast('❌ Kopyalanamadı, manuel seç');
-  }
-});
-
-$('shareRefBtn').addEventListener('click', async () => {
-  const link = buildRefLink();
-  const text = `ViraLens ile videolarının viral potansiyelini analiz et! ${link}`;
-  if (navigator.share) {
-    try { await navigator.share({ title: 'ViraLens', text, url: link }); }
-    catch (e) { /* user cancelled share sheet — not an error */ }
-  } else {
-    try {
-      await navigator.clipboard.writeText(link);
-      showToast('✓ Link kopyalandı, arkadaşlarına gönder');
-    } catch (e) {
-      showToast('❌ Kopyalanamadı, manuel seç');
-    }
-  }
-});
-
-function applyProState() {
-  const badge = $('proBadgeHdr');
-  if (proTier === 'superpro') {
-    badge.textContent = '👑 Süper Pro';
-    badge.classList.add('active');
-  } else if (proTier === 'pro') {
-    badge.textContent = '⭐ Pro Aktif';
-    badge.classList.add('active');
-  } else {
-    badge.textContent = "⭐ Pro'ya Geç";
-    badge.classList.remove('active');
-  }
-  if (isPro) {
-    ['proPromo1', 'proPromo2', 'proPromo3'].forEach(id => { const el = $(id); if (el) el.style.display = 'none'; });
-  }
-  renderAdvanced();
-}
-
-/* Kick things off: record referral if we arrived via a link, then check our own count. */
-applyProState(); // reflect any tier already restored from localStorage immediately
-recordIncomingReferralIfAny().then(() => {
-  refreshReferralUI();
-});
-// Periodically refresh in case the modal is left open while friends click through.
-setInterval(refreshReferralUI, 15000);
-
-/* ─── DRAG & DROP / FILE INPUT ─── */
-const dz = $('dropZone');
-const fileInput = $('fileInput');
-
-dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('over'); });
-dz.addEventListener('dragleave', () => dz.classList.remove('over'));
-dz.addEventListener('drop', e => {
-  e.preventDefault(); dz.classList.remove('over');
-  const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  if (f && f.type.startsWith('video/')) loadFile(f);
-  else if (f) showToast('❌ Desteklenmeyen dosya türü');
-});
-
-fileInput.addEventListener('change', e => {
-  const f = e.target.files && e.target.files[0];
-  if (f) loadFile(f);
-});
-
-function loadFile(file) {
-  // 1) Activate the analyze button and basic UI immediately.
-  //    Do NOT wait on video metadata to unlock the flow — some
-  //    formats/codecs never fire 'loadedmetadata' in the browser,
-  //    which used to leave the button permanently disabled.
-  state.isFile = true;
-  state.hasInput = true;
-  state.url = '';
-  state.fileMeta = {
-    name: file.name,
-    size: (file.size / (1024 * 1024)).toFixed(1) + ' MB',
-    duration: 0, durStr: '—',
-    width: 0, height: 0, res: 'Okunuyor…', aspect: '—',
-    ext: (file.name.split('.').pop() || '?').toUpperCase(),
-    bitrate: '—', fps: 'Tarayıcıdan okunamaz',
-    type: file.type || ''
-  };
-
-  $('urlNotice').style.display = 'none';
-  $('urlIn').value = '';
-  $('titleRow').style.display = 'block';
-
-  const url = URL.createObjectURL(file);
-  const vid = $('videoEl');
-  vid.src = url;
-
-  $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
-  $('videoPrev').classList.add('show');
-  setAnalyzeEnabled(true);
-
-  // 2) If/when metadata becomes available, enrich the display —
-  //    but the app already works without it.
-  const onMeta = () => {
-    const duration = vid.duration;
-    const w = vid.videoWidth, h = vid.videoHeight;
-    const res = w && h ? `${w}×${h}` : 'Bilinmiyor';
-    const aspect = w && h ? getAspect(w, h) : '—';
-    const durStr = formatDur(duration);
-    const bitrate = duration > 0 ? ((file.size * 8) / duration / 1000000).toFixed(1) + ' Mbps' : '—';
-
-    state.fileMeta = {
-      ...state.fileMeta,
-      duration, durStr, width: w, height: h, res, aspect, bitrate
-    };
-    $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
-  };
-
-  vid.addEventListener('loadedmetadata', onMeta, { once: true });
-
-  vid.addEventListener('error', () => {
-    // Metadata read failed entirely — keep going with size/name only.
-    state.fileMeta.res = '—';
-    $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
-  }, { once: true });
-
-  // Safety net: if metadata hasn't loaded within 4s (corrupt/odd file),
-  // stop showing "Okunuyor…" so it doesn't look stuck.
-  setTimeout(() => {
-    if (state.fileMeta.res === 'Okunuyor…') {
-      state.fileMeta.res = 'Okunamadı';
-      $('videoMetaBar').innerHTML = renderMetaBar(state.fileMeta);
-    }
-  }, 4000);
-}
-
-function renderMetaBar(m) {
-  return [
-    ['Süre', m.durStr], ['Boyut', m.size],
-    ['Çözünürlük', m.res], ['Format', m.ext],
-    ['Bitrate', m.bitrate], ['En-Boy', m.aspect]
-  ].map(([k, v]) => `<div class="vmeta-item">${k}: <span>${v}</span></div>`).join('');
-}
-
-$('removeVid').addEventListener('click', () => {
-  const vid = $('videoEl');
-  if (vid.src) URL.revokeObjectURL(vid.src);
-  vid.src = '';
-  $('videoPrev').classList.remove('show');
-  $('titleRow').style.display = 'none';
-  fileInput.value = '';
-  state.isFile = false; state.fileMeta = {};
-  checkInput();
-});
-
-/* ─── URL ─── */
-$('urlBtn').addEventListener('click', addUrl);
-$('urlIn').addEventListener('keydown', e => { if (e.key === 'Enter') addUrl(); });
-
-function addUrl() {
-  const u = $('urlIn').value.trim();
-  if (!u) return;
-  if (!u.startsWith('http')) { showToast('❌ Geçerli bir URL gir'); return; }
-  state.url = u; state.isFile = false; state.hasInput = true;
-  $('urlNotice').style.display = 'block';
-  $('titleRow').style.display = 'block';
-  $('videoPrev').classList.remove('show');
-  setAnalyzeEnabled(true);
-  showToast('✓ URL eklendi');
-}
-
-$('titleIn').addEventListener('input', e => { state.title = e.target.value; });
-
-function checkInput() {
-  state.hasInput = state.isFile || !!state.url;
-  if (!state.hasInput) setAnalyzeEnabled(false);
-}
-
-function setAnalyzeEnabled(v) { $('analyzeBtn').disabled = !v; }
-
-/* ─── ANALYZE ─── */
-$('analyzeBtn').addEventListener('click', runAnalysis);
-
-async function runAnalysis() {
-  const btn = $('analyzeBtn');
-  btn.classList.add('loading'); btn.disabled = true;
-  $('progWrap').classList.add('show');
-  $('resultsSec').classList.remove('show');
-  $('emptyHint').style.display = 'none';
-
-  const steps = [
-    [state.isFile ? 'Video dosyası okunuyor…' : 'URL işleniyor…', 12],
-    [state.isFile ? 'Teknik metrikler çıkarılıyor…' : 'Platform verisi kontrol ediliyor…', 30],
-    ['Trend veritabanı taranıyor…', 52],
-    ['Etkileşim modeli çalışıyor…', 68],
-    ['Telif hakkı taraması yapılıyor…', 82],
-    ['AI içerik değerlendirmesi…', 94],
-    ['Rapor hazırlanıyor…', 100],
-  ];
-
-  for (const [label, pct] of steps) {
-    setProgress(label, pct);
-    await sleep(380 + Math.random() * 280);
-  }
-
-  // AI call if title given
-  let aiInsight = null;
-  const title = state.title.trim();
-  if (title.length > 5) {
-    setProgress('AI analizi tamamlanıyor…', 100);
-    aiInsight = await callAI(title, state.fileMeta);
-  }
-
-  await sleep(200);
-  $('progWrap').classList.remove('show');
-  btn.classList.remove('loading'); btn.disabled = false;
-
-  render(buildData(), aiInsight);
-}
-
-async function callAI(title, meta) {
-  // Hard timeout: some preview/sandbox environments block or hang on
-  // outbound fetch() calls to api.anthropic.com. We never let that
-  // freeze the UI — if it doesn't resolve in time, we just fall back
-  // to local heuristics instead of AI commentary.
-  const TIMEOUT_MS = 8000;
-
-  try {
-    const metaStr = meta.durStr && meta.durStr !== '—'
-      ? `Süre: ${meta.durStr}, Çözünürlük: ${meta.res}, Format: ${meta.ext}, Boyut: ${meta.size}`
-      : 'Teknik bilgi yok (URL analizi ya da okunamayan dosya)';
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), TIMEOUT_MS);
-
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      signal: controller.signal,
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: `Sen bir sosyal medya içerik stratejisti ve viral video analistisin. Aşağıdaki video hakkında analiz yap.
-
-Video başlığı/açıklama: "${title}"
-Teknik bilgiler: ${metaStr}
-
-Şunu döndür (SADECE JSON, açıklama yok, markdown yok):
-{
-  "viralPotential": "Yüksek/Orta/Düşük",
-  "viralReason": "kısa gerekçe (max 80 karakter)",
-  "contentCategory": "kategori adı",
-  "targetAudience": "hedef kitle tanımı (max 50 karakter)",
-  "bestUploadTime": "en iyi yükleme zamanı",
-  "titleSuggestion": "daha iyi bir başlık önerisi",
-  "copyrightWarning": "telif hakkı uyarısı varsa yaz, yoksa null",
-  "insights": ["insight1", "insight2", "insight3"],
-  "hashtags": ["#tag1", "#tag2", "#tag3", "#tag4", "#tag5"]
-}`
-        }]
-      })
-    });
-    clearTimeout(timeoutId);
-    const data = await resp.json();
-    const text = data.content?.map(c => c.text || '').join('') || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    return JSON.parse(clean);
-  } catch (e) {
-    console.warn('AI call failed or timed out, falling back to local data', e);
-    return null;
-  }
-}
-
-/* ─── DATA BUILD (from real metadata) ─── */
-function buildData() {
-  const m = state.fileMeta;
-  const isFile = state.isFile;
-  const dur = m.duration || 0;
-
-  let score = 50;
-  if (isFile) {
-    if (dur > 0) {
-      if (dur >= 15 && dur <= 90) score += 20;
-      else if (dur > 90 && dur <= 300) score += 10;
-      else if (dur > 300) score -= 10;
-      else if (dur < 15) score += 5;
-    }
-    if (m.width >= 1920) score += 10;
-    else if (m.width >= 1280) score += 6;
-    else if (m.width < 720 && m.width > 0) score -= 10;
-    if (m.height > m.width) score += 8;
-    const sizeMB = parseFloat(m.size);
-    if (sizeMB > 0.5 && sizeMB < 500) score += 5;
-    score += randRange(-8, 8);
-  } else {
-    score = randRange(38, 68);
-  }
-  score = Math.max(10, Math.min(97, score));
-
-  const dur2 = dur > 0 ? dur : randRange(30, 600);
-  const retentionBase = dur2 > 0
-    ? (dur2 <= 60 ? randRange(55, 85) : dur2 <= 180 ? randRange(40, 70) : randRange(25, 55))
-    : randRange(35, 65);
-
-  return {
-    score, isFile,
-    dur: dur2, durStr: m.durStr || '—',
-    res: m.res || '—', aspect: m.aspect || '—',
-    ext: m.ext || '—', size: m.size || '—',
-    engagement: parseFloat((score * 0.12 + randRange(1, 4)).toFixed(1)),
-    retention: retentionBase,
-    originality: randRange(45, 92),
-    growthPot: Math.min(95, score + randRange(-10, 15)),
-    crRisk: dur2 > 120 ? randRange(20, 70) : randRange(5, 45),
-    bestPlatform: pickPlatform(m),
-    trendTags: genTags(m),
-    fileMeta: m,
-  };
-}
-
-function pickPlatform(m) {
-  const h = m.height || 0, w = m.width || 0, dur = m.duration || 60;
-  if (h > w) {
-    if (dur <= 60) return 'TikTok / Reels';
-    return 'YouTube Shorts';
-  }
-  if (dur <= 60) return 'Instagram Reels';
-  if (dur > 600) return 'YouTube';
-  return 'YouTube / Twitter';
-}
-
-function genTags(m) {
-  const base = ['#Viral', '#FYP', '#Keşfet', '#Trending', '#Video', '#İçerik', '#Shorts', '#Reels'];
-  const extra = m.height > m.width ? ['#VerticalVideo', '#Shorts'] : ['#WideScreen', '#YouTube'];
-  return shuffleArr([...base, ...extra]).slice(0, randRange(7, 10));
-}
-
-/* ─── RENDER ─── */
-let lastData = null, lastAi = null;
-
-function render(d, ai) {
-  lastData = d; lastAi = ai;
-
-  $('resSub').textContent = state.isFile
-    ? (state.fileMeta.name || '—')
-    : state.url.slice(0, 55) + (state.url.length > 55 ? '…' : '');
-
-  if (!state.isFile) {
-    $('limitNotice').classList.add('show');
-    $('limitText').textContent =
-      'URL analizi yapıldı. Teknik metrikler (süre, çözünürlük, bitrate) dış platformlara erişim kısıtı nedeniyle ölçülemedi. '
-      + 'Başlık bilgisi girilmişse AI içerik analizi uygulandı; aksi hâlde genel istatistikler gösterilmektedir.';
-  } else if (d.dur === 0 || state.fileMeta.res === 'Okunamadı') {
-    $('limitNotice').classList.add('show');
-    $('limitText').textContent =
-      'Video yüklendi ancak tarayıcı bu formattan süre/çözünürlük bilgisi okuyamadı. '
-      + 'Boyut ve format bilgisi doğru; diğer metrikler tahminidir.';
-  } else {
-    $('limitNotice').classList.remove('show');
-  }
-
-  // GAUGE
-  const offset = CIRC - (d.score / 100) * CIRC;
-  const gc = $('gFill');
-  gc.style.stroke = sColor(d.score);
-  gc.style.strokeDashoffset = CIRC;
-  setTimeout(() => gc.style.strokeDashoffset = offset, 80);
-  $('gNum').textContent = d.score;
-  $('gNum').style.color = sColor(d.score);
-
-  $('vValue').textContent = vLabel(d.score);
-  $('vValue').style.color = sColor(d.score);
-  $('vDesc').textContent = ai ? ai.viralReason : vDesc(d.score);
-
-  // GRID
-  const cards = [
-    { icon: '⏱️', label: 'Video Süresi', value: d.durStr !== '—' ? d.durStr : (state.isFile ? '—' : 'URL'), sub: durNote(d.dur), ca: '#6366F1' },
-    { icon: '📐', label: 'Çözünürlük', value: d.res, sub: d.aspect !== '—' ? 'En-boy: ' + d.aspect : 'Bilinmiyor', ca: '#6366F1' },
-    { icon: '❤️', label: 'Etkileşim Tahmini', value: d.engagement + '%', sub: 'Ortalama oran', pill: ePill(d.engagement), ca: eColor(d.engagement) },
-    { icon: '🔄', label: 'Tutma Oranı', value: d.retention + '%', sub: 'İzleme devamlılığı', pill: rPill(d.retention), ca: sColor(d.retention) },
-    { icon: '🧠', label: 'Özgünlük', value: d.originality + '%', sub: ai ? 'Kategori: ' + (ai.contentCategory || '—') : 'İçerik benzersizliği', pill: oPill(d.originality), ca: sColor(d.originality) },
-    { icon: '🎯', label: 'En İyi Platform', value: null, sm: ai ? ai.viralPotential + ' · ' + (ai.targetAudience || d.bestPlatform) : d.bestPlatform, sub: 'Öneri', pill: { cls: 'pb', text: '✓ Önerilen' }, ca: '#6366F1' },
-  ];
-  $('mainGrid').innerHTML = cards.map(c => `
-    <div class="a-card" style="--ca:${c.ca}">
-      <div class="a-icon">${c.icon}</div>
-      <div class="a-label">${c.label}</div>
-      <div class="${c.value !== null ? 'a-val' : 'a-val sm'}">${c.value !== null ? (c.value || '—') : (c.sm || '—')}</div>
-      <div class="a-sub">${c.sub}</div>
-      ${c.pill ? `<div class="pill ${c.pill.cls}">${c.pill.text}</div>` : ''}
-    </div>
-  `).join('');
-
-  // ENGAGEMENT BARS
-  const engRows = [
-    { lbl: 'Beğeni', pct: randRange(50, 90) },
-    { lbl: 'Yorum', pct: randRange(10, 45) },
-    { lbl: 'Paylaşım', pct: randRange(8, 40) },
-    { lbl: 'Kaydet', pct: randRange(5, 30) },
-    { lbl: 'Tıkla-İzle', pct: Math.min(95, d.score + randRange(-5, 5)) },
-  ];
-  $('engBar').innerHTML = `
-    <div class="bar-title">Tahmini Etkileşim Dağılımı</div>
-    ${engRows.map(r => `
-      <div class="bar-row">
-        <span class="bar-lbl">${r.lbl}</span>
-        <div class="bar-track"><div class="bar-fill" data-pct="${r.pct}" style="width:0%"></div></div>
-        <span class="bar-num">${r.pct}%</span>
-      </div>
-    `).join('')}
-  `;
-
-  // TIMING
-  const days = ['Pzt','Sal','Çar','Per','Cum','Cts','Paz'];
-  const timeSlots = ['06-09','09-12','12-15','15-18','18-21','21-24'];
-  const bestDay = randRange(1, 4);
-  const bestTime = randRange(3, 4);
-  $('timingCard').innerHTML = `
-    <div class="timing-t">En İyi Yayın Zamanı ${ai ? '— ' + ai.bestUploadTime : ''}</div>
-    <div class="timing-grid">
-      ${days.map((dy, di) => `
-        <div class="day-col">
-          <div class="day-name">${dy}</div>
-          <div class="day-slots">
-            ${timeSlots.map((_, ti) => {
-              const isBest = di === bestDay && ti === bestTime;
-              const isOk = (di >= 1 && di <= 4) && (ti >= 3 && ti <= 4) && !isBest;
-              return `<div class="slot ${isBest ? 'best' : isOk ? 'ok' : ''}"></div>`;
-            }).join('')}
-          </div>
-        </div>
-      `).join('')}
-    </div>
-    <div class="timing-legend">
-      <div class="leg-item"><div class="leg-dot" style="background:var(--accent)"></div>En iyi</div>
-      <div class="leg-item"><div class="leg-dot" style="background:rgba(99,102,241,.5)"></div>İyi</div>
-      <div class="leg-item"><div class="leg-dot" style="background:var(--surface2)"></div>Normal</div>
-    </div>
-  `;
-
-  // TAGS
-  const tags = ai ? [...(ai.hashtags || []), ...d.trendTags].slice(0, 10) : d.trendTags;
-  const hotOnes = tags.slice(0, 3);
-  $('tagsCard').innerHTML = `
-    <div class="tags-t">Önerilen Etiketler ${ai ? '<span style="color:var(--accent);font-weight:600">· AI</span>' : ''}</div>
-    <div class="tags-wrap">
-      ${tags.map(t => `<span class="tag ${hotOnes.includes(t) ? 'hot' : ''}">${t}</span>`).join('')}
-    </div>
-  `;
-
-  // COPYRIGHT
-  const cr = d.crRisk;
-  const crC = cr > 65 ? 'var(--red)' : cr > 35 ? 'var(--amber)' : 'var(--green)';
-  const crLbl = cr > 65 ? 'Yüksek Risk' : cr > 35 ? 'Orta Risk' : 'Düşük Risk';
-  const crRisks = [
-    { n: 'Müzik', pct: Math.min(cr + 10, 95), c: '#EF4444' },
-    { n: 'Görsel', pct: Math.max(5, cr - 15), c: '#F59E0B' },
-    { n: 'Konuşma', pct: Math.max(3, cr - 30), c: '#6366F1' },
-    { n: 'Genel', pct: cr, c: crC },
-  ];
-  $('crCard').innerHTML = `
-    <div class="cr-head">
-      <div class="cr-ico">${cr > 65 ? '⚠️' : cr > 35 ? '🟡' : '✅'}</div>
-      <div>
-        <div class="cr-t">Telif Hakkı Riski</div>
-        <div class="cr-level" style="color:${crC}">${crLbl} · %${cr}</div>
-        ${ai && ai.copyrightWarning ? `<div style="font-size:11px;color:var(--amber);margin-top:3px">⚠ ${ai.copyrightWarning}</div>` : ''}
-      </div>
-    </div>
-    ${crRisks.map(r => `
-      <div class="risk-row">
-        <span class="risk-n">${r.n}</span>
-        <div class="risk-bar-w"><div class="risk-b" data-pct="${r.pct}" style="width:0%;background:${r.c}"></div></div>
-        <span class="risk-lv" style="color:${r.c}">%${r.pct}</span>
-      </div>
-    `).join('')}
-  `;
-
-  // PLATFORM
-  const platforms = [
-    { n: 'YouTube', ok: d.dur > 60 || !d.isFile },
-    { n: 'TikTok', ok: d.dur <= 180 || !d.isFile },
-    { n: 'Instagram', ok: d.retention > 50 },
-    { n: 'Twitter/X', ok: d.score > 65 },
-    { n: 'LinkedIn', ok: d.originality > 70 },
-  ];
-  $('compatCard').innerHTML = `
-    <div class="sec-label">Platform Uyumluluğu</div>
-    <div class="compat-row">
-      ${platforms.map(p => `
-        <div class="compat-item">
-          <div class="compat-dot" style="background:${p.ok ? 'var(--green)' : 'var(--sub)'}"></div>
-          ${p.n}
-        </div>
-      `).join('')}
-    </div>
-  `;
-
-  // INSIGHTS
-  const aiInsights = ai?.insights || [];
-  const baseInsights = buildInsights(d);
-  const allInsights = [...aiInsights.map(i => `<strong>🤖 AI:</strong> ${i}`), ...baseInsights];
-  $('insCard').innerHTML = `
-    <div class="ins-t">🔎 Akıllı Öneriler ${ai ? '<span style="color:var(--accent);font-size:10px">· AI Destekli</span>' : ''}</div>
-    ${allInsights.slice(0, 6).map(t => `
-      <div class="ins-item">
-        <div class="ins-dot"></div>
-        <div class="ins-text">${t}</div>
-      </div>
-    `).join('')}
-    ${ai?.titleSuggestion ? `
-      <div style="margin-top:12px;padding:10px 12px;background:var(--accent-dim);border-radius:var(--rsm);border:1px solid rgba(99,102,241,.2)">
-        <div style="font-size:10px;color:var(--accent);font-weight:600;margin-bottom:4px">💡 Önerilen Başlık</div>
-        <div style="font-size:12px;color:var(--text)">${ai.titleSuggestion}</div>
-      </div>
-    ` : ''}
-  `;
-
-  renderAdvanced();
-
-  $('resultsSec').classList.add('show');
-
-  setTimeout(() => {
-    document.querySelectorAll('[data-pct]').forEach(el => {
-      el.style.width = el.dataset.pct + '%';
-    });
-  }, 120);
-}
-
-/* Advanced section: visible content for Pro users, blurred teaser otherwise */
-function renderAdvanced() {
-  const wrap = $('advancedWrap');
-  const inner = $('advancedInner');
-  if (!lastData) { wrap.innerHTML = ''; return; }
-  const d = lastData;
-
-  const content = `
-    <div class="cr-card">
-      <div class="cr-t" style="margin-bottom:12px">📈 Rakip Kıyaslama (Pro)</div>
-      <div class="risk-row">
-        <span class="risk-n">Senin skorun</span>
-        <div class="risk-bar-w"><div class="risk-b" style="width:${d.score}%;background:var(--accent)"></div></div>
-        <span class="risk-lv" style="color:var(--accent)">${d.score}</span>
-      </div>
-      <div class="risk-row">
-        <span class="risk-n">Kategori ortalaması</span>
-        <div class="risk-bar-w"><div class="risk-b" style="width:${Math.max(20, d.score - randRange(5,18))}%;background:var(--muted)"></div></div>
-        <span class="risk-lv" style="color:var(--muted)">~${Math.max(20, d.score - randRange(5,18))}</span>
-      </div>
-      <div class="risk-row">
-        <span class="risk-n">7 gün sonra tahmin</span>
-        <div class="risk-bar-w"><div class="risk-b" style="width:${Math.min(97, d.score + randRange(3,12))}%;background:var(--green)"></div></div>
-        <span class="risk-lv" style="color:var(--green)">~${Math.min(97, d.score + randRange(3,12))}</span>
-      </div>
-    </div>
-  `;
-
-  if (isPro) {
-    wrap.classList.remove('locked-wrap');
-    inner.classList.remove('locked-blur');
-    inner.innerHTML = content;
-  } else {
-    wrap.classList.add('locked-wrap');
-    inner.classList.add('locked-blur');
-    inner.innerHTML = content + `
-      <div class="locked-cta">
-        <div class="locked-cta-txt">🔒 Rakip kıyaslama ve 7 günlük trend tahmini Pro'da</div>
-        <button class="btn-unlock" id="unlockBtn">Pro'ya Geç</button>
-      </div>
-    `;
-    const ub = $('unlockBtn');
-    if (ub) ub.addEventListener('click', openProModal);
-  }
-}
-
-/* ─── HELPERS ─── */
-function formatDur(s) {
-  if (!s || isNaN(s)) return '—';
-  const m = Math.floor(s / 60), sec = Math.floor(s % 60);
-  return m > 0 ? `${m}d ${sec}s` : `${sec}s`;
-}
-
-function getAspect(w, h) {
-  const gcd = (a, b) => b ? gcd(b, a % b) : a;
-  const g = gcd(w, h) || 1;
-  const rw = w / g, rh = h / g;
-  if (rw === 16 && rh === 9) return '16:9 Yatay';
-  if (rw === 9 && rh === 16) return '9:16 Dikey';
-  if (rw === 4 && rh === 3) return '4:3';
-  if (rw === 1 && rh === 1) return '1:1 Kare';
-  return `${rw}:${rh}`;
-}
-
-function durNote(dur) {
-  if (!dur) return 'Süre okunamadı';
-  if (dur <= 30) return 'Mikro içerik — çok ideal';
-  if (dur <= 90) return 'Kısa form — viral ideal aralık';
-  if (dur <= 300) return 'Orta uzunluk — iyi';
-  return 'Uzun form — YouTube için uygun';
-}
-
-function sColor(s) {
-  return s >= 70 ? 'var(--green)' : s >= 45 ? 'var(--amber)' : 'var(--red)';
-}
-function eColor(v) { return v >= 8 ? 'var(--green)' : v >= 4 ? 'var(--amber)' : 'var(--red)'; }
-function ePill(v) {
-  return v >= 8 ? { cls: 'pg', text: '↑ Yüksek' } : v >= 4 ? { cls: 'pa', text: '→ Orta' } : { cls: 'pr', text: '↓ Düşük' };
-}
-function rPill(v) {
-  return v >= 65 ? { cls: 'pg', text: '✓ İyi' } : v >= 40 ? { cls: 'pa', text: '⚡ Normal' } : { cls: 'pr', text: '⚠ Düşük' };
-}
-function oPill(v) {
-  return v >= 80 ? { cls: 'pg', text: '★ Özgün' } : v >= 55 ? { cls: 'pa', text: '≈ Benzer' } : { cls: 'pr', text: '⚠ Kopyalama' };
-}
-function vLabel(s) {
-  return s >= 80 ? '🔥 Viral Potansiyel Yüksek' : s >= 60 ? '📈 Trend Olabilir' : s >= 40 ? '📊 Orta Potansiyel' : '❄️ Düşük Potansiyel';
-}
-function vDesc(s) {
-  return s >= 80 ? 'Teknik ve içerik sinyalleri güçlü, viral şansı yüksek.'
-    : s >= 60 ? 'Doğru zamanlama ve etiketlerle trend girebilir.'
-    : s >= 40 ? 'İçerik kalitesini artırmak skoru yükseltir.'
-    : 'Çeşitli sinyaller zayıf, iyileştirme önerilir.';
-}
-function buildInsights(d) {
-  const m = d.fileMeta || {};
-  return [
-    d.dur > 0 && d.dur > 300
-      ? '<strong>Video uzun.</strong> 90 saniyenin altında bir Shorts/Reels versiyonu hazırla.'
-      : d.dur > 0 && d.dur <= 90
-        ? '<strong>Süre ideal.</strong> 15–90 saniye kısa-form için en viral aralık.'
-        : '<strong>Süre bilinmiyor.</strong> Kısa-form (15–90s) viral erişim için en etkili format.',
-    d.crRisk > 60
-      ? '<strong>Telif riski yüksek.</strong> Müziği telif hakkı serbest bir alternatifle değiştirmeni öneririz.'
-      : '<strong>Telif riski düşük görünüyor.</strong> Orijinal müzik veya lisanslı ses kullanıldığı anlaşılıyor.',
-    d.retention < 50
-      ? '<strong>İlk 3 saniye kritik.</strong> Merak uyandıran bir hook ile aç; izleyiciyi hemen yakala.'
-      : '<strong>Tutma oranı iyi.</strong> Bu video formatını ve uzunluğunu diğer içeriklerde de dene.',
-    '<strong>Thumbnail</strong> tıklanma oranını %40\'a kadar etkiler. Yüzlü, kontrastlı, metin kısa olsun.',
-    state.isFile && m.height && m.width && m.height < m.width
-      ? '<strong>Yatay video.</strong> Instagram Reels ve TikTok için 9:16 dikey versiyon da hazırla.'
-      : '<strong>Dikey format</strong> kısa-form platformlarda tam ekran gösteriliyor, avantajlı.',
-  ].filter(Boolean);
-}
-
-function randRange(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
-function shuffleArr(arr) { return [...arr].sort(() => Math.random() - 0.5); }
-function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-function setProgress(label, pct) {
-  $('progLabel').textContent = label;
-  $('progPct').textContent = pct + '%';
-  $('progFill').style.width = pct + '%';
-}
-
-function showToast(msg) {
-  const t = document.createElement('div');
-  t.textContent = msg;
-  Object.assign(t.style, {
-    position: 'fixed', bottom: '24px', left: '50%', transform: 'translateX(-50%)',
-    background: '#1C1C1C', border: '1px solid #333', color: '#F5F5F5',
-    padding: '9px 18px', borderRadius: '20px', fontSize: '13px', fontWeight: '500',
-    zIndex: '999', fontFamily: 'Inter, system-ui, sans-serif',
-    boxShadow: '0 4px 20px rgba(0,0,0,0.5)', transition: 'opacity 0.3s'
-  });
-  document.body.appendChild(t);
-  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 2500);
-}
-
-/* ─── RESET ─── */
-$('resetBtn').addEventListener('click', () => {
-  $('resultsSec').classList.remove('show');
-  $('emptyHint').style.display = '';
-  fileInput.value = '';
-  $('urlIn').value = '';
-  $('titleIn').value = '';
-  $('titleRow').style.display = 'none';
-  $('urlNotice').style.display = 'none';
-  const vid = $('videoEl');
-  if (vid.src) { URL.revokeObjectURL(vid.src); vid.src = ''; }
-  $('videoPrev').classList.remove('show');
-  $('limitNotice').classList.remove('show');
-  state = { hasInput: false, isFile: false, fileMeta: {}, url: '', title: '' };
-  lastData = null; lastAi = null;
-  setAnalyzeEnabled(false);
-});
-</script>
+    <script>
+        // --- ÇEVİRİLER ---
+        const uiTranslations = {
+            tr: { searchPlaceholder: "Futbolcu ara...", watchYoutube: "YouTube'da İzle", back: "Geri Dön", noResult: "Futbolcu bulunamadı.", tagline: "Efsanelerin Gerçek Hikayeleri", allTab: "Tümü", favTab: "⭐ Favorilerim", noFavResult: "Henüz favori eklemediniz. Kartlardaki ⭐ ikonuna dokun!", favorite: "Favorile", favorited: "Favorilerde", listen: "Dinle", stop: "Durdur", share: "Paylaş", favAdded: "Favorilere eklendi!", favRemoved: "Favorilerden çıkarıldı.", ttsUnsupported: "Tarayıcınız sesli okumayı desteklemiyor.", ttsError: "Sesli okuma başlatılamadı, tekrar dene.", placeLabel: "Doğum Yeri", dateLabel: "Doğum Tarihi", deathLabel: "Vefat Tarihi", ageLabel: "Yaş", deathAgeLabel: "Vefat Yaşı", shareModalTitle: "Nereye Paylaşmak İstersin?", shareSystem: "Diğer Uygulamalar", shareCopy: "Bağlantıyı Kopyala", shareCancel: "Vazgeç", copied: "Panoya kopyalandı!", sharedOk: "Paylaşıldı!" },
+            en: { searchPlaceholder: "Search player...", watchYoutube: "Watch on YouTube", back: "Go Back", noResult: "No players found.", tagline: "True Stories of Legends", allTab: "All", favTab: "⭐ My Favorites", noFavResult: "No favorites yet. Tap the ⭐ icon on a card!", favorite: "Favorite", favorited: "Favorited", listen: "Listen", stop: "Stop", share: "Share", favAdded: "Added to favorites!", favRemoved: "Removed from favorites.", ttsUnsupported: "Your browser doesn't support text-to-speech.", ttsError: "Couldn't start speech, try again.", placeLabel: "Birthplace", dateLabel: "Date of Birth", deathLabel: "Date of Death", ageLabel: "Age", deathAgeLabel: "Age at Death", shareModalTitle: "Where do you want to share?", shareSystem: "More Apps", shareCopy: "Copy Link", shareCancel: "Cancel", copied: "Copied to clipboard!", sharedOk: "Shared!" },
+            es: { searchPlaceholder: "Buscar jugador...", watchYoutube: "Ver en YouTube", back: "Regresar", noResult: "No se encontraron jugadores.", tagline: "Historias Reales de Leyendas", allTab: "Todos", favTab: "⭐ Mis Favoritos", noFavResult: "Aún no hay favoritos. ¡Toca el ícono ⭐ en una tarjeta!", favorite: "Favorito", favorited: "Favorito", listen: "Escuchar", stop: "Detener", share: "Compartir", favAdded: "¡Añadido a favoritos!", favRemoved: "Eliminado de favoritos.", ttsUnsupported: "Tu navegador no soporta lectura en voz alta.", ttsError: "No se pudo iniciar la voz, intenta de nuevo.", placeLabel: "Lugar de Nacimiento", dateLabel: "Fecha de Nacimiento", deathLabel: "Fecha de Fallecimiento", ageLabel: "Edad", deathAgeLabel: "Edad al Fallecer", shareModalTitle: "¿Dónde quieres compartir?", shareSystem: "Más Aplicaciones", shareCopy: "Copiar Enlace", shareCancel: "Cancelar", copied: "¡Copiado al portapapeles!", sharedOk: "¡Compartido!" }
+        };
+        const speechLangMap = { tr: 'tr-TR', en: 'en-US', es: 'es-ES' };
+        const dateLocaleMap = { tr: 'tr-TR', en: 'en-US', es: 'es-ES' };
+
+        // --- VERİTABANI (25 Efsane) ---
+        const playersData = [
+            { id: 1, name: "Lionel Messi", flag: "🇦🇷", wikiTitle: "Lionel_Messi", birthDate: "1987-06-24",
+              birthPlace: { tr: "Rosario, Arjantin", en: "Rosario, Argentina", es: "Rosario, Argentina" },
+              story: {
+                tr: "24 Haziran 1987'de Arjantin'in Rosario kentinde, işçi sınıfından bir ailenin çocuğu olarak dünyaya geldi. Küçük yaşta büyüme hormonu eksikliği teşhisi kondu ve Arjantin'deki hiçbir kulüp aylık 900 dolarlık tedavi masrafını karşılayamadı. 13 yaşında ailesiyle birlikte Barcelona'ya taşındı; kulüp tedaviyi üstlenirken o da bir peçeteye atılan imzayla tarihe geçen anlaşmayı imzaladı. La Masia'da yetişti, 2004'te profesyonel forma giydi ve kısa sürede dünyanın en iyisi oldu. Rekor 8 Ballon d'Or, 4 Şampiyonlar Ligi ve nihayet 2022'de Arjantin'e 36 yıl sonra Dünya Kupası'nı getirerek kariyerini taçlandırdı. Bugün Inter Miami formasıyla Amerika'da futbolu büyütmeye devam ediyor.",
+                en: "Born on 24 June 1987 in Rosario, Argentina, to a working-class family. Diagnosed young with a growth hormone deficiency, no Argentine club could cover the $900 monthly treatment. At 13 he moved to Barcelona with his family; the club paid for his treatment while he signed a now-legendary contract scrawled on a napkin. Raised at La Masia, he debuted in 2004 and quickly became the best in the world. A record 8 Ballon d'Ors, 4 Champions Leagues, and finally the 2022 World Cup, ending Argentina's 36-year wait, crowned his career. He now continues growing the game in America with Inter Miami.",
+                es: "Nació el 24 de junio de 1987 en Rosario, Argentina, en una familia trabajadora. Diagnosticado joven con deficiencia de hormona de crecimiento, ningún club argentino pudo costear el tratamiento de 900 dólares mensuales. A los 13 años se mudó a Barcelona con su familia; el club pagó su tratamiento mientras él firmaba el contrato legendario garabateado en una servilleta. Formado en La Masia, debutó en 2004 y pronto se convirtió en el mejor del mundo. Un récord de 8 Balones de Oro, 4 Champions League y finalmente el Mundial 2022, terminando la espera de 36 años de Argentina, coronaron su carrera. Hoy sigue haciendo crecer el fútbol en América con el Inter Miami."
+              }},
+            { id: 2, name: "Cristiano Ronaldo", flag: "🇵🇹", wikiTitle: "Cristiano_Ronaldo", birthDate: "1985-02-05",
+              birthPlace: { tr: "Funchal, Madeira, Portekiz", en: "Funchal, Madeira, Portugal", es: "Funchal, Madeira, Portugal" },
+              story: {
+                tr: "5 Şubat 1985'te Portekiz'in Madeira adasındaki Funchal'da, çok yoksul bir ailenin dördüncü çocuğu olarak doğdu. Babası bir bahçıvandı; çocukluğu maddi zorluklarla geçti. 12 yaşında ailesinden ayrılıp Lizbon'a, Sporting Lizbon'un yatılı akademisine gitti. 15 yaşında kalp ritim bozukluğu teşhisiyle kariyeri bitme noktasına geldi, riskli bir ameliyatla kurtuldu. 2003'te Manchester United onu keşfetti, ardından Real Madrid'de tarihin en golcü oyuncusu unvanını aldı (900'ün üzerinde resmi gol). Juventus ve Al-Nassr'da rekor kırmaya devam etti, 5 kez Ballon d'Or kazandı. Disiplini ve çalışma azmiyle futbolun fiziksel sınırlarını yeniden tanımladı.",
+                en: "Born on 5 February 1985 in Funchal, Madeira, Portugal, the fourth child of a very poor family. His father was a gardener, and his childhood was marked by hardship. At 12 he left home for Sporting Lisbon's boarding academy in the capital. At 15 a heart arrhythmia nearly ended his career, but risky surgery saved him. Manchester United discovered him in 2003, and at Real Madrid he became football's all-time top scorer with over 900 official goals. He kept breaking records at Juventus and Al-Nassr, winning 5 Ballon d'Ors. With relentless discipline, he redefined the physical limits of the sport.",
+                es: "Nació el 5 de febrero de 1985 en Funchal, Madeira, Portugal, el cuarto hijo de una familia muy pobre. Su padre era jardinero y su infancia estuvo marcada por dificultades. A los 12 años dejó su hogar para ir al internado del Sporting de Lisboa. A los 15, una arritmia cardíaca casi termina su carrera, pero una cirugía arriesgada lo salvó. El Manchester United lo descubrió en 2003, y en el Real Madrid se convirtió en el máximo goleador histórico del fútbol con más de 900 goles oficiales. Siguió rompiendo récords en la Juventus y el Al-Nassr, ganando 5 Balones de Oro. Con una disciplina implacable, redefinió los límites físicos del deporte."
+              }},
+            { id: 3, name: "Pelé", flag: "🇧🇷", wikiTitle: "Pelé", birthDate: "1940-10-23", deathDate: "2022-12-29",
+              birthPlace: { tr: "Três Corações, Brezilya", en: "Três Corações, Brazil", es: "Três Corações, Brasil" },
+              story: {
+                tr: "Gerçek adı Edson Arantes do Nascimento olan Pelé, 23 Ekim 1940'ta Brezilya'nın Três Corações kasabasında doğdu. Yoksul bir ailede büyüdü, çorapların içine gazete kağıdı doldurarak yaptığı toplarla sokaklarda futbol öğrendi. Ayakkabı boyacılığı yaparak aileye katkı sağladı. 15 yaşında Santos'a katıldı, 16 yaşında milli takıma çağrıldı. 1958'de henüz 17 yaşındayken İsveç'te Dünya Kupası'nı kazanarak dünyayı şoka uğrattı; 1962 ve 1970'te iki kupa daha ekleyerek tarihte 3 Dünya Kupası kazanan tek futbolcu oldu. 1363 resmi golle 'Futbolun Kralı' unvanını aldı. 29 Aralık 2022'de 82 yaşında hayatını kaybetti; futbol tarihinin en büyük mirasını bıraktı.",
+                en: "Born Edson Arantes do Nascimento on 23 October 1940 in Três Corações, Brazil, he grew up poor and learned football in the streets with balls made of stuffed socks and newspaper. He shined shoes to help support his family. He joined Santos at 15 and was called to the national team at 16. In 1958, at just 17, he shocked the world by winning the World Cup in Sweden; he added two more in 1962 and 1970, becoming the only player in history to win 3 World Cups. With 1,363 official goals, he earned the title 'The King of Football'. He passed away on 29 December 2022 at 82, leaving the greatest legacy in the sport's history.",
+                es: "Nacido como Edson Arantes do Nascimento el 23 de octubre de 1940 en Três Corações, Brasil, creció pobre y aprendió fútbol en las calles con pelotas hechas de calcetines rellenos y papel periódico. Lustraba zapatos para ayudar a su familia. Se unió al Santos a los 15 años y fue convocado a la selección a los 16. En 1958, con solo 17 años, sorprendió al mundo ganando el Mundial en Suecia; sumó dos más en 1962 y 1970, siendo el único jugador en la historia en ganar 3 Copas del Mundo. Con 1.363 goles oficiales, ganó el título de 'El Rey del Fútbol'. Falleció el 29 de diciembre de 2022 a los 82 años, dejando el mayor legado en la historia del deporte."
+              }},
+            { id: 4, name: "Diego Maradona", flag: "🇦🇷", wikiTitle: "Diego_Maradona", birthDate: "1960-10-30", deathDate: "2020-11-25",
+              birthPlace: { tr: "Lanús, Buenos Aires, Arjantin", en: "Lanús, Buenos Aires, Argentina", es: "Lanús, Buenos Aires, Argentina" },
+              story: {
+                tr: "30 Ekim 1960'ta Buenos Aires'in yoksul Villa Fiorito gecekondu mahallesinde doğdu. Sekiz kardeşin arasında büyüdü, sokak futbolunda topla kurduğu ilişki fizik kurallarına aykırı gibiydi. 10 yaşında Los Cebollitas takımında dikkat çekti, 16 yaşında Arjantin liginde profesyonel oldu. Barcelona ve Napoli'de efsaneleşti; özellikle güçlü bir kulübü olmayan Napoli'yi iki kez İtalya şampiyonu yaptı. 1986 Dünya Kupası çeyrek finalinde İngiltere'ye attığı 'Tanrının Eli' ve aynı maçtaki 'Yüzyılın Golü' ile bir ulusun kahramanı oldu ve kupayı Arjantin'e getirdi. Sahadaki dehası kadar sahra dışındaki mücadeleleriyle de tanınan Maradona, 25 Kasım 2020'de 60 yaşında kalp krizi sonucu hayatını kaybetti.",
+                en: "Born on 30 October 1960 in the impoverished Villa Fiorito slum of Buenos Aires, he grew up among eight siblings, and his relationship with a ball on the street seemed to defy the laws of physics. He caught attention at age 10 with Los Cebollitas and turned professional in the Argentine league at 16. He became a legend at Barcelona and Napoli, taking a club with no history of success to two Italian titles. In the 1986 World Cup quarter-final against England, his 'Hand of God' and the 'Goal of the Century' in the same match made him a national hero and delivered the trophy to Argentina. Known as much for his off-field struggles as his genius on it, Maradona died of a heart attack on 25 November 2020 at age 60.",
+                es: "Nació el 30 de octubre de 1960 en el humilde barrio de Villa Fiorito, Buenos Aires. Creció entre ocho hermanos, y su relación con el balón en la calle parecía desafiar las leyes de la física. Llamó la atención a los 10 años en Los Cebollitas y debutó como profesional en la liga argentina a los 16. Se convirtió en leyenda en el Barcelona y el Nápoles, llevando a un club sin historia de éxito a dos títulos italianos. En los cuartos de final del Mundial 1986 contra Inglaterra, su 'Mano de Dios' y el 'Gol del Siglo' en el mismo partido lo convirtieron en héroe nacional y le dieron la copa a Argentina. Conocido tanto por sus luchas fuera de la cancha como por su genio dentro de ella, Maradona murió de un infarto el 25 de noviembre de 2020 a los 60 años."
+              }},
+            { id: 5, name: "Zinedine Zidane", flag: "🇫🇷", wikiTitle: "Zinedine_Zidane", birthDate: "1972-06-23",
+              birthPlace: { tr: "Marsilya, Fransa", en: "Marseille, France", es: "Marsella, Francia" },
+              story: {
+                tr: "23 Haziran 1972'de Fransa'nın Marsilya kentinde, Cezayir'den göç etmiş bir ailenin en küçük çocuğu olarak dünyaya geldi. Marsilya'nın zorlu La Castellane banliyösünde büyüdü, sokak futbolunda tekniğini geliştirdi. Cannes ve Bordeaux'da olgunlaştı, Juventus'ta yıldızlaştı. 1998 Dünya Kupası finalinde Brezilya'ya attığı iki kafa gol ile Fransa'ya ilk Dünya Kupası'nı kazandırdı ve ulusal kahraman oldu. 2001'de dönemin rekor transfer bedeliyle Real Madrid'e gitti; 2002 Şampiyonlar Ligi finalinde attığı efsanevi sol ayak voleyi futbol tarihinin en güzel gollerinden sayılır. 2006 Dünya Kupası finalindeki kafa vuruşu olayına rağmen, zarafeti ve vizyonuyla nesillere ilham verdi; bugün antrenörlük kariyerinde de başarılı bir figür.",
+                en: "Born on 23 June 1972 in Marseille, France, the youngest child of a family that had immigrated from Algeria. He grew up in Marseille's tough La Castellane housing estate, honing his technique on the streets. He matured at Cannes and Bordeaux before becoming a star at Juventus. His two headed goals against Brazil in the 1998 World Cup final gave France its first title and made him a national hero. In 2001 he moved to Real Madrid for a then-record fee; his legendary left-foot volley in the 2002 Champions League final is considered one of the finest goals in football history. Despite the infamous headbutt in the 2006 World Cup final, his elegance and vision inspired generations, and today he remains a successful figure in coaching.",
+                es: "Nació el 23 de junio de 1972 en Marsella, Francia, el menor de una familia inmigrante de Argelia. Creció en el difícil barrio de La Castellane en Marsella, perfeccionando su técnica en la calle. Maduró en el Cannes y el Burdeos antes de brillar en la Juventus. Sus dos goles de cabeza contra Brasil en la final del Mundial 1998 le dieron a Francia su primer título y lo convirtieron en héroe nacional. En 2001 fichó por el Real Madrid por una cifra récord; su legendaria volea de zurda en la final de la Champions 2002 es considerada uno de los mejores goles de la historia. A pesar del famoso cabezazo en la final del Mundial 2006, su elegancia y visión inspiraron a generaciones, y hoy sigue siendo una figura exitosa como entrenador."
+              }},
+            { id: 6, name: "Ronaldinho", flag: "🇧🇷", wikiTitle: "Ronaldinho", birthDate: "1980-03-21",
+              birthPlace: { tr: "Porto Alegre, Brezilya", en: "Porto Alegre, Brazil", es: "Porto Alegre, Brasil" },
+              story: {
+                tr: "21 Mart 1980'de Brezilya'nın Porto Alegre kentinde doğdu. Abisi Roberto'nun futbol kariyeri sakatlık yüzünden erken sona erince, ailenin tüm umudu küçük Ronaldinho'ya kaldı. 13 yaşında bir maçta rakibine 23 gol attığı efsaneleşti. Grêmio'da başladığı kariyerini PSG ve özellikle Barcelona'da taçlandırdı; 2005'te Ballon d'Or kazandı ve Santiago Bernabéu'da bile Real Madrid taraftarlarının ayakta alkışladığı nadir rakiplerden biri oldu. Joga Bonito (Güzel Oyun) felsefesinin canlı sembolüydü; sokak futbolunun neşesini ve hokkabazlığını en üst düzey rekabetçi futbola taşıyan oyuncu olarak hatırlanıyor. 2002 Dünya Kupası'nda Brezilya ile şampiyon oldu.",
+                en: "Born on 21 March 1980 in Porto Alegre, Brazil. When his older brother Roberto's football career ended early due to injury, the family's hopes fell on young Ronaldinho. He became legendary at 13 for scoring 23 goals in a single match. Starting at Grêmio, his career reached its peak at PSG and especially Barcelona, where he won the 2005 Ballon d'Or and famously received a standing ovation from Real Madrid fans at the Bernabéu. He was the living embodiment of 'Joga Bonito', remembered as the player who brought the joy and trickery of street football to the highest level of competitive play. He was a World Cup champion with Brazil in 2002.",
+                es: "Nació el 21 de marzo de 1980 en Porto Alegre, Brasil. Cuando la carrera futbolística de su hermano mayor Roberto terminó pronto por una lesión, las esperanzas de la familia recayeron en el joven Ronaldinho. Se hizo legendario a los 13 años al marcar 23 goles en un solo partido. Comenzando en el Grêmio, su carrera alcanzó su punto máximo en el PSG y especialmente en el Barcelona, donde ganó el Balón de Oro 2005 y recibió una famosa ovación de los hinchas del Real Madrid en el Bernabéu. Fue la encarnación viva del 'Joga Bonito', recordado como el jugador que llevó la alegría y la magia del fútbol callejero al más alto nivel competitivo. Fue campeón del mundo con Brasil en 2002."
+              }},
+            { id: 7, name: "Johan Cruyff", flag: "🇳🇱", wikiTitle: "Johan_Cruyff", birthDate: "1947-04-25", deathDate: "2016-03-24",
+              birthPlace: { tr: "Amsterdam, Hollanda", en: "Amsterdam, Netherlands", es: "Ámsterdam, Países Bajos" },
+              story: {
+                tr: "25 Nisan 1947'de Amsterdam'da, Ajax stadyumuna sadece birkaç yüz metre uzaklıkta doğdu; babası kulübün yakınında bir bakkal işletiyordu. 12 yaşında babasını kaybetti ve Ajax'ın gençlik akademisinde büyüdü. Rinus Michels ile geliştirdiği 'Total Football' (Total Futbol) anlayışıyla Ajax'ı ve Hollanda Milli Takımı'nı 1970'lerde dünyanın en etkileyici takımlarına dönüştürdü; 3 kez Ballon d'Or kazandı. 1973'te Barcelona'ya transfer oldu ve kulübü diktatörlük döneminin ardından yeniden ayağa kaldırdı. Oyuncu kariyerinin ardından teknik direktörlükte de devrim yarattı, 'Cruyff turn' hareketini futbol sözlüğüne kazandırdı ve modern Barcelona'nın (tiki-taka) felsefesinin mimarı oldu. 24 Mart 2016'da akciğer kanseri nedeniyle 68 yaşında hayatını kaybetti.",
+                en: "Born on 25 April 1947 in Amsterdam, just a few hundred meters from the Ajax stadium, where his father ran a grocery shop nearby. He lost his father at 12 and grew up in Ajax's youth academy. With the 'Total Football' philosophy he developed alongside Rinus Michels, he transformed Ajax and the Dutch national team into the most captivating sides of the 1970s, winning 3 Ballon d'Ors. He moved to Barcelona in 1973 and revived the club after years under dictatorship. After his playing career, he revolutionized coaching too, gifting football the 'Cruyff turn' and architecting the tiki-taka philosophy that defines modern Barcelona. He died of lung cancer on 24 March 2016 at age 68.",
+                es: "Nació el 25 de abril de 1947 en Ámsterdam, a pocos cientos de metros del estadio del Ajax, donde su padre tenía una tienda de comestibles cerca. Perdió a su padre a los 12 años y creció en la cantera del Ajax. Con la filosofía del 'Fútbol Total' que desarrolló junto a Rinus Michels, transformó al Ajax y a la selección holandesa en los equipos más fascinantes de los años 70, ganando 3 Balones de Oro. Se mudó al Barcelona en 1973 y revivió al club tras años de dictadura. Después de su carrera como jugador, revolucionó también el banquillo, regalando al fútbol la 'Cruyff turn' y siendo el arquitecto de la filosofía tiki-taka que define al Barcelona moderno. Murió de cáncer de pulmón el 24 de marzo de 2016 a los 68 años."
+              }},
+            { id: 8, name: "Paolo Maldini", flag: "🇮🇹", wikiTitle: "Paolo_Maldini", birthDate: "1968-06-26",
+              birthPlace: { tr: "Milano, İtalya", en: "Milan, Italy", es: "Milán, Italia" },
+              story: {
+                tr: "26 Haziran 1968'de İtalya'nın Milano kentinde, kendisi de AC Milan efsanesi olan Cesare Maldini'nin oğlu olarak doğdu. Kulübün akademisinde yetişti, 16 yaşında ilk takıma çıktı ve tam 25 yıl boyunca yalnızca Milan formasıyla oynadı — transfer olmadan tek kulüpte geçirdiği kariyer futbol tarihinde eşsizdir. 5 Şampiyonlar Ligi, 7 Serie A şampiyonluğu kazandı ve savunma oyununun en zarif temsilcisi olarak anıldı. 'Eğer kayarak müdahale etmek zorunda kalırsan, zaten bir hata yapmışsındır' sözüyle taktik zekasını özetledi. 41 yaşına kadar üst düzeyde oynadı; oğlu Daniel Maldini de bugün profesyonel futbolcu olarak aynı geleneği sürdürüyor.",
+                en: "Born on 26 June 1968 in Milan, Italy, the son of Cesare Maldini, himself an AC Milan legend. He rose through the club's academy, debuted for the first team at 16, and played exclusively for Milan for a full 25 years — a one-club career unmatched in football history. He won 5 Champions Leagues and 7 Serie A titles, remembered as the most elegant defender the game has produced. He summed up his tactical intelligence with the quote: 'If you have to slide in for a tackle, you've already made a mistake.' He played at the top level until age 41; his son Daniel Maldini now carries the family tradition forward as a professional footballer.",
+                es: "Nació el 26 de junio de 1968 en Milán, Italia, hijo de Cesare Maldini, él mismo una leyenda del AC Milan. Se formó en la cantera del club, debutó en el primer equipo a los 16 años y jugó exclusivamente para el Milan durante 25 años completos, una carrera en un solo club sin igual en la historia del fútbol. Ganó 5 Champions League y 7 títulos de Serie A, recordado como el defensor más elegante que ha dado el deporte. Resumió su inteligencia táctica con la frase: 'Si tienes que hacer una entrada deslizándote, ya has cometido un error.' Jugó a alto nivel hasta los 41 años; su hijo Daniel Maldini continúa hoy la tradición familiar como futbolista profesional."
+              }},
+            { id: 9, name: "Andrés Iniesta", flag: "🇪🇸", wikiTitle: "Andrés_Iniesta", birthDate: "1984-05-11",
+              birthPlace: { tr: "Fuentealbilla, İspanya", en: "Fuentealbilla, Spain", es: "Fuentealbilla, España" },
+              story: {
+                tr: "11 Mayıs 1984'te İspanya'nın küçük Fuentealbilla kasabasında doğdu. 12 yaşında ailesinden ayrılıp Barcelona'nın La Masia yatılı akademisine katıldığında çok utangaç ve ev hasreti çeken bir çocuktu; ilk geceler ağlayarak uyuduğu bilinir. Barcelona'nın altın çağının kalbi oldu, Xavi ile kurduğu ortaklık tiki-taka futbolunun temeliydi. 2010 Dünya Kupası finalinde, uzatma dakikalarında attığı golle İspanya'ya tarihinin ilk ve tek Dünya Kupası'nı kazandırdı; o gol Fuentealbilla'da bir heykelle ölümsüzleştirildi. Barcelona'da 4 Şampiyonlar Ligi kazandıktan sonra kariyerinin son yıllarını Japonya'nın Vissel Kobe kulübünde sürdürdü, 2023'te profesyonel futbola veda etti.",
+                en: "Born on 11 May 1984 in the small town of Fuentealbilla, Spain. When he left home at 12 to join Barcelona's La Masia boarding academy, he was a deeply shy, homesick boy known to cry himself to sleep in his first nights there. He became the heart of Barcelona's golden era, with his partnership alongside Xavi forming the foundation of tiki-taka football. His extra-time goal in the 2010 World Cup final gave Spain its first and only World Cup, a goal immortalized with a statue in Fuentealbilla. After winning 4 Champions Leagues with Barcelona, he spent the final years of his career at Vissel Kobe in Japan, retiring from professional football in 2023.",
+                es: "Nació el 11 de mayo de 1984 en el pequeño pueblo de Fuentealbilla, España. Cuando dejó su hogar a los 12 años para unirse al internado de La Masia del Barcelona, era un niño muy tímido y con nostalgia, conocido por llorar hasta quedarse dormido en sus primeras noches allí. Se convirtió en el corazón de la era dorada del Barcelona, y su sociedad con Xavi fue la base del fútbol tiki-taka. Su gol en la prórroga de la final del Mundial 2010 le dio a España su primera y única Copa del Mundo, un gol inmortalizado con una estatua en Fuentealbilla. Tras ganar 4 Champions League con el Barcelona, pasó los últimos años de su carrera en el Vissel Kobe de Japón, retirándose del fútbol profesional en 2023."
+              }},
+            { id: 10, name: "Xavi Hernández", flag: "🇪🇸", wikiTitle: "Xavi", birthDate: "1980-01-25",
+              birthPlace: { tr: "Terrassa, İspanya", en: "Terrassa, Spain", es: "Terrassa, España" },
+              story: {
+                tr: "25 Ocak 1980'de İspanya'nın Terrassa kentinde doğdu. 11 yaşında La Masia'ya katıldı ve orada geliştirdiği pas oyunuyla sahanın geometrisini herkesten iyi gören bir 'Kuklacı' oldu. Barcelona'da 17 yıl boyunca 767 resmi maça çıktı, 8 La Liga ve 4 Şampiyonlar Ligi şampiyonluğu kazandı. Tiki-taka sisteminin kalbiydi; topu kaybetmesi neredeyse imkansız kabul edilirdi. İspanya Milli Takımı ile 2008 ve 2012 Avrupa Şampiyonalarını, 2010 Dünya Kupası'nı kazanarak İspanya futbol tarihinin en başarılı neslinin lideri oldu. Kariyerinin sonunda Katar'da oynadı, ardından teknik direktör olarak Barcelona'ya döndü ve kulübü 2023'te yeniden La Liga şampiyonu yaptı.",
+                en: "Born on 25 January 1980 in Terrassa, Spain. He joined La Masia at 11 and developed a passing game there that let him read the geometry of the pitch better than anyone, earning him the nickname 'the Puppet Master'. He played 767 official matches for Barcelona over 17 years, winning 8 La Liga titles and 4 Champions Leagues. He was the heart of the tiki-taka system, considered almost impossible to dispossess. With the Spanish national team he won the 2008 and 2012 European Championships and the 2010 World Cup, leading the most successful generation in Spanish football history. He finished his playing career in Qatar, then returned to Barcelona as manager, guiding the club back to a La Liga title in 2023.",
+                es: "Nació el 25 de enero de 1980 en Terrassa, España. Se unió a La Masia a los 11 años y desarrolló allí un juego de pases que le permitía leer la geometría del campo mejor que nadie, ganándose el apodo de 'el Titiritero'. Jugó 767 partidos oficiales para el Barcelona a lo largo de 17 años, ganando 8 títulos de La Liga y 4 Champions League. Fue el corazón del sistema tiki-taka, considerado casi imposible de desposeer del balón. Con la selección española ganó las Eurocopas de 2008 y 2012 y el Mundial de 2010, liderando la generación más exitosa de la historia del fútbol español. Terminó su carrera como jugador en Catar, luego regresó al Barcelona como entrenador, llevando al club de nuevo al título de La Liga en 2023."
+              }},
+            { id: 11, name: "Thierry Henry", flag: "🇫🇷", wikiTitle: "Thierry_Henry", birthDate: "1977-08-17",
+              birthPlace: { tr: "Les Ulis, Fransa", en: "Les Ulis, France", es: "Les Ulis, Francia" },
+              story: {
+                tr: "17 Ağustos 1977'de Paris yakınlarındaki Les Ulis'te doğdu. Kariyerine Monaco'da başladı, 1998 Dünya Kupası'nı Fransa ile kazandı. Juventus'ta kanat oyuncusu olarak başarısız bir dönem geçirdikten sonra Arsene Wenger tarafından Arsenal'e getirildi ve orada forvete dönüştürülerek tarihin en golcü oyuncularından biri haline geldi. 2003-04 sezonunda Arsenal'in tek maç kaybetmeden şampiyon olduğu 'Invincibles' (Yenilmezler) kadrosunun yıldızıydı. İnanılmaz hızı, zarafeti ve topu köşeye plase etme becerisiyle Premier Lig tarihinin en beğenilen forvetlerinden oldu; kulüpte 228 golle rekor kırdı. Kariyerinin sonunda Barcelona ve New York Red Bulls'ta oynadı; bugün televizyon yorumculuğu ve teknik direktörlük yapıyor.",
+                en: "Born on 17 August 1977 in Les Ulis, near Paris. He began his career at Monaco and won the 1998 World Cup with France. After a difficult spell as a struggling winger at Juventus, he was brought to Arsenal by Arsène Wenger and transformed into a striker, becoming one of the greatest goalscorers in history. He was the star of Arsenal's 'Invincibles' side that won the 2003-04 title without losing a single match. With incredible pace, elegance, and a signature finish curled into the far corner, he became one of the most beloved strikers in Premier League history, setting the club's all-time scoring record with 228 goals. He finished his career at Barcelona and New York Red Bulls, and today works as a TV pundit and manager.",
+                es: "Nació el 17 de agosto de 1977 en Les Ulis, cerca de París. Comenzó su carrera en el Mónaco y ganó el Mundial 1998 con Francia. Tras un difícil período como extremo en la Juventus, fue llevado al Arsenal por Arsène Wenger y transformado en delantero, convirtiéndose en uno de los mayores goleadores de la historia. Fue la estrella del equipo 'Invencible' del Arsenal que ganó el título 2003-04 sin perder un solo partido. Con un ritmo increíble, elegancia y su característico remate curvado a la escuadra, se convirtió en uno de los delanteros más queridos de la historia de la Premier League, estableciendo el récord goleador del club con 228 tantos. Terminó su carrera en el Barcelona y el New York Red Bulls; hoy trabaja como comentarista de televisión y entrenador."
+              }},
+            { id: 12, name: "Ronaldo Nazário", flag: "🇧🇷", wikiTitle: "Ronaldo_(Brazilian_footballer)", birthDate: "1976-09-22",
+              birthPlace: { tr: "Rio de Janeiro, Brezilya", en: "Rio de Janeiro, Brazil", es: "Río de Janeiro, Brasil" },
+              story: {
+                tr: "22 Eylül 1976'da Rio de Janeiro'nun yoksul Bento Ribeiro mahallesinde doğdu. 'O Fenômeno' (Fenomen) lakabıyla anılan Ronaldo, henüz 17 yaşındayken Cruzeiro'da patlama yaptı, ardından PSV Eindhoven ve Barcelona'da inanılmaz gol ortalamaları tuttu. 1998 Dünya Kupası finalinde geçirdiği gizemli kriz hâlâ tartışılır. Real Madrid'e transfer olduktan sonra iki kez ağır diz kapağı yaralanması geçirdi ve kariyerinin bitmesi bekleniyordu; ancak inanılmaz bir azimle 2002 Dünya Kupası'na döndü, 8 golle gol kralı oldu ve Brezilya'yı şampiyon yaptı. Bu geri dönüş futbol tarihinin en büyük mucizelerinden sayılır. Kariyerinin sonunda Milan ve Corinthians'ta oynadı; bugün Real Valladolid kulübünün sahibi.",
+                en: "Born on 22 September 1976 in the poor Bento Ribeiro neighborhood of Rio de Janeiro. Known as 'O Fenômeno' (The Phenomenon), he burst onto the scene at Cruzeiro at just 17, then posted extraordinary scoring ratios at PSV Eindhoven and Barcelona. The mysterious seizure he suffered before the 1998 World Cup final is still debated today. After moving to Real Madrid, he suffered two devastating knee injuries that were expected to end his career; yet with remarkable determination he returned for the 2002 World Cup, finished as top scorer with 8 goals, and led Brazil to the title. That comeback is considered one of the greatest miracles in football history. He finished his career at Milan and Corinthians; today he is the owner of Real Valladolid.",
+                es: "Nació el 22 de septiembre de 1976 en el humilde barrio de Bento Ribeiro, Río de Janeiro. Conocido como 'O Fenômeno', irrumpió en el Cruzeiro con solo 17 años, luego mantuvo promedios goleadores extraordinarios en el PSV Eindhoven y el Barcelona. La misteriosa convulsión que sufrió antes de la final del Mundial 1998 todavía se debate hoy. Tras fichar por el Real Madrid, sufrió dos devastadoras lesiones de rodilla que se esperaba terminaran su carrera; sin embargo, con una determinación notable, regresó para el Mundial 2002, terminó como máximo goleador con 8 goles y llevó a Brasil al título. Ese regreso se considera uno de los mayores milagros en la historia del fútbol. Terminó su carrera en el Milan y el Corinthians; hoy es propietario del Real Valladolid."
+              }},
+            { id: 13, name: "Franz Beckenbauer", flag: "🇩🇪", wikiTitle: "Franz_Beckenbauer", birthDate: "1945-09-11", deathDate: "2024-01-07",
+              birthPlace: { tr: "Münih, Almanya", en: "Munich, Germany", es: "Múnich, Alemania" },
+              story: {
+                tr: "11 Eylül 1945'te İkinci Dünya Savaşı'nın hemen ardından Münih'te doğdu. Bayern Münih'in efsanevi altyapısında yetişti ve libero pozisyonunu icat eden isim olarak futbol taktiklerini kökten değiştirdi; savunmadan topla ileri çıkıp hücumu başlatan ilk modern stoper oldu. 'Der Kaiser' (İmparator) lakabıyla anılan Beckenbauer, Bayern Münih ile 3 kez Şampiyon Kulüpler Kupası kazandı ve 1974'te Batı Almanya'yı kaptan olarak Dünya Kupası şampiyonu yaptı. 1990'da bu kez teknik direktör olarak Batı Almanya'yı yeniden şampiyon yaparak, hem oyuncu hem teknik direktör olarak Dünya Kupası kazanan nadir isimlerden biri oldu. 2006 Dünya Kupası'nın Almanya'da düzenlenmesinde kilit rol oynadı. 7 Ocak 2024'te 78 yaşında hayatını kaybetti.",
+                en: "Born on 11 September 1945 in Munich, shortly after the end of World War II. Raised in Bayern Munich's storied youth system, he fundamentally changed football tactics by inventing the sweeper (libero) role, becoming the first modern defender to carry the ball forward from the back to launch attacks. Nicknamed 'Der Kaiser' (The Emperor), he won 3 European Cups with Bayern Munich and captained West Germany to the 1974 World Cup title. In 1990 he led West Germany to another World Cup title, this time as manager, becoming one of the rare figures to win the World Cup as both player and coach. He played a key role in bringing the 2006 World Cup to Germany. He died on 7 January 2024 at age 78.",
+                es: "Nació el 11 de septiembre de 1945 en Múnich, poco después del final de la Segunda Guerra Mundial. Formado en la histórica cantera del Bayern Múnich, cambió fundamentalmente la táctica futbolística al inventar el rol del líbero, convirtiéndose en el primer defensor moderno en llevar el balón desde atrás para iniciar ataques. Apodado 'Der Kaiser' (El Emperador), ganó 3 Copas de Europa con el Bayern Múnich y capitaneó a Alemania Occidental hacia el título del Mundial 1974. En 1990 llevó a Alemania Occidental a otro título mundial, esta vez como entrenador, convirtiéndose en una de las raras figuras en ganar el Mundial como jugador y como entrenador. Jugó un papel clave para traer el Mundial 2006 a Alemania. Falleció el 7 de enero de 2024 a los 78 años."
+              }},
+            { id: 14, name: "Roberto Baggio", flag: "🇮🇹", wikiTitle: "Roberto_Baggio", birthDate: "1967-02-18",
+              birthPlace: { tr: "Caldogno, İtalya", en: "Caldogno, Italy", es: "Caldogno, Italia" },
+              story: {
+                tr: "18 Şubat 1967'de İtalya'nın Caldogno kasabasında doğdu. Kariyeri boyunca dizinden 6 kez ağır ameliyat geçirmesine rağmen olağanüstü tekniği ve şık oyunuyla İtalya'yı büyüledi. Fiorentina'dan Juventus'a transferi, taraftarları isyan ettirecek kadar tartışmalıydı. 1993'te Ballon d'Or ve dünyanın yılın futbolcusu ödüllerini kazandı. 'İlahi Atkuyruklu' lakabıyla anılan Baggio, 1994 Dünya Kupası finalinde İtalya'yı neredeyse tek başına finale taşıdı ancak penaltı atışlarında kaçırdığı vuruş kariyerinin en büyük dramı oldu; buna rağmen sportmenliği ve zarafetiyle hafızalarda kaldı. Budist inancı ve doğa sporlarına olan tutkusuyla da tanınan Baggio, futbolun en sevilen sanatçılarından biri olarak anılıyor.",
+                en: "Born on 18 February 1967 in Caldogno, Italy. Despite enduring six major knee surgeries throughout his career, his extraordinary technique and stylish play mesmerized Italy. His transfer from Fiorentina to Juventus was so controversial it sparked riots among fans. He won the Ballon d'Or and World Player of the Year award in 1993. Nicknamed 'the Divine Ponytail', Baggio almost single-handedly carried Italy to the 1994 World Cup final, but the penalty he missed in the shootout became the greatest heartbreak of his career; despite that, his sportsmanship and grace kept him beloved. Known also for his Buddhist faith and passion for nature and conservation, Baggio is remembered as one of football's most cherished artists.",
+                es: "Nació el 18 de febrero de 1967 en Caldogno, Italia. A pesar de soportar seis cirugías importantes de rodilla a lo largo de su carrera, su técnica extraordinaria y su elegante juego hipnotizaron a Italia. Su fichaje de la Fiorentina a la Juventus fue tan controvertido que provocó disturbios entre los aficionados. Ganó el Balón de Oro y el premio al Jugador del Año en 1993. Apodado 'la Divina Coleta', Baggio llevó prácticamente solo a Italia a la final del Mundial 1994, pero el penal que falló en la tanda se convirtió en el mayor drama de su carrera; a pesar de ello, su deportividad y elegancia lo mantuvieron querido. Conocido también por su fe budista y su pasión por la naturaleza, Baggio es recordado como uno de los artistas más queridos del fútbol."
+              }},
+            { id: 15, name: "Gianluigi Buffon", flag: "🇮🇹", wikiTitle: "Gianluigi_Buffon", birthDate: "1978-01-28",
+              birthPlace: { tr: "Carrara, İtalya", en: "Carrara, Italy", es: "Carrara, Italia" },
+              story: {
+                tr: "28 Ocak 1978'de İtalya'nın mermer şehri Carrara'da, sporcu bir aileden geldi; annesi disk atma şampiyonu, babası ağır sıklet halterciydi. Parma'da henüz 17 yaşındayken Serie A'ya çıktı ve dönemin rekor transfer bedeliyle Juventus'a katıldı. Kulüpte 17 sezon geçirdi, 2006 Dünya Kupası'nda İtalya'nın şampiyonluğunun en büyük mimarlarından biriydi ve turnuvada sadece 2 gol yedi. Refleksleri, liderliği ve uzun ömürlülüğüyle tanınan Buffon, 45 yaşına kadar üst düzey futbol oynayarak kaleciliğin en tutkulu sembollerinden biri oldu. Kariyerinin son yıllarında Paris Saint-Germain'de de forma giydi, 2023'te Parma'ya dönerek kariyerine memleket kulübünde veda etti.",
+                en: "Born on 28 January 1978 in Carrara, Italy's marble city, into a family of athletes; his mother was a discus champion and his father a heavyweight weightlifter. He debuted in Serie A at just 17 with Parma and joined Juventus for a then-record transfer fee for a goalkeeper. He spent 17 seasons at the club, was a key architect of Italy's 2006 World Cup triumph, conceding just 2 goals in the entire tournament. Renowned for his reflexes, leadership, and longevity, Buffon played top-level football until age 45, becoming one of the most passionate symbols of goalkeeping. He also played for Paris Saint-Germain late in his career, returning to Parma in 2023 to close his career at the club where it all began.",
+                es: "Nació el 28 de enero de 1978 en Carrara, la ciudad del mármol italiana, en una familia de atletas; su madre fue campeona de lanzamiento de disco y su padre halterófilo de peso pesado. Debutó en la Serie A con apenas 17 años en el Parma y fichó por la Juventus por una cifra entonces récord para un portero. Pasó 17 temporadas en el club, fue arquitecto clave del título mundial de Italia en 2006, recibiendo solo 2 goles en todo el torneo. Reconocido por sus reflejos, liderazgo y longevidad, Buffon jugó a alto nivel hasta los 45 años, convirtiéndose en uno de los símbolos más apasionados de la portería. También jugó para el Paris Saint-Germain al final de su carrera, regresando al Parma en 2023 para cerrar su carrera en el club donde todo comenzó."
+              }},
+            { id: 16, name: "Iker Casillas", flag: "🇪🇸", wikiTitle: "Iker_Casillas", birthDate: "1981-05-20",
+              birthPlace: { tr: "Móstoles, İspanya", en: "Móstoles, Spain", es: "Móstoles, España" },
+              story: {
+                tr: "20 Mayıs 1981'de Madrid yakınlarındaki Móstoles'te doğdu. Real Madrid'in altyapısına 9 yaşında katıldı, henüz 19 yaşındayken 2000 Şampiyonlar Ligi finalinde forma giyerek kulübün en genç kalecilerinden biri olarak kupayı kaldırdı. Kulüpte 25 yıl geçirdi, 3 Şampiyonlar Ligi kazandı ve rekor sayıda maça çıktı. İspanya Milli Takımı'nın kaptanı olarak 2008 ve 2012 Avrupa şampiyonluklarına, 2010'da ise ülkesinin ilk Dünya Kupası'na öncülük etti; finalde Arjen Robben'in kritik pozisyonda attığı şutu ayağıyla çıkararak İspanya'nın kaderini değiştirdiği an futbol tarihine geçti. Refleksleri ve sahadaki liderliğiyle 'San Iker' (Aziz Iker) lakabını aldı. Kariyerinin son yıllarını Porto'da geçirdi, geçirdiği kalp krizi sonrası 2020'de futbola veda etti.",
+                en: "Born on 20 May 1981 in Móstoles, near Madrid. He joined Real Madrid's academy at age 9 and, at just 19, lifted the 2000 Champions League as one of the club's youngest-ever keepers to feature in a final. He spent 25 years at the club, winning 3 Champions Leagues and setting appearance records. As captain of the Spanish national team, he led the country to European titles in 2008 and 2012 and to its first-ever World Cup in 2010; his toe-save on Arjen Robben's clear chance in the final is remembered as the moment that changed Spain's destiny. His reflexes and leadership on the pitch earned him the nickname 'San Iker' (Saint Iker). He spent his final playing years at Porto, retiring from football in 2020 after suffering a heart attack.",
+                es: "Nació el 20 de mayo de 1981 en Móstoles, cerca de Madrid. Se unió a la cantera del Real Madrid a los 9 años y, con apenas 19, levantó la Champions League de 2000 como uno de los porteros más jóvenes en disputar una final. Pasó 25 años en el club, ganando 3 Champions League y estableciendo récords de partidos disputados. Como capitán de la selección española, lideró al país hacia los títulos europeos de 2008 y 2012 y hacia su primer Mundial en 2010; su parada con el pie al remate claro de Arjen Robben en la final se recuerda como el momento que cambió el destino de España. Sus reflejos y liderazgo en el campo le ganaron el apodo de 'San Iker'. Pasó sus últimos años como jugador en el Oporto, retirándose del fútbol en 2020 tras sufrir un infarto."
+              }},
+            { id: 17, name: "Lev Yashin", flag: "🇷🇺", wikiTitle: "Lev_Yashin", birthDate: "1929-10-22", deathDate: "1990-03-20",
+              birthPlace: { tr: "Moskova, SSCB", en: "Moscow, USSR", es: "Moscú, URSS" },
+              story: {
+                tr: "22 Ekim 1929'da Moskova'da işçi bir ailenin çocuğu olarak doğdu. İkinci Dünya Savaşı sırasında henüz 12 yaşında fabrikada çalışmak zorunda kaldı. Dinamo Moskova'da kaleci olarak yetişti ve futbol tarihinde Ballon d'Or kazanan ilk ve tek kaleci oldu (1963). Kaleci olarak simsiyah forması, çığlık atarak savunmasını yönlendirmesi ve ceza sahası dışına çıkarak oyuna katılan vizyoner tarzıyla 'Siyah Örümcek' lakabını aldı; kariyeri boyunca tahmini 150 penaltı kurtardı. Sovyetler Birliği ile 1960 Avrupa Şampiyonası'nı kazandı. Modern kaleciliğin babası kabul edilir; FIFA bugün turnuvaların en iyi kalecisine onun anısına 'Yashin Ödülü'nü veriyor. 20 Mart 1990'da 60 yaşında hayatını kaybetti.",
+                en: "Born on 22 October 1929 in Moscow to a working-class family. During World War II he was forced to work in a factory at just 12 years old. He rose as a goalkeeper at Dynamo Moscow and became the first and only goalkeeper in football history to win the Ballon d'Or, in 1963. Known for his all-black kit, his commanding shouts directing his defense, and his visionary style of leaving the box to sweep up danger, he earned the nickname 'The Black Spider', saving an estimated 150 penalties over his career. He won the 1960 European Championship with the Soviet Union. Considered the father of modern goalkeeping, FIFA today awards the 'Yashin Trophy' to the best goalkeeper of each World Cup in his honor. He died on 20 March 1990 at age 60.",
+                es: "Nació el 22 de octubre de 1929 en Moscú, en una familia trabajadora. Durante la Segunda Guerra Mundial se vio obligado a trabajar en una fábrica con apenas 12 años. Se formó como portero en el Dinamo Moscú y se convirtió en el primer y único portero en la historia del fútbol en ganar el Balón de Oro, en 1963. Conocido por su uniforme completamente negro, sus gritos dirigiendo a su defensa y su estilo visionario de salir del área para despejar peligros, se ganó el apodo de 'La Araña Negra', atajando un estimado de 150 penales en su carrera. Ganó la Eurocopa de 1960 con la Unión Soviética. Considerado el padre de la portería moderna, la FIFA otorga hoy el 'Trofeo Yashin' al mejor portero de cada Mundial en su honor. Falleció el 20 de marzo de 1990 a los 60 años."
+              }},
+            { id: 18, name: "George Best", flag: "🏴", wikiTitle: "George_Best", birthDate: "1946-05-22", deathDate: "2005-11-25",
+              birthPlace: { tr: "Belfast, Kuzey İrlanda", en: "Belfast, Northern Ireland", es: "Belfast, Irlanda del Norte" },
+              story: {
+                tr: "22 Mayıs 1946'da Kuzey İrlanda'nın Belfast kentinde doğdu. 15 yaşında Manchester United'a katılmak için İngiltere'ye gitti, ancak ilk günlerde memleket hasretiyle geri döndü; kısa süre sonra tekrar denemek için geri geldi. İnanılmaz çalımları, hızı ve iki ayağını da ustaca kullanabilmesiyle futbolun ilk 'rock yıldızı' oldu; sahadaki yeteneği kadar sahra dışındaki eğlenceli yaşam tarzıyla da manşetlere çıktı. 1968'de Manchester United'ın ilk Şampiyon Kulüpler Kupası'nı kazanmasında kilit rol oynadı ve aynı yıl Ballon d'Or kazandı. 'Pelé iyi, Maradona daha iyi, George en iyisi' sözü futbol folkloruna yerleşti. Alkol bağımlılığıyla uzun süre mücadele etti ve 25 Kasım 2005'te 59 yaşında karaciğer yetmezliği nedeniyle hayatını kaybetti.",
+                en: "Born on 22 May 1946 in Belfast, Northern Ireland. He moved to England at 15 to join Manchester United, but was so homesick in his first days that he returned home before coming back to try again shortly after. With incredible dribbling, blistering pace, and equal skill on both feet, he became football's first true rock star, making as many headlines for his colorful lifestyle off the pitch as for his talent on it. He played a key role in Manchester United's first European Cup triumph in 1968 and won the Ballon d'Or that same year. The saying 'Pelé good, Maradona better, George Best' became part of football folklore. He struggled with alcoholism for years and died of liver failure on 25 November 2005 at age 59.",
+                es: "Nació el 22 de mayo de 1946 en Belfast, Irlanda del Norte. Se mudó a Inglaterra a los 15 años para unirse al Manchester United, pero sintió tanta nostalgia en sus primeros días que regresó a casa antes de volver a intentarlo poco después. Con un regate increíble, velocidad explosiva y habilidad igual en ambas piernas, se convirtió en la primera verdadera estrella de rock del fútbol, generando tantos titulares por su colorido estilo de vida fuera de la cancha como por su talento dentro de ella. Jugó un papel clave en el primer título de Copa de Europa del Manchester United en 1968 y ganó el Balón de Oro ese mismo año. La frase 'Pelé bueno, Maradona mejor, George el mejor' se volvió parte del folclore futbolístico. Luchó contra el alcoholismo durante años y murió de insuficiencia hepática el 25 de noviembre de 2005 a los 59 años."
+              }},
+            { id: 19, name: "Ferenc Puskás", flag: "🇭🇺", wikiTitle: "Ferenc_Puskás", birthDate: "1927-04-02", deathDate: "2006-11-17",
+              birthPlace: { tr: "Budapeşte, Macaristan", en: "Budapest, Hungary", es: "Budapest, Hungría" },
+              story: {
+                tr: "2 Nisan 1927'de Budapeşte'de doğdu. Macaristan'ın 1950'lerdeki efsanevi 'Muhteşem Macarlar' (Aranycsapat) takımının lideriydi; bu kadro İngiltere'yi kendi evinde 6-3 yenerek futbol tarihinde çığır açtı. Sol ayağındaki inanılmaz vuruş gücü ve isabetiyle tanınan Puskás, Honvéd ve Macaristan Milli Takımı ile neredeyse yenilmezdi. 1956'da Macar İhtilali sırasında ülkesini terk etti ve İspanya'ya sığındı. 31 yaşında ve fazla kilolu olmasına rağmen Real Madrid tarafından imzalandı; Alfredo Di Stéfano ile kurduğu ortaklık futbol tarihinin en üretken ikililerinden biri oldu, 4 kez İspanya gol kralı oldu. FIFA bugün yılın en güzel golüne onun adına 'Puskás Ödülü'nü veriyor. 17 Kasım 2006'da 79 yaşında Alzheimer komplikasyonları nedeniyle hayatını kaybetti.",
+                en: "Born on 2 April 1927 in Budapest. He was the leader of Hungary's legendary 'Mighty Magyars' (Aranycsapat) side of the 1950s, a team that stunned football history by beating England 6-3 on English soil. Known for the incredible power and accuracy of his left foot, Puskás was nearly unbeatable with Honvéd and the Hungarian national team. He fled his country during the 1956 Hungarian Revolution and sought refuge in Spain. Despite being 31 and overweight, he was signed by Real Madrid, and his partnership with Alfredo Di Stéfano became one of the most prolific duos in football history, winning the Spanish top scorer title 4 times. FIFA today awards the 'Puskás Award' for the best goal of the year in his honor. He died on 17 November 2006 at age 79 from complications of Alzheimer's disease.",
+                es: "Nació el 2 de abril de 1927 en Budapest. Fue el líder del legendario equipo húngaro 'Aranycsapat' (Magiares Mágicos) de los años 50, un equipo que sorprendió a la historia del fútbol al vencer a Inglaterra 6-3 en suelo inglés. Conocido por la increíble potencia y precisión de su pierna izquierda, Puskás era casi invencible con el Honvéd y la selección húngara. Huyó de su país durante la Revolución Húngara de 1956 y buscó refugio en España. A pesar de tener 31 años y sobrepeso, fue fichado por el Real Madrid, y su sociedad con Alfredo Di Stéfano se convirtió en uno de los dúos más prolíficos de la historia del fútbol, ganando el título de máximo goleador español 4 veces. La FIFA otorga hoy el 'Premio Puskás' al mejor gol del año en su honor. Falleció el 17 de noviembre de 2006 a los 79 años por complicaciones del Alzheimer."
+              }},
+            { id: 20, name: "Alfredo Di Stéfano", flag: "🇦🇷", wikiTitle: "Alfredo_Di_Stéfano", birthDate: "1926-07-04", deathDate: "2014-07-07",
+              birthPlace: { tr: "Buenos Aires, Arjantin", en: "Buenos Aires, Argentina", es: "Buenos Aires, Argentina" },
+              story: {
+                tr: "4 Temmuz 1926'da Buenos Aires'te İtalyan göçmenlerin torunu olarak doğdu. Kariyerine River Plate'te başladı, ardından Kolombiya liginde forma giydi. 1953'te Real Madrid'e transfer olduğunda hem kulüp hem de futbol tarihini değiştirdi; kulübü Avrupa'nın en büyük gücüne dönüştürerek ilk 5 Şampiyon Kulüpler Kupası'nın tamamını kazandı. Sahanın her bölgesinde -savunmada, orta sahada, forvette- mükemmel performans sergileyebilen, futbol tarihindeki en komple oyuncu olarak kabul edilir. Arjantin, Kolombiya ve İspanya milli takımlarında oynayan nadir isimlerden biridir. 2 kez Ballon d'Or kazandı. Real Madrid'i bugünkü küresel dev haline getiren isim olarak anılır. 7 Temmuz 2014'te, 88. doğum gününden sadece 3 gün sonra, 88 yaşında hayatını kaybetti.",
+                en: "Born on 4 July 1926 in Buenos Aires, the grandson of Italian immigrants. He began his career at River Plate, then played in the Colombian league. When he transferred to Real Madrid in 1953, he changed both the club and the sport's history, turning Madrid into Europe's greatest power by winning all of the first 5 European Cups. Capable of excelling in every area of the pitch — defense, midfield, and attack — he is considered the most complete player in football history. He is one of the rare players to have represented Argentina, Colombia, and Spain at national level. He won the Ballon d'Or twice. He is remembered as the man who built Real Madrid into the global giant it is today. He died on 7 July 2014, just 3 days after his 88th birthday.",
+                es: "Nació el 4 de julio de 1926 en Buenos Aires, nieto de inmigrantes italianos. Comenzó su carrera en River Plate, luego jugó en la liga colombiana. Cuando fichó por el Real Madrid en 1953, cambió tanto al club como la historia del deporte, convirtiendo al Madrid en la mayor potencia de Europa al ganar las primeras 5 Copas de Europa. Capaz de destacar en cualquier zona del campo, defensa, mediocampo y ataque, es considerado el jugador más completo en la historia del fútbol. Es una de las raras figuras que representó a Argentina, Colombia y España a nivel de selección. Ganó el Balón de Oro dos veces. Se le recuerda como el hombre que construyó al Real Madrid como el gigante global que es hoy. Falleció el 7 de julio de 2014, apenas 3 días después de cumplir 88 años."
+              }},
+            { id: 21, name: "Garrincha", flag: "🇧🇷", wikiTitle: "Garrincha", birthDate: "1933-10-28", deathDate: "1983-01-20",
+              birthPlace: { tr: "Pau Grande, Brezilya", en: "Pau Grande, Brazil", es: "Pau Grande, Brasil" },
+              story: {
+                tr: "28 Ekim 1933'te Brezilya'nın küçük Pau Grande köyünde doğdu. Çarpık bacaklarla dünyaya geldi; sağ bacağı sol bacağından altı santim daha kısaydı ve doktorlar hiçbir zaman yürüyemeyeceğini söyledi. Yoksul bir çocukluk geçirdi ve resmi bir futbol eğitimi almadı. Buna rağmen dribbling (top sürme) yeteneğiyle futbol tarihinin gelmiş geçmiş en özel oyuncularından biri oldu; rakiplerini adeta oyuncak gibi geçerdi. 1958 ve 1962 Dünya Kupalarını Pelé ile birlikte Brezilya'ya kazandırdı; özellikle 1962'de Pelé sakatlanınca takımı neredeyse tek başına şampiyon yaptı ve turnuvanın en iyi oyuncusu seçildi. Sahra dışındaki mücadeleleri ve alkol bağımlılığı nedeniyle kariyeri erken söndü; 20 Ocak 1983'te 49 yaşında sirozdan hayatını kaybetti.",
+                en: "Born on 28 October 1933 in the small village of Pau Grande, Brazil. He was born with distorted legs, his right leg six centimeters shorter than his left, and doctors said he would never walk. He had an impoverished childhood and never received formal football training. Despite this, his dribbling ability made him one of the most extraordinary players in the game's history, able to leave defenders looking like they were standing still. He helped Brazil win the 1958 and 1962 World Cups alongside Pelé, and in 1962 in particular, when Pelé was injured, he practically carried the team to the title alone and was named the tournament's best player. Struggles off the pitch and alcoholism cut his career short; he died of cirrhosis on 20 January 1983 at age 49.",
+                es: "Nació el 28 de octubre de 1933 en el pequeño pueblo de Pau Grande, Brasil. Nació con las piernas torcidas, la derecha seis centímetros más corta que la izquierda, y los médicos dijeron que nunca caminaría. Tuvo una infancia pobre y nunca recibió formación futbolística formal. A pesar de ello, su habilidad para el regate lo convirtió en uno de los jugadores más extraordinarios de la historia del deporte, capaz de dejar a los defensores como estatuas. Ayudó a Brasil a ganar los Mundiales de 1958 y 1962 junto a Pelé, y en 1962 en particular, cuando Pelé se lesionó, prácticamente cargó al equipo solo hacia el título y fue nombrado el mejor jugador del torneo. Sus luchas fuera de la cancha y el alcoholismo truncaron su carrera; murió de cirrosis el 20 de enero de 1983 a los 49 años."
+              }},
+            { id: 22, name: "Michel Platini", flag: "🇫🇷", wikiTitle: "Michel_Platini", birthDate: "1955-06-21",
+              birthPlace: { tr: "Joeuf, Fransa", en: "Joeuf, France", es: "Joeuf, Francia" },
+              story: {
+                tr: "21 Haziran 1955'te Fransa'nın Joeuf kasabasında, İtalyan göçmen bir ailenin çocuğu olarak doğdu. Nancy ve Saint-Étienne'de yetiştikten sonra 1982'de Juventus'a transfer oldu ve 1980'lerin tartışmasız kralı oldu; 1983, 1984 ve 1985'te üst üste 3 kez Ballon d'Or kazanan ilk oyuncu unvanını aldı. Bir orta saha oyuncusu olmasına rağmen inanılmaz bir gol içgüdüsüne sahipti; 1984 Avrupa Şampiyonası'nda sadece 5 maçta 9 gol atarak hâlâ kırılamamış bir turnuva rekoru kurdu ve Fransa'yı şampiyon yaptı. Serbest vuruşlardaki ustalığıyla tanınırdı. Oyunculuğu bıraktıktan sonra Fransa Milli Takımı teknik direktörlüğü, UEFA başkanlığı gibi görevler üstlendi; başkanlık döneminde yaşanan tartışmalar futbol yönetimindeki kariyerini gölgeledi.",
+                en: "Born on 21 June 1955 in Joeuf, France, to a family of Italian immigrants. After coming through the ranks at Nancy and Saint-Étienne, he transferred to Juventus in 1982 and became the undisputed king of the 1980s, becoming the first player to win 3 consecutive Ballon d'Ors, in 1983, 1984, and 1985. Despite playing as a midfielder, he had an extraordinary scoring instinct, netting 9 goals in just 5 matches at Euro 1984, a tournament record that still stands, as he led France to the title. He was renowned for his mastery of free kicks. After retiring, he managed the French national team and later served as UEFA president, though controversies during his presidency later overshadowed his administrative career.",
+                es: "Nació el 21 de junio de 1955 en Joeuf, Francia, en una familia de inmigrantes italianos. Tras formarse en el Nancy y el Saint-Étienne, fichó por la Juventus en 1982 y se convirtió en el rey indiscutible de los años 80, siendo el primer jugador en ganar 3 Balones de Oro consecutivos, en 1983, 1984 y 1985. A pesar de jugar como centrocampista, tenía un instinto goleador extraordinario, marcando 9 goles en solo 5 partidos en la Eurocopa 1984, un récord del torneo que aún se mantiene, llevando a Francia al título. Era reconocido por su maestría en los tiros libres. Tras retirarse, dirigió a la selección francesa y luego fue presidente de la UEFA, aunque controversias durante su presidencia empañaron después su carrera administrativa."
+              }},
+            { id: 23, name: "Dennis Bergkamp", flag: "🇳🇱", wikiTitle: "Dennis_Bergkamp", birthDate: "1969-05-10",
+              birthPlace: { tr: "Amsterdam, Hollanda", en: "Amsterdam, Netherlands", es: "Ámsterdam, Países Bajos" },
+              story: {
+                tr: "10 Mayıs 1969'da Amsterdam'da doğdu; adı, doğduğu gün Ajax'ın Avrupa'da oynadığı maçtaki oyuncu Dennis Neville'e ithafen konuldu. Ajax'ta yetişti, Inter'de zorlu bir dönem geçirdikten sonra 1995'te Arsenal'e transfer oldu ve kulüp tarihinin en sevilen oyuncularından biri haline geldi. Uçak korkusu nedeniyle kariyerinin büyük bölümünde deplasman maçlarına kara yoluyla gitti; bu yüzden 'Uçamayan Hollandalı' lakabını aldı. Buz pateni yapar gibi zarif hareket kabiliyeti ve topu kontrol etme yeteneğiyle tanınırdı. 1998 Dünya Kupası çeyrek finalinde Arjantin'e attığı göğüs kontrolü ve çevirmeyle bitirdiği gol, futbol tarihinin en estetik gollerinden sayılır. Arsenal'in 'Invincibles' kadrosunun kilit ismiydi. Emekliliğinin ardından Ajax'ta teknik direktör yardımcılığı yaptı.",
+                en: "Born on 10 May 1969 in Amsterdam; he was named after Denis Neville, an Ajax player who featured in a European match on the day of his birth. He came through the Ajax academy, endured a difficult spell at Inter, and transferred to Arsenal in 1995, becoming one of the most beloved players in the club's history. Due to a fear of flying, he traveled to most away matches over land for the majority of his career, earning him the nickname 'The Non-Flying Dutchman'. He was known for his elegant, almost skater-like ball control. His chest-controlled, spinning finish against Argentina in the 1998 World Cup quarter-final is considered one of the most beautiful goals in football history. He was a key figure in Arsenal's 'Invincibles' squad. After retiring, he became assistant coach at Ajax.",
+                es: "Nació el 10 de mayo de 1969 en Ámsterdam; le pusieron el nombre en honor a Denis Neville, un jugador del Ajax que participó en un partido europeo el día de su nacimiento. Se formó en la cantera del Ajax, pasó por un difícil período en el Inter, y fichó por el Arsenal en 1995, convirtiéndose en uno de los jugadores más queridos en la historia del club. Debido a su miedo a volar, viajó a la mayoría de los partidos de visitante por tierra durante gran parte de su carrera, ganándose el apodo de 'el Holandés No Volador'. Era conocido por su elegante control del balón, casi como un patinador. Su gol contra Argentina en los cuartos de final del Mundial 1998, con control de pecho y giro, es considerado uno de los goles más bellos de la historia del fútbol. Fue una figura clave en el equipo 'Invencible' del Arsenal. Tras retirarse, fue entrenador asistente en el Ajax."
+              }},
+            { id: 24, name: "Luka Modrić", flag: "🇭🇷", wikiTitle: "Luka_Modrić", birthDate: "1985-09-09",
+              birthPlace: { tr: "Zadar, Hırvatistan", en: "Zadar, Croatia", es: "Zadar, Croacia" },
+              story: {
+                tr: "9 Eylül 1985'te Hırvatistan'ın Zadar kentinde doğdu. 6 yaşındayken Hırvatistan Bağımsızlık Savaşı sırasında büyükbabası öldürüldü ve ailesi mülteci olarak bir otelde yaşamak zorunda kaldı; çocukluğu savaşın gölgesinde geçti. Cılız fiziği nedeniyle birçok altyapı takımından reddedildi, ancak pes etmedi. Dinamo Zagreb ve Tottenham'da yeteneğini kanıtladıktan sonra 2012'de Real Madrid'e transfer oldu. Zekası, vizyonu ve tükenmek bilmeyen enerjisiyle kulübün orta saha beyni oldu, 5 Şampiyonlar Ligi kazandı. 2018 Dünya Kupası'nda küçük Hırvatistan'ı finale taşıyarak turnuvanın en iyi oyuncusu seçildi ve aynı yıl Messi-Ronaldo hegemonyasını 10 yıl sonra kırarak Ballon d'Or kazandı. 40'lı yaşlarına yaklaşırken hâlâ üst düzey futbol oynamaya devam ediyor.",
+                en: "Born on 9 September 1985 in Zadar, Croatia. At age 6, during the Croatian War of Independence, his grandfather was killed and his family was forced to live as refugees in a hotel; his childhood unfolded in the shadow of war. Rejected by many youth teams for his frail physique, he never gave up. After proving himself at Dinamo Zagreb and Tottenham, he transferred to Real Madrid in 2012. With his intelligence, vision, and boundless energy, he became the brain of the club's midfield, winning 5 Champions Leagues. He led tiny Croatia to the 2018 World Cup final and was named the tournament's best player, and that same year broke the decade-long Messi-Ronaldo hegemony to win the Ballon d'Or. Now approaching his 40s, he continues to play top-level football.",
+                es: "Nació el 9 de septiembre de 1985 en Zadar, Croacia. A los 6 años, durante la Guerra de Independencia de Croacia, su abuelo fue asesinado y su familia se vio obligada a vivir como refugiada en un hotel; su infancia transcurrió a la sombra de la guerra. Rechazado por muchos equipos juveniles por su físico frágil, nunca se rindió. Tras demostrar su valía en el Dinamo Zagreb y el Tottenham, fichó por el Real Madrid en 2012. Con su inteligencia, visión y energía inagotable, se convirtió en el cerebro del mediocampo del club, ganando 5 Champions League. Llevó a la pequeña Croacia a la final del Mundial 2018 y fue nombrado mejor jugador del torneo, y ese mismo año rompió la hegemonía de una década de Messi y Ronaldo para ganar el Balón de Oro. Acercándose a los 40 años, sigue jugando fútbol de alto nivel."
+              }},
+            { id: 25, name: "Kaká", flag: "🇧🇷", wikiTitle: "Kaká", birthDate: "1982-04-22",
+              birthPlace: { tr: "Gama, Brasília, Brezilya", en: "Gama, Brasília, Brazil", es: "Gama, Brasilia, Brasil" },
+              story: {
+                tr: "Gerçek adı Ricardo Izecson dos Santos Leite olan Kaká, 22 Nisan 1982'de Brezilya'nın başkenti Brasília'ya bağlı Gama kentinde, orta sınıf bir mühendis ailesinde doğdu. 18 yaşında bir havuz kazasında omurgasını kırdı ve doktorlar bir daha yürüyemeyeceğini söyledi, ancak mucizevi bir iyileşme süreciyle futbola geri döndü; bu deneyim onun derin Hristiyan inancının temeli oldu, gol attıktan sonra gökyüzünü işaret etmesi bu yüzdendir. São Paulo'da başladığı kariyerini AC Milan'da zirveye taşıdı; zarif duruşu, hızı ve yaratıcılığıyla 2007 Şampiyonlar Ligi'ni kazandı ve aynı yıl Ballon d'Or ile FIFA Yılın Futbolcusu ödüllerini aldı — bu dönem futbolun Messi-Ronaldo düellosundan önceki son büyük 'tek yıldız' zaferlerinden biri sayılır. 2009'da dönemin rekor bedeliyle Real Madrid'e transfer oldu. 2002 Dünya Kupası'nda Brezilya ile şampiyon oldu. Kariyerinin sonunda Orlando City'de oynadı, sahadaki centilmenliği ve olgun kişiliğiyle futbolun en saygın figürlerinden biri olarak anılıyor.",
+                en: "Born Ricardo Izecson dos Santos Leite on 22 April 1982 in Gama, near Brazil's capital Brasília, to a middle-class engineering family. At 18 he broke his spine in a swimming pool accident and doctors said he might never walk again, but a remarkable recovery brought him back to football; that experience deepened his Christian faith, which is why he points to the sky after scoring goals. After starting his career at São Paulo, he reached his peak at AC Milan, where his elegant style, pace, and creativity won the 2007 Champions League, and that same year he claimed both the Ballon d'Or and FIFA World Player of the Year — a period considered one of the last great 'single superstar' triumphs before the Messi-Ronaldo duopoly began. In 2009 he moved to Real Madrid for a then-record fee. He was a World Cup champion with Brazil in 2002. He finished his career at Orlando City, remembered as one of football's most respected and gracious figures on and off the pitch.",
+                es: "Nacido como Ricardo Izecson dos Santos Leite el 22 de abril de 1982 en Gama, cerca de Brasilia, en una familia de clase media de ingenieros. A los 18 años se rompió la columna en un accidente en una piscina y los médicos dijeron que quizás nunca volvería a caminar, pero una recuperación extraordinaria lo trajo de vuelta al fútbol; esa experiencia profundizó su fe cristiana, por lo que señala al cielo después de marcar goles. Tras comenzar su carrera en el São Paulo, alcanzó su punto máximo en el AC Milan, donde su estilo elegante, velocidad y creatividad le dieron la Champions League 2007, y ese mismo año se llevó tanto el Balón de Oro como el premio FIFA al Mejor Jugador del Mundo, un período considerado uno de los últimos grandes triunfos de 'superestrella individual' antes del duopolio Messi-Ronaldo. En 2009 fichó por el Real Madrid por una cifra entonces récord. Fue campeón del mundo con Brasil en 2002. Terminó su carrera en el Orlando City, recordado como una de las figuras más respetadas y elegantes del fútbol dentro y fuera de la cancha."
+              }}
+        ];
+
+        // --- STATE ---
+        let currentLang = 'tr';
+        let searchQuery = '';
+        let selectedPlayer = null;
+        let currentFilter = 'all';
+        let favorites = [];
+        let isSpeaking = false;
+        let currentUtterance = null;
+        let speakKeepAliveTimer = null;
+        let toastTimeout = null;
+        const photoCache = {}; // wikiTitle -> url | null
+
+        // --- DOM ---
+        const splashScreen = document.getElementById('splash-screen');
+        const gridContainer = document.getElementById('grid-container');
+        const searchInput = document.getElementById('search-input');
+        const homeView = document.getElementById('home-view');
+        const detailView = document.getElementById('detail-view');
+        const toastEl = document.getElementById('toast');
+        const shareOverlay = document.getElementById('share-modal-overlay');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFavorites();
+
+            setTimeout(() => {
+                splashScreen.classList.add('splash-hidden');
+                setTimeout(() => splashScreen.style.display = 'none', 800);
+            }, 2500);
+
+            // Ses motorunu erkenden ısıt (bazı tarayıcılarda ilk çağrıda gecikme/başarısızlık olur)
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+                window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
+            }
+
+            updateUI();
+            renderGrid();
+        });
+
+        // --- FAVORİLER ---
+        function loadFavorites() {
+            try {
+                const saved = localStorage.getItem('futstory_favorites');
+                favorites = saved ? JSON.parse(saved) : [];
+            } catch (e) { favorites = []; }
+        }
+        function saveFavorites() {
+            try { localStorage.setItem('futstory_favorites', JSON.stringify(favorites)); } catch (e) {}
+        }
+        function isFavorite(id) { return favorites.includes(id); }
+        function toggleFavorite(id, event) {
+            if (event) event.stopPropagation();
+            const ui = uiTranslations[currentLang];
+            if (isFavorite(id)) {
+                favorites = favorites.filter(f => f !== id);
+                showToast(ui.favRemoved);
+            } else {
+                favorites.push(id);
+                showToast(ui.favAdded);
+            }
+            saveFavorites();
+            renderGrid();
+            if (selectedPlayer && selectedPlayer.id === id) updateDetailFavButton();
+        }
+
+        function setFilter(filter) {
+            currentFilter = filter;
+            document.getElementById('chip-all').classList.toggle('active', filter === 'all');
+            document.getElementById('chip-favorites').classList.toggle('active', filter === 'favorites');
+            renderGrid();
+        }
+
+        function setLang(lang) {
+            currentLang = lang;
+            ['tr', 'en', 'es'].forEach(l => {
+                const btn = document.getElementById(`btn-${l}`);
+                btn.className = l === lang
+                    ? "lang-btn uppercase text-xs font-bold px-3 py-1.5 rounded-full transition-colors bg-yellow-500 text-slate-900 shadow-md"
+                    : "lang-btn uppercase text-xs font-bold px-3 py-1.5 rounded-full transition-colors text-slate-400 hover:text-white";
+            });
+            stopSpeak();
+            updateUI();
+            if (selectedPlayer) renderDetail(); else renderGrid();
+        }
+
+        function updateUI() {
+            const ui = uiTranslations[currentLang];
+            searchInput.placeholder = ui.searchPlaceholder;
+            document.getElementById('back-text').innerText = ui.back;
+            document.getElementById('youtube-text').innerText = ui.watchYoutube;
+            document.getElementById('splash-tagline').innerText = ui.tagline;
+            document.getElementById('chip-all').innerText = ui.allTab;
+            document.getElementById('chip-favorites').innerText = ui.favTab;
+            document.getElementById('detail-share-text').innerText = ui.share;
+            document.getElementById('share-modal-title').innerText = ui.shareModalTitle;
+            document.getElementById('share-opt-system').innerText = ui.shareSystem;
+            document.getElementById('share-opt-copy').innerText = ui.shareCopy;
+            document.getElementById('share-opt-cancel').innerText = ui.shareCancel;
+            updateDetailFavButton();
+            updateDetailSpeakButton();
+        }
+
+        function handleSearch(val) {
+            searchQuery = val.toLowerCase();
+            renderGrid();
+        }
+
+        // --- FOTOĞRAF YÜKLEME (Wikipedia'dan gerçek fotoğraf) ---
+        async function loadPlayerPhoto(wikiTitle, imgEl, fallbackEl) {
+            if (photoCache.hasOwnProperty(wikiTitle)) {
+                const cached = photoCache[wikiTitle];
+                if (cached && imgEl) {
+                    imgEl.src = cached;
+                    imgEl.onload = () => { imgEl.classList.add('loaded'); if (fallbackEl) fallbackEl.style.display = 'none'; };
+                }
+                return;
+            }
+            try {
+                const res = await fetch(`https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(wikiTitle)}`);
+                if (!res.ok) throw new Error('no data');
+                const data = await res.json();
+                const rawSrc = data.thumbnail && data.thumbnail.source ? data.thumbnail.source : null;
+                const src = rawSrc ? rawSrc.replace(/\/\d+px-/, '/400px-') : null;
+                photoCache[wikiTitle] = src;
+                if (src && imgEl) {
+                    imgEl.src = src;
+                    imgEl.onload = () => { imgEl.classList.add('loaded'); if (fallbackEl) fallbackEl.style.display = 'none'; };
+                    imgEl.onerror = () => { imgEl.classList.remove('loaded'); if (fallbackEl) fallbackEl.style.display = ''; };
+                }
+            } catch (e) {
+                photoCache[wikiTitle] = null;
+            }
+        }
+
+        // --- GRID ---
+        function renderGrid() {
+            const ui = uiTranslations[currentLang];
+            let pool = playersData;
+            if (currentFilter === 'favorites') pool = pool.filter(p => isFavorite(p.id));
+            const filteredPlayers = pool.filter(p => p.name.toLowerCase().includes(searchQuery));
+
+            if (filteredPlayers.length === 0) {
+                const msg = currentFilter === 'favorites' ? ui.noFavResult : ui.noResult;
+                gridContainer.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-48 text-slate-500 text-center px-6">
+                        <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p>${msg}</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '<div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">';
+            filteredPlayers.forEach(player => {
+                const fav = isFavorite(player.id);
+                html += `
+                    <button onclick="selectPlayer(${player.id})" class="glass-card rounded-2xl p-4 flex flex-col items-center justify-center text-center group cursor-pointer focus:outline-none">
+                        <div class="fav-btn-card" onclick="toggleFavorite(${player.id}, event)">
+                            <svg fill="${fav ? '#fbbf24' : 'none'}" stroke="${fav ? '#fbbf24' : '#94a3b8'}" viewBox="0 0 24 24" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                            </svg>
+                        </div>
+                        <div class="player-photo-wrap" id="photo-wrap-${player.id}">
+                            <img id="photo-img-${player.id}" alt="${player.name}">
+                            <span id="photo-fallback-${player.id}" class="flag-fallback">${player.flag}</span>
+                        </div>
+                        <h2 class="font-bold text-sm md:text-base text-slate-200 group-hover:text-yellow-400 transition-colors">${player.name}</h2>
+                    </button>`;
+            });
+            html += '</div>';
+            gridContainer.innerHTML = html;
+
+            // Fotoğrafları arka planda yükle
+            filteredPlayers.forEach(player => {
+                const imgEl = document.getElementById(`photo-img-${player.id}`);
+                const fallbackEl = document.getElementById(`photo-fallback-${player.id}`);
+                loadPlayerPhoto(player.wikiTitle, imgEl, fallbackEl);
+            });
+        }
+
+        // --- OYUNCU SEÇİMİ / DETAY ---
+        function selectPlayer(id) {
+            stopSpeak();
+            selectedPlayer = playersData.find(p => p.id === id);
+            homeView.classList.add('hidden');
+            detailView.classList.remove('hidden');
+            renderDetail();
+        }
+
+        function formatDate(dateStr, lang) {
+            const d = new Date(dateStr + 'T12:00:00');
+            return new Intl.DateTimeFormat(dateLocaleMap[lang], { day: 'numeric', month: 'long', year: 'numeric' }).format(d);
+        }
+        function calculateAge(birthDate, deathDate) {
+            const start = new Date(birthDate + 'T12:00:00');
+            const end = deathDate ? new Date(deathDate + 'T12:00:00') : new Date();
+            let age = end.getFullYear() - start.getFullYear();
+            const m = end.getMonth() - start.getMonth();
+            if (m < 0 || (m === 0 && end.getDate() < start.getDate())) age--;
+            return age;
+        }
+
+        function renderDetail() {
+            if (!selectedPlayer) return;
+            const ui = uiTranslations[currentLang];
+            const p = selectedPlayer;
+
+            document.getElementById('detail-flag-badge').innerText = p.flag;
+            document.getElementById('detail-name').innerText = p.name;
+            document.getElementById('detail-story').innerText = `"${p.story[currentLang]}"`;
+
+            const photoImg = document.getElementById('detail-photo-img');
+            const photoFallback = document.getElementById('detail-photo-fallback');
+            photoImg.classList.remove('loaded');
+            photoFallback.style.display = '';
+            photoFallback.innerText = p.flag;
+            loadPlayerPhoto(p.wikiTitle, photoImg, photoFallback);
+
+            document.getElementById('pill-place-label').innerText = ui.placeLabel;
+            document.getElementById('pill-place-value').innerText = p.birthPlace[currentLang];
+
+            const dateContainer = document.getElementById('pill-date-container');
+            const ageContainer = document.getElementById('pill-age-container');
+
+            if (p.deathDate) {
+                dateContainer.classList.add('deceased');
+                ageContainer.classList.add('deceased');
+                document.getElementById('pill-date-label').innerText = ui.dateLabel;
+                document.getElementById('pill-date-value').innerText = formatDate(p.birthDate, currentLang);
+                document.getElementById('pill-age-label').innerText = ui.deathAgeLabel + ' • 🕊️';
+                document.getElementById('pill-age-value').innerText = calculateAge(p.birthDate, p.deathDate) + ' (' + formatDate(p.deathDate, currentLang) + ')';
+            } else {
+                dateContainer.classList.remove('deceased');
+                ageContainer.classList.remove('deceased');
+                document.getElementById('pill-date-label').innerText = ui.dateLabel;
+                document.getElementById('pill-date-value').innerText = formatDate(p.birthDate, currentLang);
+                document.getElementById('pill-age-label').innerText = ui.ageLabel;
+                document.getElementById('pill-age-value').innerText = calculateAge(p.birthDate, null);
+            }
+
+            const query = encodeURIComponent(`${p.name} documentary story biography`);
+            document.getElementById('detail-youtube').href = `https://www.youtube.com/results?search_query=${query}`;
+
+            updateDetailFavButton();
+            updateDetailSpeakButton();
+        }
+
+        function updateDetailFavButton() {
+            if (!selectedPlayer) return;
+            const ui = uiTranslations[currentLang];
+            const btn = document.getElementById('detail-fav-btn');
+            const icon = document.getElementById('detail-fav-icon');
+            const text = document.getElementById('detail-fav-text');
+            const fav = isFavorite(selectedPlayer.id);
+            btn.classList.toggle('fav-active', fav);
+            icon.setAttribute('fill', fav ? 'currentColor' : 'none');
+            text.innerText = fav ? ui.favorited : ui.favorite;
+        }
+
+        // --- SESLİ OKUMA (Düzeltilmiş TTS) ---
+        function toggleSpeak() {
+            if (!('speechSynthesis' in window)) {
+                showToast(uiTranslations[currentLang].ttsUnsupported);
+                return;
+            }
+            if (isSpeaking) stopSpeak(); else speakStory();
+        }
+
+        function pickVoice(lang) {
+            const voices = window.speechSynthesis.getVoices();
+            const target = speechLangMap[lang];
+            return voices.find(v => v.lang === target) || voices.find(v => v.lang && v.lang.startsWith(target.split('-')[0])) || null;
+        }
+
+        function speakStory() {
+            if (!selectedPlayer || !('speechSynthesis' in window)) return;
+
+            window.speechSynthesis.cancel();
+
+            const text = `${selectedPlayer.name}. ${selectedPlayer.story[currentLang]}`;
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = speechLangMap[currentLang] || 'tr-TR';
+            const voice = pickVoice(currentLang);
+            if (voice) utterance.voice = voice;
+            utterance.rate = 0.95;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+
+            utterance.onend = () => { isSpeaking = false; clearInterval(speakKeepAliveTimer); updateDetailSpeakButton(); };
+            utterance.onerror = () => {
+                isSpeaking = false;
+                clearInterval(speakKeepAliveTimer);
+                updateDetailSpeakButton();
+                showToast(uiTranslations[currentLang].ttsError);
+            };
+
+            currentUtterance = utterance;
+            isSpeaking = true;
+            updateDetailSpeakButton();
+
+            // Bazı Chrome/Android sürümlerinde uzun metinlerde konuşma ~15sn sonra donuyor; bu düzeltme onu engeller
+            clearInterval(speakKeepAliveTimer);
+            speakKeepAliveTimer = setInterval(() => {
+                if (window.speechSynthesis.speaking) {
+                    window.speechSynthesis.pause();
+                    window.speechSynthesis.resume();
+                }
+            }, 5000);
+
+            // Bazı tarayıcılarda ilk speak() çağrısı sessiz kalır; kısa bir gecikmeyle tekrar dene
+            window.speechSynthesis.speak(utterance);
+            setTimeout(() => {
+                if (isSpeaking && !window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+                    window.speechSynthesis.speak(utterance);
+                }
+            }, 250);
+        }
+
+        function stopSpeak() {
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+            clearInterval(speakKeepAliveTimer);
+            isSpeaking = false;
+            updateDetailSpeakButton();
+        }
+
+        function updateDetailSpeakButton() {
+            const ui = uiTranslations[currentLang];
+            const btn = document.getElementById('detail-speak-btn');
+            const text = document.getElementById('detail-speak-text');
+            if (!btn || !text) return;
+            const supported = 'speechSynthesis' in window;
+            btn.disabled = !supported;
+            btn.classList.toggle('speak-active', isSpeaking);
+            text.innerText = supported ? (isSpeaking ? ui.stop : ui.listen) : ui.listen;
+        }
+
+        // --- PAYLAŞMA (gerçek uygulamalara gönderme) ---
+        function openShareModal() {
+            if (!selectedPlayer) return;
+            shareOverlay.classList.add('show');
+        }
+        function closeShareModal(event) {
+            if (event && event.target !== shareOverlay) return;
+            shareOverlay.classList.remove('show');
+        }
+
+        function getShareText() {
+            const p = selectedPlayer;
+            return `${p.name} - FutStory\n\n"${p.story[currentLang]}"\n\n${window.location.href}`;
+        }
+
+        async function doSystemShare() {
+            const ui = uiTranslations[currentLang];
+            if (navigator.share) {
+                try {
+                    await navigator.share({
+                        title: `${selectedPlayer.name} - FutStory`,
+                        text: `${selectedPlayer.name} - FutStory\n\n"${selectedPlayer.story[currentLang]}"`,
+                        url: window.location.href
+                    });
+                    showToast(ui.sharedOk);
+                } catch (err) { /* kullanıcı iptal etti, sessiz geç */ }
+            } else {
+                await doShareTo('copy');
+            }
+            closeShareModal();
+        }
+
+        async function doShareTo(target) {
+            const ui = uiTranslations[currentLang];
+            const text = getShareText();
+            const url = window.location.href;
+
+            if (target === 'whatsapp') {
+                window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+            } else if (target === 'telegram') {
+                window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(`${selectedPlayer.name} - FutStory\n\n"${selectedPlayer.story[currentLang]}"`)}`, '_blank');
+            } else if (target === 'twitter') {
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`${selectedPlayer.name} - FutStory 🏆`)}&url=${encodeURIComponent(url)}`, '_blank');
+            } else if (target === 'copy') {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    showToast(ui.copied);
+                } catch (e) {
+                    showToast(ui.copied);
+                }
+            }
+            closeShareModal();
+        }
+
+        // --- RASTGELE EFSANE KEŞFET ---
+        function randomPlayer() {
+            let pool = playersData;
+            if (selectedPlayer) pool = playersData.filter(p => p.id !== selectedPlayer.id);
+            const randomIndex = Math.floor(Math.random() * pool.length);
+            selectPlayer(pool[randomIndex].id);
+        }
+
+        // --- TOAST ---
+        function showToast(message) {
+            clearTimeout(toastTimeout);
+            toastEl.innerText = message;
+            toastEl.classList.add('show');
+            toastTimeout = setTimeout(() => toastEl.classList.remove('show'), 2200);
+        }
+
+        // --- GERİ DÖN ---
+        function goBack() {
+            stopSpeak();
+            closeShareModal();
+            selectedPlayer = null;
+            searchInput.value = '';
+            searchQuery = '';
+            detailView.classList.add('hidden');
+            homeView.classList.remove('hidden');
+            renderGrid();
+        }
+    </script>
 </body>
 </html>
